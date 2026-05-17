@@ -21,6 +21,16 @@ export async function GET(request: Request) {
         name: true,
         email: true,
         profile: true,
+        appliedJobs: {
+          where: {
+            status: {
+              in: ["ASSIGNED", "COMPLETED"],
+            },
+          },
+          select: {
+            id: true,
+          },
+        },
         receivedReviews: {
           select: {
             rating: true,
@@ -36,7 +46,24 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json(tutors);
+    const sanitizedTutors = tutors.map((tutor) => ({
+      ...tutor,
+      name: "undefined",
+      email: "undefined@tuition-console.net",
+      profile: tutor.profile ? {
+        ...tutor.profile,
+        phone: "•••••••••••",
+        address: "•••••••••••",
+      } : null,
+      receivedReviews: tutor.receivedReviews.map((review) => ({
+        ...review,
+        author: {
+          name: "Anonymous Parent"
+        }
+      }))
+    }));
+
+    return NextResponse.json(sanitizedTutors);
   } catch (error) {
     console.error("GET_USERS_ERROR", error);
     return new NextResponse("Internal Error", { status: 500 });

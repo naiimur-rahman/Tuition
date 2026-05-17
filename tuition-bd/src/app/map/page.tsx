@@ -33,9 +33,9 @@ function MapSearchContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
       {/* Page Header */}
-      <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-slate-800 pb-8">
+      <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-slate-200/60 dark:border-slate-800/80 pb-8 transition-colors duration-300">
         <div className="space-y-2">
-          <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--foreground)] tracking-tight">
             {type === "tutor" ? (
               <>
                 Find <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Tutors</span> Near You
@@ -46,7 +46,7 @@ function MapSearchContent() {
               </>
             )}
           </h1>
-          <p className="text-slate-400 text-sm max-w-2xl leading-relaxed">
+          <p className="text-[var(--muted)] text-sm max-w-2xl leading-relaxed">
             {type === "tutor" ? (
               "Locations shown on the map are approximate (within ~800 meters) to protect privacy. Parents can view tutor credentials and unlock contact details inside their popup box."
             ) : (
@@ -58,47 +58,47 @@ function MapSearchContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
         {/* Filters Sidebar */}
-        <div className="lg:col-span-1 glass-card p-5 rounded-2xl border border-slate-800 h-fit space-y-6">
+        <div className="lg:col-span-1 glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 h-fit space-y-6 transition-all duration-300">
           <div>
-            <h2 className="text-lg font-bold font-heading text-white flex items-center">
+            <h2 className="text-lg font-bold font-heading text-[var(--foreground)] flex items-center">
               <svg className="w-5 h-5 mr-2 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
               Search Filters
             </h2>
-            <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">Filter parameters</p>
+            <p className="text-xs text-[var(--muted)] mt-1 font-mono uppercase tracking-wider">Filter parameters</p>
           </div>
 
-          <div className="h-px bg-slate-800/80" />
+          <div className="h-px bg-slate-200/60 dark:bg-slate-800/80 transition-colors duration-300" />
 
           <div className="space-y-5">
             <div className="space-y-2">
-              <label className="block text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold">Subject</label>
+              <label className="block text-xs font-mono uppercase tracking-wider text-[var(--foreground)] opacity-70 font-semibold">Subject</label>
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
+                className="w-full glass-input focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
               >
-                <option>All Subjects</option>
-                <option>Mathematics</option>
-                <option>English</option>
-                <option>Physics</option>
-                <option>Chemistry</option>
+                <option value="All Subjects" className="bg-[var(--background)] text-[var(--foreground)]">All Subjects</option>
+                <option value="Mathematics" className="bg-[var(--background)] text-[var(--foreground)]">Mathematics</option>
+                <option value="English" className="bg-[var(--background)] text-[var(--foreground)]">English</option>
+                <option value="Physics" className="bg-[var(--background)] text-[var(--foreground)]">Physics</option>
+                <option value="Chemistry" className="bg-[var(--background)] text-[var(--foreground)]">Chemistry</option>
               </select>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-xs font-mono uppercase tracking-wider text-slate-400 font-semibold">Class / Medium</label>
+              <label className="block text-xs font-mono uppercase tracking-wider text-[var(--foreground)] opacity-70 font-semibold">Class / Medium</label>
               <select
                 value={classLevel}
                 onChange={(e) => setClassLevel(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
+                className="w-full glass-input focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
               >
-                <option>Any</option>
-                <option>Class 1-5 (Bangla Medium)</option>
-                <option>Class 6-8 (Bangla Medium)</option>
-                <option>O Level</option>
-                <option>A Level</option>
+                <option value="Any" className="bg-[var(--background)] text-[var(--foreground)]">Any</option>
+                <option value="Class 1-5 (Bangla Medium)" className="bg-[var(--background)] text-[var(--foreground)]">Class 1-5 (Bangla Medium)</option>
+                <option value="Class 6-8 (Bangla Medium)" className="bg-[var(--background)] text-[var(--foreground)]">Class 6-8 (Bangla Medium)</option>
+                <option value="O Level" className="bg-[var(--background)] text-[var(--foreground)]">O Level</option>
+                <option value="A Level" className="bg-[var(--background)] text-[var(--foreground)]">A Level</option>
               </select>
             </div>
 
@@ -122,7 +122,7 @@ function MapSearchContent() {
 
 export default function MapPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 flex flex-col relative">
       <Navbar />
       <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading spatial datasets...</div>}>
         <MapSearchContent />

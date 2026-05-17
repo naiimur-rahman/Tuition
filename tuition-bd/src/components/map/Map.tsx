@@ -63,14 +63,27 @@ export default function MapComponent({
         .then((data) => {
           const mapTutors = data
             .filter((u: any) => u.profile)
-            .map((u: any) => ({
-              id: u.id,
-              name: u.name,
-              approxLat: u.profile.approxLatitude || 23.734,
-              approxLng: u.profile.approxLongitude || 90.3928,
-              verified: u.profile.verificationStatus === "VERIFIED",
-              subject: u.profile.bio || "Various Subjects",
-            }));
+            .map((u: any) => {
+              const reviews = u.receivedReviews || [];
+              const confirmedCount = u.appliedJobs?.length || 0;
+              const hasConfirmedTuition = confirmedCount > 0 || reviews.length > 0;
+              const avgRating = reviews.length > 0
+                ? (reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / reviews.length).toFixed(1)
+                : "0.0";
+
+              return {
+                id: u.id,
+                name: u.name,
+                approxLat: u.profile.approxLatitude || 23.734,
+                approxLng: u.profile.approxLongitude || 90.3928,
+                verified: u.profile.verificationStatus === "VERIFIED",
+                subject: u.profile.bio || "Various Subjects",
+                hasConfirmedTuition,
+                avgRating,
+                reviews,
+                tutorSeq: u.profile.tutorSeq,
+              };
+            });
           
           // Fallback mockup tutor if SQLite database user table doesn't have tutors yet
           if (mapTutors.length === 0) {
@@ -82,6 +95,7 @@ export default function MapComponent({
                 approxLng: 90.3928,
                 verified: true,
                 subject: "Physics, Advanced Mathematics",
+                tutorSeq: 1,
               },
               {
                 id: "mock2",
@@ -90,6 +104,7 @@ export default function MapComponent({
                 approxLng: 90.4078,
                 verified: false,
                 subject: "English Literature, IELTS Preparation",
+                tutorSeq: 2,
               },
             ]);
           } else {
@@ -119,6 +134,7 @@ export default function MapComponent({
         center={userLocation || center}
         zoom={12}
         scrollWheelZoom={true}
+        attributionControl={false}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
@@ -189,11 +205,29 @@ export default function MapComponent({
             >
               <Popup>
                 <div className="p-3 font-sans min-w-[220px] text-slate-200">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-bold text-base text-white leading-tight font-heading">
-                      {item.title || item.name}
-                    </h3>
-                  </div>
+                    <div className="flex flex-col gap-1.5 mb-2">
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded border w-fit font-extrabold ${
+                        isTutor
+                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                          : "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
+                      }`}>
+                        {isTutor
+                          ? `TC-${String(item.tutorSeq && item.tutorSeq > 0 ? item.tutorSeq : 1).padStart(3, '0')}`
+                          : `TT-${String(item.jobSeq && item.jobSeq > 0 ? item.jobSeq : 1).padStart(4, '0')}`}
+                      </span>
+                      <h3 className="font-bold text-sm text-white leading-tight font-heading mt-1 flex flex-wrap items-center gap-1.5">
+                        {isTutor ? (
+                          <>
+                            <span>Tutor Profile</span>
+                            <span className="select-none pointer-events-none filter blur-[4.5px] bg-slate-950 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-mono leading-none border border-slate-800/60 inline-block">
+                              undefined
+                            </span>
+                          </>
+                        ) : (
+                          item.title
+                        )}
+                      </h3>
+                    </div>
 
                   <div className="h-px bg-slate-800 my-2" />
 
@@ -218,6 +252,29 @@ export default function MapComponent({
                         </span>
                       </p>
                     )}
+
+                    {/* Rating system appears only after tuition has been confirmed */}
+                    {item.hasConfirmedTuition && (
+                      <div className="bg-emerald-500/5 border border-emerald-500/10 p-2.5 rounded-lg space-y-1 mt-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500 font-mono text-[9px] uppercase">Educator Rating</span>
+                          <span className="text-emerald-400 font-bold flex items-center gap-1 font-mono text-[11px]">
+                            ★ {item.avgRating}
+                          </span>
+                        </div>
+                        {item.reviews && item.reviews.length > 0 && (
+                          <div className="text-[10px] text-slate-400 italic mt-1 max-h-[50px] overflow-y-auto border-t border-slate-900 pt-1 leading-normal font-sans">
+                            "{item.reviews[0].comment}"
+                            <span className="block text-[8px] text-slate-500 not-italic mt-0.5 font-mono text-right flex items-center justify-end gap-1">
+                              — 
+                              <span className="select-none pointer-events-none filter blur-[3px] bg-slate-800/40 text-slate-500 px-1 py-px rounded text-[8px] font-mono leading-none border border-slate-700/20 inline-block">
+                                {item.reviews[0].author?.name || "Parent"}
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-2">
@@ -240,13 +297,13 @@ export default function MapComponent({
                         <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 space-y-1 font-mono text-[10px]">
                           <p className="text-slate-500">Contact Email:</p>
                           <p className="text-slate-200 font-bold">
-                            {item.name.toLowerCase().replace(/[^a-z0-9]/g, "")}@tuition-console.net
+                            tutor.tc-{String(item.tutorSeq && item.tutorSeq > 0 ? item.tutorSeq : 1).padStart(3, '0')}@tuition-console.net
                           </p>
                           <p className="text-slate-500 mt-1">Coordination Status:</p>
                           <p className="text-emerald-400 font-bold">Available</p>
                         </div>
                         <a 
-                          href={`mailto:${item.name.toLowerCase().replace(/[^a-z0-9]/g, "")}@tuition-console.net?subject=Tuition Roster Coordination Inquiry`}
+                          href={`mailto:tutor.tc-${String(item.tutorSeq && item.tutorSeq > 0 ? item.tutorSeq : 1).padStart(3, '0')}@tuition-console.net?subject=Tuition Roster Coordination Inquiry`}
                           className="bg-emerald-500 text-slate-950 px-3 py-2 rounded-lg text-xs font-bold w-full hover:bg-emerald-600 transition duration-200 cursor-pointer shadow-[0_2px_8px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-1.5"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

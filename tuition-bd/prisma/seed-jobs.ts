@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -16,12 +17,25 @@ async function main() {
 
   // 2. Create default parent user
   console.log("👤 Creating premium dummy parent account...");
+  const hashedParentPassword = await bcrypt.hash("securepassword123", 10);
   const parent = await prisma.user.create({
     data: {
       name: "Mrs. Farhana Rahman",
       email: "farhana.parent@tuition-console.net",
       role: "PARENT",
-      password: "securepassword123", // Plain placeholder
+      password: hashedParentPassword,
+    },
+  });
+
+  // Create default admin user
+  console.log("👤 Creating default admin account...");
+  const hashedAdminPassword = await bcrypt.hash("adminpassword123", 10);
+  await prisma.user.create({
+    data: {
+      name: "System Administrator",
+      email: "admin@tuition-console.net",
+      role: "ADMIN",
+      password: hashedAdminPassword,
     },
   });
 
@@ -193,12 +207,13 @@ async function main() {
   ];
 
   for (const t of dummyTutors) {
+    const hashedTutorPassword = await bcrypt.hash(t.password, 10);
     const user = await prisma.user.create({
       data: {
         name: t.name,
         email: t.email,
         role: t.role,
-        password: t.password,
+        password: hashedTutorPassword,
       }
     });
 

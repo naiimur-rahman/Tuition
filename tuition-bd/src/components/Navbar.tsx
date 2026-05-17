@@ -16,10 +16,12 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeRole, setActiveRole] = useState<"parent" | "tutor" | undefined>(selectedRole);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const isLinkActive = (href: string) => pathname === href;
 
   useEffect(() => {
+    setMounted(true);
     const isLightActive = document.documentElement.classList.contains("light");
     setTheme(isLightActive ? "light" : "dark");
   }, []);
@@ -161,13 +163,17 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
               whileTap={{ scale: 0.95 }}
               onClick={toggleTheme}
               className={`p-2 rounded-xl border transition-colors duration-200 cursor-pointer ${
-                theme === "light"
+                !mounted
+                  ? "bg-slate-900/30 border-slate-800 text-slate-400"
+                  : theme === "light"
                   ? "bg-slate-100 border-slate-200 text-slate-600 hover:text-emerald-500 hover:border-emerald-400/30"
                   : "bg-slate-900/30 border-slate-800 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30"
               }`}
               aria-label="Toggle theme color mode"
             >
-              {theme === "light" ? (
+              {!mounted ? (
+                <div className="w-5 h-5" />
+              ) : theme === "light" ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>

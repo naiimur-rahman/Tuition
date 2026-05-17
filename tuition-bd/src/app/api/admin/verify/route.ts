@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -38,7 +40,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { profileId, status } = body;
+    const { profileId, status, rejectionReason } = body;
 
     if (!profileId || !status || !['VERIFIED', 'REJECTED'].includes(status)) {
       return new NextResponse("Invalid request", { status: 400 });
@@ -46,7 +48,11 @@ export async function PATCH(request: Request) {
 
     const profile = await prisma.profile.update({
       where: { id: profileId },
-      data: { verificationStatus: status },
+      data: { 
+        verificationStatus: status,
+        rejectionReason: status === "REJECTED" ? (rejectionReason || "No reason specified by administrator.") : null,
+        rejectedAt: status === "REJECTED" ? new Date() : null,
+      },
     });
 
     return NextResponse.json(profile);

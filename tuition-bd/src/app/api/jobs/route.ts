@@ -30,6 +30,11 @@ export async function GET(request: Request) {
           select: {
             name: true,
             email: true,
+            profile: {
+              select: {
+                verificationStatus: true,
+              }
+            }
           },
         },
       },
@@ -43,12 +48,19 @@ export async function GET(request: Request) {
     const sanitizedJobs = jobs.map((job) => {
       const isOwner = userId && job.parentId === userId;
       const isUnlocked = job.locationUnlocked;
+      const parentVerificationStatus = job.parent?.profile?.verificationStatus || "UNVERIFIED";
 
       if (isOwner || isUnlocked) {
         return {
           ...job,
           approxLat: job.latitude,
           approxLng: job.longitude,
+          verified: parentVerificationStatus === "VERIFIED",
+          parent: {
+            name: "undefined",
+            email: "undefined@tuition-console.net",
+            verificationStatus: parentVerificationStatus,
+          }
         };
       }
 
@@ -59,6 +71,12 @@ export async function GET(request: Request) {
         longitude: null,
         approxLat: job.approxLatitude || 23.8103,
         approxLng: job.approxLongitude || 90.4125,
+        verified: parentVerificationStatus === "VERIFIED",
+        parent: {
+          name: "undefined",
+          email: "undefined@tuition-console.net",
+          verificationStatus: parentVerificationStatus,
+        }
       };
     });
 

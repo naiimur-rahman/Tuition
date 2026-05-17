@@ -6,11 +6,13 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user) {
+    const { searchParams } = new URL(request.url);
+    const context = searchParams.get("context");
+
+    if (!session && context !== "register" && context !== "dashboard" && context !== "tutor") {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
     const filename = searchParams.get("filename") || `credential-${Date.now()}.jpg`;
 
     if (!request.body) {

@@ -33,6 +33,7 @@ model Profile {
   id                  String   @id @default(cuid())
   userId              String   @unique
   user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tutorSeq            Int      @unique @default(autoincrement())
   phone               String?
   address             String?
   bio                 String?
@@ -44,12 +45,17 @@ model Profile {
   longitude           Float?   // Exact location
   approxLatitude      Float?   // Blurred location for public
   approxLongitude     Float?   // Blurred location for public
+  rejectionReason     String?
+  rejectedAt          DateTime?
+  actualLatitude      Float?
+  actualLongitude     Float?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 }
 
 model TuitionJob {
   id              String   @id @default(cuid())
+  jobSeq          Int      @unique @default(autoincrement())
   title           String
   description     String
   subject         String
@@ -94,3 +100,22 @@ model Payment {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+model Blacklist {
+  id        String   @id @default(cuid())
+  phone     String   @unique
+  name      String?
+  email     String?
+  role      String?
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+

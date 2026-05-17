@@ -12,20 +12,23 @@ export async function POST(request: Request) {
 
     const userId = (session.user as any).id;
     const body = await request.json();
-    const { idImageUrl } = body;
+    const { nidImageUrl, universityIdImageUrl } = body;
 
-    if (!idImageUrl) {
-      return new NextResponse("Missing Image URL", { status: 400 });
+    if (!nidImageUrl && !universityIdImageUrl) {
+      return new NextResponse("Missing Image URL(s)", { status: 400 });
     }
 
-    // Update the profile's NID/ID field and change verification status to PENDING
+    // Update the profile's fields and change verification status to PENDING
     const updatedProfile = await prisma.profile.update({
       where: {
         userId: userId,
       },
       data: {
-        nidImageUrl: idImageUrl,
+        ...(nidImageUrl && { nidImageUrl }),
+        ...(universityIdImageUrl && { universityIdImageUrl }),
         verificationStatus: "PENDING",
+        rejectionReason: null,
+        rejectedAt: null,
       },
     });
 
