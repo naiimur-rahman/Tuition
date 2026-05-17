@@ -3,32 +3,27 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🚀 Starting database job seeding...");
+  console.log("🚀 Starting comprehensive database seeding...");
 
-  // 1. Find or create a dummy Parent User
-  let parent = await prisma.user.findFirst({
-    where: { role: "PARENT" },
+  // 1. Clean existing data in order of relations
+  console.log("🧹 Purging old database entries...");
+  await prisma.profile.deleteMany({});
+  await prisma.payment.deleteMany({});
+  await prisma.tuitionJob.deleteMany({});
+  await prisma.review.deleteMany({});
+  await prisma.user.deleteMany({});
+  console.log("✨ Database cleared.");
+
+  // 2. Create default parent user
+  console.log("👤 Creating premium dummy parent account...");
+  const parent = await prisma.user.create({
+    data: {
+      name: "Mrs. Farhana Rahman",
+      email: "farhana.parent@tuition-console.net",
+      role: "PARENT",
+      password: "securepassword123", // Plain placeholder
+    },
   });
-
-  if (!parent) {
-    console.log("👤 Creating a default dummy parent account...");
-    parent = await prisma.user.create({
-      data: {
-        name: "Mrs. Farhana Rahman",
-        email: "farhana.parent@tuition-console.net",
-        role: "PARENT",
-        password: "securepassword123", // Dummy hashed password placeholder
-      },
-    });
-  } else {
-    console.log(`👤 Using existing parent: ${parent.name} (${parent.email})`);
-  }
-
-  // 2. Clear out any existing open open jobs to avoid pollution
-  await prisma.tuitionJob.deleteMany({
-    where: { parentId: parent.id },
-  });
-  console.log("🧹 Cleaned existing open open jobs for this parent.");
 
   // 3. Define 5 premium localized Dhaka tuition jobs
   const dummyJobs = [
@@ -99,14 +94,132 @@ async function main() {
     },
   ];
 
-  console.log("📝 Inserting 5 localized dummy jobs into database...");
+  console.log("📝 Inserting 5 localized dummy jobs...");
   for (const job of dummyJobs) {
     await prisma.tuitionJob.create({
       data: job,
     });
   }
 
-  console.log("✨ Seeding completed successfully! 5 open jobs populated!");
+  // 4. Create 5 verified premium dummy Tutors with high-fidelity profiles
+  console.log("🎓 Seeding 5 premium verified educators with coordinates...");
+  
+  const dummyTutors = [
+    {
+      name: "Abrar Shakir",
+      email: "abrar.shakir@tuition-console.net",
+      role: "TUTOR",
+      password: "tutorpassword123",
+      profile: {
+        phone: "+8801711223344",
+        address: "Road 11, Banani, Dhaka",
+        bio: "IEM Graduate from BUET. Specializes in O/A Level Math & Physics. 4+ years of active home tutoring experience.",
+        education: "B.Sc in Industrial & Production Engineering (BUET)",
+        verificationStatus: "VERIFIED",
+        latitude: 23.7915,
+        longitude: 90.4042,
+        approxLatitude: 23.7937,
+        approxLongitude: 90.4066,
+      }
+    },
+    {
+      name: "Nusrat Jahan",
+      email: "nusrat.jahan@tuition-console.net",
+      role: "TUTOR",
+      password: "tutorpassword123",
+      profile: {
+        phone: "+8801811998877",
+        address: "Lalmatia Block D, Dhaka",
+        bio: "English Literature graduate from DU. Expert in IELTS, SAT prep, and school-level English medium syllabus coaching.",
+        education: "BA & MA in English Literature (University of Dhaka)",
+        verificationStatus: "VERIFIED",
+        latitude: 23.7535,
+        longitude: 90.3654,
+        approxLatitude: 23.7550,
+        approxLongitude: 90.3680,
+      }
+    },
+    {
+      name: "Sajid Hasan",
+      email: "sajid.hasan@tuition-console.net",
+      role: "TUTOR",
+      password: "tutorpassword123",
+      profile: {
+        phone: "+8801912445566",
+        address: "Bashundhara R/A Block C, Dhaka",
+        bio: "Computer Science undergraduate at NSU. Passionate about teaching ICT, Math, and Chemistry. Practical labs focus.",
+        education: "B.Sc in Computer Science & Engineering (North South University)",
+        verificationStatus: "VERIFIED",
+        latitude: 23.8155,
+        longitude: 90.4285,
+        approxLatitude: 23.8180,
+        approxLongitude: 90.4310,
+      }
+    },
+    {
+      name: "Dr. Farhan Tanvir",
+      email: "farhan.tanvir@tuition-console.net",
+      role: "TUTOR",
+      password: "tutorpassword123",
+      profile: {
+        phone: "+8801511223399",
+        address: "Tejgaon near Farmgate, Dhaka",
+        bio: "Medical student from Dhaka Medical College. Biology and Chemistry specialist for SSC/HSC board standards.",
+        education: "MBBS candidate (Dhaka Medical College)",
+        verificationStatus: "VERIFIED",
+        latitude: 23.7555,
+        longitude: 90.3878,
+        approxLatitude: 23.7580,
+        approxLongitude: 90.3900,
+      }
+    },
+    {
+      name: "Tahmina Chowdhury",
+      email: "tahmina.chowdhury@tuition-console.net",
+      role: "TUTOR",
+      password: "tutorpassword123",
+      profile: {
+        phone: "+8801611001122",
+        address: "Khilgaon Area, Dhaka",
+        bio: "Professional high-school math teacher. Mathematics, Algebra, and General Science coaching for Class 1-8.",
+        education: "B.Ed in Science (National University)",
+        verificationStatus: "VERIFIED",
+        latitude: 23.7465,
+        longitude: 90.4182,
+        approxLatitude: 23.7490,
+        approxLongitude: 90.4210,
+      }
+    }
+  ];
+
+  for (const t of dummyTutors) {
+    const user = await prisma.user.create({
+      data: {
+        name: t.name,
+        email: t.email,
+        role: t.role,
+        password: t.password,
+      }
+    });
+
+    await prisma.profile.create({
+      data: {
+        userId: user.id,
+        phone: t.profile.phone,
+        address: t.profile.address,
+        bio: t.profile.bio,
+        education: t.profile.education,
+        verificationStatus: t.profile.verificationStatus,
+        latitude: t.profile.latitude,
+        longitude: t.profile.longitude,
+        approxLatitude: t.profile.approxLatitude,
+        approxLongitude: t.profile.approxLongitude,
+      }
+    });
+  }
+
+  console.log("✨ Seeding completed successfully!");
+  console.log("👥 Populated: 1 Parent, 5 Tuition Jobs, 5 Verified Tutors with dynamic Dhaka profiles!");
 }
 
 main()
