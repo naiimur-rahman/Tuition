@@ -3,7 +3,17 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import Navbar from "@/components/Navbar";
-import MapComponent from "@/components/map/Map";
+import dynamic from "next/dynamic";
+
+const MapComponent = dynamic(() => import("@/components/map/Map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[750px] lg:h-[800px] w-full bg-slate-900/50 border border-slate-800 rounded-2xl animate-pulse flex flex-col items-center justify-center space-y-3">
+      <div className="animate-spin h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full" />
+      <p className="text-slate-400 font-mono text-xs uppercase tracking-wider">Syncing map coordinates...</p>
+    </div>
+  ),
+});
 
 function MapSearchContent() {
   const searchParams = useSearchParams();
