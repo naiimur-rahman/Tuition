@@ -1,26 +1,94 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const subject = searchParams.get("subject");
+    const classLevel = searchParams.get("classLevel");
+
+    const where: any = { status: "OPEN" };
+    
+    // Filter subject if specific
+    if (subject && subject !== "All Subjects" && subject !== "Any") {
+      where.subject = { contains: subject };
+    }
+    
+    // Filter classLevel if specific
+    if (classLevel && classLevel !== "Any") {
+      where.classLevel = { contains: classLevel };
+    }
+
+    const jobs = await prisma.tuitionJob.findMany({
+      where,
+      include: {
+        parent: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const session = await getServerSession(authOptions);
+    const userId = (session?.user as any)?.id;
+
+    // Securely sanitize exact addresses/coordinates unless unlocked or the current user is the owner
+    const sanitizedJobs = jobs.map((job) => {
+      const isOwner = userId && job.parentId === userId;
+      const isUnlocked = job.locationUnlocked;
+
+      if (isOwner || isUnlocked) {
+        return {
+          ...job,
+          approxLat: job.latitude,
+          approxLng: job.longitude,
+        };
+      }
+
+      // Hide exact coordinates and return approximate ones
+      return {
+        ...job,
+        latitude: null,
+        longitude: null,
+        approxLat: job.approxLatitude || 23.8103,
+        approxLng: job.approxLongitude || 90.4125,
+      };
+    });
+
+    return NextResponse.json(sanitizedJobs);
+  } catch (error) {
+    console.error("GET_JOBS_ERROR", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || (session.user as any).role !== "PARENT") {
+    if (!session || !session.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const body = await request.json();
     const { title, description, subject, classLevel, salary, latitude, longitude } = body;
 
-    if (!title || !subject || !classLevel || !salary || !latitude || !longitude) {
+    if (!title || !subject || !classLevel || !salary) {
       return new NextResponse("Missing required fields", { status: 400 });
     }
 
-    // Create approx location by adding a small random offset (roughly ~500m to 1km)
-    const approxLatitude = latitude + (Math.random() - 0.5) * 0.01;
-    const approxLongitude = longitude + (Math.random() - 0.5) * 0.01;
+    const lat = parseFloat(latitude) || 23.8103;
+    const lng = parseFloat(longitude) || 90.4125;
+
+    // Generate blurred approximate coordinates within ~800 meters of the original coordinate
+    const latOffset = (Math.random() - 0.5) * 0.008;
+    const lngOffset = (Math.random() - 0.5) * 0.008;
+    const approxLatitude = lat + latOffset;
+    const approxLongitude = lng + lngOffset;
 
     const job = await prisma.tuitionJob.create({
       data: {
@@ -28,42 +96,19 @@ export async function POST(request: Request) {
         description: description || "",
         subject,
         classLevel,
-        salary: parseInt(salary, 10),
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
+        salary: parseInt(salary),
+        parentId: (session.user as any).id,
+        latitude: lat,
+        longitude: lng,
         approxLatitude,
         approxLongitude,
-        parentId: (session.user as any).id,
+        status: "OPEN",
       },
     });
 
     return NextResponse.json(job);
   } catch (error) {
-    console.error("JOB_POST_ERROR", error);
-    return new NextResponse("Internal Error", { status: 500 });
-  }
-}
-
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const parentId = searchParams.get("parentId");
-
-    let whereClause = {};
-    if (parentId) {
-      whereClause = { parentId };
-    }
-
-    const jobs = await prisma.tuitionJob.findMany({
-      where: whereClause,
-      orderBy: {
-        createdAt: "desc"
-      }
-    });
-
-    return NextResponse.json(jobs);
-  } catch (error) {
-    console.error("JOB_GET_ERROR", error);
+    console.error("POST_JOBS_ERROR", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
