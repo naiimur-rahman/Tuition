@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +13,15 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    if (countdown <= 0) return;
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   const [data, setData] = useState({
     email: "",
@@ -38,8 +47,9 @@ export default function ForgotPassword() {
         throw new Error(await res.text());
       }
       
-      setMessage("An OTP code has been dispatched. (Check server console for local testing)");
+      setMessage("An OTP code has been sent to your email.");
       setStep(2);
+      setCountdown(900); // 15 minutes
     } catch (err: any) {
       setError(err.message || "Failed to dispatch OTP");
     } finally {
@@ -201,6 +211,18 @@ export default function ForgotPassword() {
                   <p className="text-center text-[10px] text-slate-500 mt-2">
                     Code sent to <span className="text-sky-400">{data.email}</span>
                   </p>
+                  
+                  <button
+                    type="button"
+                    onClick={handleSendOTP}
+                    disabled={loading || countdown > 0}
+                    className={`w-full text-center text-xs font-semibold transition-colors mt-2 ${countdown > 0 ? 'text-slate-600 cursor-not-allowed' : 'text-slate-400 hover:text-sky-400'}`}
+                  >
+                    {countdown > 0 
+                      ? `Resend OTP in ${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, '0')}`
+                      : <span>Didn't receive the code? <span className="underline underline-offset-2">Resend OTP</span></span>
+                    }
+                  </button>
                 </div>
                 <div className="flex gap-3">
                   <button
