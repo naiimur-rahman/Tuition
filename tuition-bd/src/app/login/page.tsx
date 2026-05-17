@@ -54,7 +54,7 @@ export default function Login() {
             Welcome Back
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm font-sans">
-            Enter your active terminal credentials to sign in
+            Enter your console account credentials to sign in
           </p>
         </div>
 
@@ -69,7 +69,7 @@ export default function Login() {
                 autoComplete="email"
                 required
                 className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
-                placeholder="developer@console.com"
+                placeholder="email@example.com"
                 value={data.email}
                 onChange={(e) => setData({ ...data, email: e.target.value })}
               />

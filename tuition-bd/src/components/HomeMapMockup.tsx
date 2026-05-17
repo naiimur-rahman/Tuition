@@ -187,7 +187,7 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
             <div className="glass-card rounded-2xl p-6 border border-slate-800/80 flex-grow min-h-[180px] flex flex-col justify-between">
               <div>
                 <span className="text-[10px] font-mono text-[var(--muted)] uppercase tracking-widest">Display Output 02 // Operation Logs</span>
-                <h3 className="text-lg font-bold font-heading text-[var(--foreground)] mt-1">Live Telemetry Terminal</h3>
+                <h3 className="text-lg font-bold font-heading text-[var(--foreground)] mt-1">Live Telemetry Console</h3>
               </div>
 
               <div className="h-32 bg-slate-950 border border-slate-800 rounded-xl p-3.5 font-mono text-[10px] md:text-xs text-slate-300 space-y-1.5 overflow-y-auto mt-4 scrollbar-thin">

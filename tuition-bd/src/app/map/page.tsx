@@ -37,38 +37,18 @@ function MapSearchContent() {
             )}
           </h1>
           <p className="text-slate-400 text-sm max-w-2xl leading-relaxed">
-            Locations shown on the map are approximate (within ~800 meters) to protect privacy. Tutors can unlock exact coordinates and parent contacts inside their popup box.
+            {type === "tutor" ? (
+              "Locations shown on the map are approximate (within ~800 meters) to protect privacy. Parents can view tutor credentials and unlock contact details inside their popup box."
+            ) : (
+              "Locations shown on the map are approximate (within ~800 meters) to protect privacy. Tutors can unlock exact coordinates and parent contacts inside their popup box."
+            )}
           </p>
-        </div>
-
-        {/* Toggle Switch */}
-        <div className="bg-slate-900 border border-slate-800 p-1 rounded-xl flex items-center h-fit w-fit">
-          <button
-            onClick={() => router.push("/map")}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
-              type !== "tutor"
-                ? "bg-emerald-500 text-slate-950 shadow-[0_2px_8px_rgba(16,185,129,0.2)]"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Tuition Jobs
-          </button>
-          <button
-            onClick={() => router.push("/map?type=tutor")}
-            className={`px-4 py-2 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
-              type === "tutor"
-                ? "bg-emerald-500 text-slate-950 shadow-[0_2px_8px_rgba(16,185,129,0.2)]"
-                : "text-slate-400 hover:text-slate-200"
-            }`}
-          >
-            Tutors List
-          </button>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
         {/* Filters Sidebar */}
-        <div className="w-full lg:w-1/4 glass-card p-6 rounded-2xl border border-slate-800 h-fit space-y-6">
+        <div className="lg:col-span-1 glass-card p-5 rounded-2xl border border-slate-800 h-fit space-y-6">
           <div>
             <h2 className="text-lg font-bold font-heading text-white flex items-center">
               <svg className="w-5 h-5 mr-2 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -76,7 +56,7 @@ function MapSearchContent() {
               </svg>
               Search Filters
             </h2>
-            <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">Coordinates matching parameters</p>
+            <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">Filter parameters</p>
           </div>
 
           <div className="h-px bg-slate-800/80" />
@@ -122,7 +102,7 @@ function MapSearchContent() {
         </div>
 
         {/* Map Area */}
-        <div className="w-full lg:w-3/4">
+        <div className="lg:col-span-3">
           <MapComponent type={type} subject={activeSubject} classLevel={activeClassLevel} />
         </div>
       </div>

@@ -61,7 +61,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
         <div className="flex justify-between h-16">
           {/* Logo / Brand */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2.5">
               <motion.div
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
@@ -69,11 +69,40 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                   theme === "light" ? "text-slate-900" : "text-white"
                 }`}
               >
+                {/* Map & Tuition Combined Brand Logo */}
+                <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mr-2 shadow-[0_0_15px_rgba(16,185,129,0.15)] text-emerald-400">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* A premium map marker shape */}
+                    <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                    />
+                    {/* A graduation cap inside the center of the marker */}
+                    <path d="M12 6.5L8.5 8.5L12 10.5L15.5 8.5L12 6.5Z" 
+                          fill="currentColor" 
+                          stroke="currentColor" 
+                          strokeWidth="1" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round"
+                    />
+                    <path d="M9.5 9.1V11.5C9.5 12.5 10.6 13.5 12 13.5C13.4 13.5 14.5 12.5 14.5 11.5V9.1" 
+                          stroke="currentColor" 
+                          strokeWidth="1.2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round"
+                    />
+                    {/* Tassel */}
+                    <path d="M13.8 8.5V10.5" 
+                          stroke="currentColor" 
+                          strokeWidth="0.8" 
+                          strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
                 <span>Tuition</span>
                 <span className="text-emerald-500 font-sans ml-1">Console</span>
-                <span className="ml-2 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-widest hidden sm:inline-block shadow-[0_0_10px_rgba(16,185,129,0.1)]">
-                  v1.0
-                </span>
               </motion.div>
             </Link>
 

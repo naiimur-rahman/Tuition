@@ -1,33 +1,43 @@
 "use client";
-
-import { useState, useEffect } from "react";
+ 
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-
+ 
 interface HeroProps {
   selectedRole?: "parent" | "tutor";
 }
-
+ 
 export default function Hero({ selectedRole }: HeroProps) {
-  const words = selectedRole === "parent"
-    ? ["tutor near you", "home educator", "academic specialist", "matching mentor"]
-    : selectedRole === "tutor"
-      ? ["tuition match", "premium job", "student request", "teaching vacancy"]
-      : ["tutor near you", "tuition match", "home educator", "academic guide"];
-
+  const words = useMemo(() => {
+    return selectedRole === "parent"
+      ? ["tutor near you", "home educator", "academic specialist", "matching mentor"]
+      : selectedRole === "tutor"
+        ? ["tuition match", "premium job", "student request", "teaching vacancy"]
+        : ["tutor near you", "tuition match", "home educator", "academic guide"];
+  }, [selectedRole]);
+ 
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [typingSpeed, setTypingSpeed] = useState(100);
-
+ 
   // Reset typewriter when user changes their role dynamically
   useEffect(() => {
     setCurrentWordIndex(0);
     setCurrentText("");
     setIsDeleting(false);
   }, [selectedRole]);
-
+ 
   useEffect(() => {
+    // Hold typewriter initialization until the user selects a tactical workspace role
+    if (!selectedRole) {
+      if (currentText !== "") {
+        setCurrentText("");
+      }
+      return;
+    }
+
     let timer: NodeJS.Timeout;
     const handleType = () => {
       if (words.length === 0) return;
@@ -54,7 +64,7 @@ export default function Hero({ selectedRole }: HeroProps) {
 
     timer = setTimeout(handleType, typingSpeed);
     return () => clearTimeout(timer);
-  }, [currentText, isDeleting, currentWordIndex, typingSpeed, words]);
+  }, [currentText, isDeleting, currentWordIndex, typingSpeed, words, selectedRole]);
 
   const containerVariants: any = {
     hidden: { opacity: 0 },
@@ -205,94 +215,108 @@ export default function Hero({ selectedRole }: HeroProps) {
 
               {/* Terminal Contents */}
               <div className="p-6 font-mono text-xs sm:text-sm text-slate-300 space-y-4 min-h-[280px] bg-slate-950/40">
-                <div className="flex items-center space-x-2">
-                  <span className="text-emerald-400 font-bold">guest@tuition-console:~$</span>
-                  <span className="text-white">
-                    {selectedRole === "parent"
-                      ? "tutor-search --verified --radius=1.5km"
-                      : "tuition-search --dhaka --radius=1.5km"}
-                  </span>
-                </div>
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-slate-500"
-                >
-                  {selectedRole === "parent"
-                    ? "[i] Initiating parent-educator grid link..."
-                    : "[i] Initializing active spatial coordination..."}
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.2 }}
-                  className="space-y-1.5"
-                >
-                  <div className="text-emerald-400/90 font-bold">✓ Coordinates Loaded (23.8103° N, 90.4125° E)</div>
-                  <div className="text-slate-400">
-                    {selectedRole === "parent"
-                      ? "🔍 Locating nearest active educators..."
-                      : "🔍 Fetching matching listings..."}
+                {!selectedRole ? (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-emerald-400 font-bold">guest@tuition-console:~$</span>
+                    <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block" />
                   </div>
-                </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="text-emerald-400 font-bold">guest@tuition-console:~$</span>
+                      <span className="text-white">
+                        {selectedRole === "parent"
+                          ? "tutor-search --verified --radius=1.5km"
+                          : "tuition-search --dhaka --radius=1.5km"}
+                      </span>
+                    </div>
 
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 2.2 }}
-                  className="p-3 bg-slate-900/60 border border-slate-800 rounded-lg space-y-2 text-[11px] sm:text-xs"
-                >
-                  {selectedRole === "parent" ? (
-                    <>
-                      <div className="flex justify-between text-slate-200">
-                        <span className="font-bold text-emerald-400">Tutor Profile Found</span>
-                        <span className="text-slate-500">Banani Sector 4</span>
-                      </div>
-                      <div className="h-px bg-slate-800" />
-                      <div className="text-slate-400 font-sans">
-                        <span className="font-bold text-slate-300 font-mono">Educator:</span> Fahim Rahman<br />
-                        <span className="font-bold text-slate-300 font-mono">Specs:</span> CSE Grad (BUET)<br />
-                        <span className="font-bold text-slate-300 font-mono">Expertise:</span> Math, Physics & ICT
-                      </div>
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 font-sans">
-                          ✓ University Verified
-                        </span>
-                        <span className="text-[10px] text-emerald-400 font-bold font-sans">Active Match</span>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="flex justify-between text-slate-200">
-                        <span className="font-bold text-emerald-400">Listing Found</span>
-                        <span className="text-slate-500">Dhaka North</span>
-                      </div>
-                      <div className="h-px bg-slate-800" />
-                      <div className="text-slate-400 font-sans">
-                        <span className="font-bold text-slate-300 font-mono">Job:</span> Mathematics Tutor Required<br />
-                        <span className="font-bold text-slate-300 font-mono">Class:</span> O Level (EDEXCEL)<br />
-                        <span className="font-bold text-slate-300 font-mono">Salary:</span> 12,000 BDT/month
-                      </div>
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-[10px] text-yellow-500 font-bold px-1.5 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 font-sans">Approximate Location Secured</span>
-                        <span className="text-[10px] text-emerald-400 font-bold font-sans">Ready</span>
-                      </div>
-                    </>
-                  )}
-                </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="text-slate-500"
+                    >
+                      {selectedRole === "parent"
+                        ? "[i] Initiating parent-educator grid link..."
+                        : "[i] Initializing active spatial coordination..."}
+                    </motion.div>
 
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 3.5 }}
-                  className="flex items-center space-x-2 pt-1"
-                >
-                  <span className="text-emerald-400">guest@tuition-console:~$</span>
-                  <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block" />
-                </motion.div>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 1.2 }}
+                      className="space-y-1.5"
+                    >
+                      <div className="text-emerald-400/90 font-bold">✓ Coordinates Loaded (23.8103° N, 90.4125° E)</div>
+                      <div className="text-slate-400">
+                        {selectedRole === "parent"
+                          ? "🔍 Locating nearest active educators..."
+                          : "🔍 Fetching matching listings..."}
+                      </div>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 2.2 }}
+                      className="p-3 bg-slate-900/60 border border-slate-800 rounded-lg space-y-2 text-[11px] sm:text-xs"
+                    >
+                      {selectedRole === "parent" ? (
+                        <>
+                          <div className="flex justify-between text-slate-200">
+                            <span className="font-bold text-emerald-400">Tutor Profile Found</span>
+                            <span className="text-slate-500">Banani Sector 4</span>
+                          </div>
+                          <div className="h-px bg-slate-800" />
+                          <div className="text-slate-400 font-sans">
+                            <span className="font-bold text-slate-300 font-mono">Educator:</span> Fahim Rahman<br />
+                            <span className="font-bold text-slate-300 font-mono">Specs:</span> CSE Grad (BUET)<br />
+                            <span className="font-bold text-slate-300 font-mono">Expertise:</span> Math, Physics & ICT
+                          </div>
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 font-sans">
+                              ✓ University Verified
+                            </span>
+                            <span className="text-[10px] text-emerald-400 font-bold font-sans">Active Match</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between text-slate-200">
+                            <span className="font-bold text-emerald-400">Listing Found</span>
+                            <span className="text-slate-500">Dhaka North</span>
+                          </div>
+                          <div className="h-px bg-slate-800" />
+                          <div className="text-slate-400 font-sans">
+                            <span className="font-bold text-slate-300 font-mono">Job:</span> Mathematics Tutor Required<br />
+                            <span className="font-bold text-slate-300 font-mono">Class:</span> O Level (EDEXCEL)<br />
+                            <span className="font-bold text-slate-300 font-mono">Salary:</span> 12,000 BDT/month
+                          </div>
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[10px] text-yellow-500 font-bold px-1.5 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 font-sans">Approximate Location Secured</span>
+                            <span className="text-[10px] text-emerald-400 font-bold font-sans">Ready</span>
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 3.5 }}
+                      className="flex items-center space-x-2 pt-1"
+                    >
+                      <span className="text-emerald-400">guest@tuition-console:~$</span>
+                      <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block" />
+                    </motion.div>
+                  </motion.div>
+                )}
               </div>
             </div>
           </motion.div>
