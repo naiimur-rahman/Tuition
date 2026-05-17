@@ -24,18 +24,10 @@ const Circle = dynamic(() => import("react-leaflet").then((mod) => mod.Circle), 
   ssr: false,
 });
 
-// Mock data - In a real app, this comes from Prisma/API
-const MOCK_JOBS = [
-  { id: 1, title: "Math Tutor Needed for Class 10", approxLat: 23.8103, approxLng: 90.4125, salary: "5000 BDT", locationUnlocked: false },
-  { id: 2, title: "English Tutor Class 8", approxLat: 23.7937, approxLng: 90.4066, salary: "4000 BDT", locationUnlocked: false },
-];
-
-const MOCK_TUTORS = [
-  { id: 1, name: "Rahim (DU Student)", approxLat: 23.7340, approxLng: 90.3928, verified: true, subject: "Physics" },
-];
-
 export default function MapComponent({ type }: { type: string }) {
   const [isMounted, setIsMounted] = useState(false);
+  const [dbJobs, setDbJobs] = useState<any[]>([]);
+  const [dbTutors, setDbTutors] = useState<any[]>([]);
 
   // Fix Leaflet marker icons in Next.js
   useEffect(() => {
@@ -47,13 +39,40 @@ export default function MapComponent({ type }: { type: string }) {
       iconUrl: require("leaflet/dist/images/marker-icon.png").default?.src || "/marker-icon.png",
       shadowUrl: require("leaflet/dist/images/marker-shadow.png").default?.src || "/marker-shadow.png",
     });
-  }, []);
+
+    if (type !== 'tutor') {
+      fetch('/api/jobs')
+        .then(res => res.json())
+        .then(data => setDbJobs(data))
+        .catch(err => console.error(err));
+    } else {
+      fetch('/api/users?role=TUTOR')
+        .then(res => res.json())
+        .then(data => {
+            const mapTutors = data.filter((u: any) => u.profile).map((u: any) => ({
+                id: u.id,
+                name: u.name,
+                approxLat: u.profile.approxLatitude || 23.7340, // fallback
+                approxLng: u.profile.approxLongitude || 90.3928,
+                verified: u.profile.verificationStatus === 'VERIFIED',
+                subject: u.profile.bio || "Various Subjects"
+            }));
+            // Add a mock tutor if db is empty for demo purposes
+            if (mapTutors.length === 0) {
+               setDbTutors([{ id: 'mock1', name: "Rahim (DU Student)", approxLat: 23.7340, approxLng: 90.3928, verified: true, subject: "Physics" }]);
+            } else {
+               setDbTutors(mapTutors);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+  }, [type]);
 
   if (!isMounted) return <div className="h-[600px] w-full bg-gray-100 animate-pulse flex items-center justify-center">Loading Map...</div>;
 
   const center: [number, number] = [23.8103, 90.4125]; // Dhaka Center
 
-  const items = type === 'tutor' ? MOCK_TUTORS : MOCK_JOBS;
+  const items = type === 'tutor' ? dbTutors : dbJobs;
 
   return (
     <div className="h-[600px] w-full rounded-lg overflow-hidden shadow-lg border border-gray-200">
