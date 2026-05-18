@@ -8,11 +8,7 @@ interface OnboardingGatewayProps {
 }
 
 export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayProps) {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
+  const [isVisible, setIsVisible] = useState(true);
 
   // Lock body scroll when selection modal is visible
   useEffect(() => {
@@ -39,35 +35,22 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[9999] bg-slate-950/80 backdrop-blur-2xl flex items-start md:items-center justify-center p-4 overflow-y-auto"
+          className="fixed inset-0 z-[9999] bg-slate-950/90 backdrop-blur-md md:backdrop-blur-xl flex items-start md:items-center justify-center p-4 overflow-y-auto"
         >
           {/* Cyber Decorative Ambient Background Glows */}
-          <div className="absolute top-1/4 left-1/4 w-[350px] h-[350px] bg-emerald-500/10 rounded-full filter blur-[120px] pointer-events-none" />
-          <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] bg-indigo-500/10 rounded-full filter blur-[120px] pointer-events-none" />
-
+          <div className="hidden md:block absolute top-1/4 left-1/4 w-[350px] h-[350px] bg-emerald-500/10 rounded-full filter blur-[120px] pointer-events-none" />
+          <div className="hidden md:block absolute bottom-1/4 right-1/4 w-[350px] h-[350px] bg-indigo-500/10 rounded-full filter blur-[120px] pointer-events-none" />
+ 
           <div className="relative max-w-4xl w-full mx-auto text-center py-4 sm:py-8 z-10 space-y-6 sm:space-y-10 my-auto">
             {/* Header / Brand Logo & Title */}
             <div className="space-y-4 flex flex-col items-center">
               {/* Playful Floating/Bouncing Custom SVG Logo */}
               <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ 
-                  scale: 1, 
-                  rotate: 0,
-                  y: [0, -8, 0]
-                }}
-                transition={{
-                  scale: { type: "spring", stiffness: 180, damping: 12, delay: 0.1 },
-                  rotate: { type: "spring", stiffness: 180, damping: 12, delay: 0.1 },
-                  y: {
-                    repeat: Infinity,
-                    repeatType: "reverse",
-                    duration: 2.2,
-                    ease: "easeInOut"
-                  }
-                }}
-                whileHover={{ scale: 1.15, rotate: 10 }}
-                className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.25)] cursor-pointer"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)] cursor-pointer"
               >
                 <svg className="w-9 h-9" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   {/* A premium map marker shape */}
@@ -83,13 +66,13 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                         stroke="currentColor" 
                         strokeWidth="1" 
                         strokeLinecap="round" 
-                        strokeLinejoin="round"
+                        strokeLinejoin="round" 
                   />
                   <path d="M9.5 9.1V11.5C9.5 12.5 10.6 13.5 12 13.5C13.4 13.5 14.5 12.5 14.5 11.5V9.1" 
                         stroke="currentColor" 
                         strokeWidth="1.2" 
                         strokeLinecap="round" 
-                        strokeLinejoin="round"
+                        strokeLinejoin="round" 
                   />
                   {/* Tassel */}
                   <path d="M13.8 8.5V10.5" 
@@ -101,18 +84,18 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
               </motion.div>
  
               <motion.h1
-                initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
                 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight font-heading px-2"
               >
                 Welcome to <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-sm">Tuition Console</span>
               </motion.h1>
  
               <motion.p
-                initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.05 }}
                 className="text-slate-400 max-w-lg mx-auto text-xs sm:text-sm md:text-base font-sans leading-relaxed px-4"
               >
                 Select your console mode to initialize queries, scan location maps, and launch the matching engine.
@@ -123,11 +106,10 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-3xl mx-auto px-4 w-full">
               {/* Option 1: Searching for Home Tutor */}
               <motion.div
-                initial={{ x: -30, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.5 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                whileHover={{ scale: 1.01 }}
                 onClick={() => handleSelection("parent")}
                 className="glass-card group border border-slate-800 hover:border-emerald-500/50 p-5 sm:p-8 rounded-2xl text-left cursor-pointer transition-all duration-300 relative overflow-hidden shadow-2xl flex flex-col justify-between min-h-[200px] sm:min-h-[260px]"
               >
@@ -163,11 +145,10 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
   
               {/* Option 2: Looking for Tuition Jobs */}
               <motion.div
-                initial={{ x: 30, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 100, damping: 15, delay: 0.5 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3, delay: 0.15 }}
+                whileHover={{ scale: 1.01 }}
                 onClick={() => handleSelection("tutor")}
                 className="glass-card group border border-slate-800 hover:border-indigo-500/50 p-5 sm:p-8 rounded-2xl text-left cursor-pointer transition-all duration-300 relative overflow-hidden shadow-2xl flex flex-col justify-between min-h-[200px] sm:min-h-[260px]"
               >

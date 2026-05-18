@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface NavbarProps {
@@ -13,6 +13,7 @@ interface NavbarProps {
 export default function Navbar({ selectedRole }: NavbarProps = {}) {
   const { data: session } = useSession() || { data: null };
   const pathname = usePathname();
+  const router = useRouter();
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [activeRole, setActiveRole] = useState<"parent" | "tutor" | undefined>(selectedRole);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -63,6 +64,25 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
         <div className="flex justify-between h-16">
           {/* Logo / Brand */}
           <div className="flex items-center">
+            {pathname !== "/" && (
+              <motion.button
+                whileHover={{ scale: 1.05, x: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  if (typeof window !== "undefined" && window.history.length > 1) {
+                    router.back();
+                  } else {
+                    router.push("/");
+                  }
+                }}
+                className="mr-3 p-1.5 rounded-xl border border-slate-800/80 bg-slate-900/60 hover:border-emerald-500/30 text-slate-400 hover:text-white transition-all cursor-pointer shadow-sm flex items-center justify-center"
+                title="Go Back"
+              >
+                <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </motion.button>
+            )}
             <Link href="/" className="flex items-center space-x-2.5">
               <motion.div
                 whileHover={{ scale: 1.03 }}

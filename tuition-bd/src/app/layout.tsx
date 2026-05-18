@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/providers/SessionProvider";
+import BackButton from "@/components/BackButton";
 
 const headingFont = Bricolage_Grotesque({
   variable: "--font-heading",
@@ -50,6 +51,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)] font-sans transition-colors duration-300 selection:bg-emerald-400 selection:text-slate-950">
         <SessionProvider>
+          <BackButton />
           {children}
         </SessionProvider>
       </body>

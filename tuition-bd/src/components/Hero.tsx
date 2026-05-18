@@ -22,6 +22,24 @@ export default function Hero({ selectedRole }: HeroProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [typingSpeed, setTypingSpeed] = useState(100);
   const [isMobile, setIsMobile] = useState(true);
+  const [animationKey, setAnimationKey] = useState(0);
+  const [mockIndex, setMockIndex] = useState(0);
+
+  const mockTutors = useMemo(() => [
+    { name: "Fahim Rahman", specs: "CSE Grad (BUET)", expertise: "Math, Physics & ICT", sector: "Banani Sector 4", coords: "23.7937° N, 90.4066° E" },
+    { name: "Naimur Sohan", specs: "Physics Major (DU)", expertise: "Physics & Chemistry", sector: "Dhanmondi Road 12", coords: "23.7461° N, 90.3742° E" },
+    { name: "Farhana Amin", specs: "English Honours (NSU)", expertise: "O/A Level English", sector: "Gulshan 2 Circle", coords: "23.7925° N, 90.4156° E" },
+    { name: "Tahmid Islam", specs: "Chemistry Specialist (MC)", expertise: "Chemistry & Biology", sector: "Uttara Sector 11", coords: "23.8759° N, 90.3795° E" },
+    { name: "Aisha Siddiqua", specs: "Math Expert (BUET)", expertise: "Higher Math & Calculus", sector: "Mirpur DOHS", coords: "23.8243° N, 90.3542° E" },
+  ], []);
+
+  const mockJobs = useMemo(() => [
+    { title: "Mathematics Tutor Required", grade: "O Level (EDEXCEL)", salary: "12,000 BDT/month", sector: "Dhaka North", coords: "23.8103° N, 90.4125° E" },
+    { title: "Physics & Chem Instructor", grade: "A Level (CIE)", salary: "15,000 BDT/month", sector: "Dhanmondi", coords: "23.7461° N, 90.3742° E" },
+    { title: "Class 8 All-Subject Guide", grade: "National Curriculum", salary: "8,500 BDT/month", sector: "Mirpur 10", coords: "23.8069° N, 90.3687° E" },
+    { title: "ICT & Computer Coding Mentor", grade: "Junior Programmer Level", salary: "18,000 BDT/month", sector: "Gulshan 1", coords: "23.7801° N, 90.4178° E" },
+    { title: "English Language Specialist", grade: "IELTS Preparation", salary: "20,000 BDT/month", sector: "Uttara Sector 3", coords: "23.8687° N, 90.3985° E" },
+  ], []);
  
   // Detect mobile screens to disable expensive blur animations
   useEffect(() => {
@@ -31,11 +49,97 @@ export default function Hero({ selectedRole }: HeroProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const [terminalText, setTerminalText] = useState("");
+  const [terminalPhase, setTerminalPhase] = useState<"typing" | "submitting" | "results">("typing");
+  const [showStatus, setShowStatus] = useState(false);
+  const [showCoords, setShowCoords] = useState(false);
+  const [showCard, setShowCard] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
+
+  // Single self-cleaning typewriter state machine loop to prevent race conditions & duplicate intervals
+  useEffect(() => {
+    if (!selectedRole) return;
+
+    // Reset all state values immediately before typing
+    setTerminalText("");
+    setTerminalPhase("typing");
+    setShowStatus(false);
+    setShowCoords(false);
+    setShowCard(false);
+    setShowPrompt(false);
+
+    const command = selectedRole === "parent"
+      ? "tutor--search --verified --radius=1.5km"
+      : "tuition--search --dhaka --radius=1.5km";
+
+    let typingInterval: NodeJS.Timeout | null = null;
+    let submitTimeout: NodeJS.Timeout | null = null;
+    let statusTimeout: NodeJS.Timeout | null = null;
+    let coordsTimeout: NodeJS.Timeout | null = null;
+    let cardTimeout: NodeJS.Timeout | null = null;
+    let promptTimeout: NodeJS.Timeout | null = null;
+    let resetTimeout: NodeJS.Timeout | null = null;
+
+    // Start typing command letter-by-letter
+    typingInterval = setInterval(() => {
+      setTerminalText((prev) => {
+        if (prev.length >= command.length) {
+          if (typingInterval) clearInterval(typingInterval);
+          return prev;
+        }
+
+        const nextChar = command.charAt(prev.length);
+        const nextText = prev + nextChar;
+
+        // When the final character is appended, clear interval and trigger stdout sequence
+        if (nextText.length === command.length) {
+          if (typingInterval) clearInterval(typingInterval);
+          
+          // Brief pause after command is fully typed (simulates enter key pause)
+          submitTimeout = setTimeout(() => {
+            setTerminalPhase("submitting");
+            
+            // Shift to active result streaming stage
+            submitTimeout = setTimeout(() => {
+              setTerminalPhase("results");
+              
+              // Stagger stdout data prints
+              statusTimeout = setTimeout(() => setShowStatus(true), 300);
+              coordsTimeout = setTimeout(() => setShowCoords(true), 900);
+              cardTimeout = setTimeout(() => setShowCard(true), 1700);
+              promptTimeout = setTimeout(() => setShowPrompt(true), 2500);
+
+              // Hold results visible, then increment loop index to trigger next scan
+              resetTimeout = setTimeout(() => {
+                setMockIndex((prevIndex) => (prevIndex + 1) % 5);
+              }, 7500);
+
+            }, 400);
+          }, 200);
+        }
+
+        return nextText;
+      });
+    }, 45); // Natural typing speed: 45ms per character
+
+    // Absolute cleanup: halts every timer and active interval on unmount or refresh
+    return () => {
+      if (typingInterval) clearInterval(typingInterval);
+      if (submitTimeout) clearTimeout(submitTimeout);
+      if (statusTimeout) clearTimeout(statusTimeout);
+      if (coordsTimeout) clearTimeout(coordsTimeout);
+      if (cardTimeout) clearTimeout(cardTimeout);
+      if (promptTimeout) clearTimeout(promptTimeout);
+      if (resetTimeout) clearTimeout(resetTimeout);
+    };
+  }, [selectedRole, mockIndex]);
+
   // Reset typewriter when user changes their role dynamically
   useEffect(() => {
     setCurrentWordIndex(0);
     setCurrentText("");
     setIsDeleting(false);
+    setMockIndex(0);
   }, [selectedRole]);
  
   useEffect(() => {
@@ -215,108 +319,116 @@ export default function Hero({ selectedRole }: HeroProps) {
               </div>
 
               {/* Terminal Contents */}
-              <div className="p-6 font-mono text-xs sm:text-sm text-slate-300 space-y-4 min-h-[280px] bg-slate-950/40">
+              <div className="p-6 font-mono text-xs sm:text-sm text-slate-300 space-y-4 h-[390px] overflow-hidden bg-slate-950/40">
                 {!selectedRole ? (
                   <div className="flex items-center space-x-2">
-                    <span className="text-emerald-400 font-bold">guest@tuition-console:~$</span>
-                    <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block" />
+                    <span className="text-emerald-400 font-bold flex-shrink-0 whitespace-nowrap">guest@tuition-console:~$</span>
+                    <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block flex-shrink-0" />
                   </div>
                 ) : (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-4"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className="text-emerald-400 font-bold">guest@tuition-console:~$</span>
-                      <span className="text-white">
-                        {selectedRole === "parent"
-                          ? "tutor-search --verified --radius=1.5km"
-                          : "tuition-search --dhaka --radius=1.5km"}
+                  <div className="space-y-4">
+                    {/* Command Input Prompt */}
+                    <div className="flex items-center space-x-2 flex-wrap">
+                      <span className="text-emerald-400 font-bold flex-shrink-0 whitespace-nowrap">guest@tuition-console:~$</span>
+                      <span className="text-white whitespace-nowrap overflow-hidden">
+                        {terminalText}
                       </span>
+                      {(terminalPhase === "typing" || terminalPhase === "submitting") && (
+                        <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block align-middle flex-shrink-0" />
+                      )}
                     </div>
 
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                      className="text-slate-500"
-                    >
-                      {selectedRole === "parent"
-                        ? "[i] Initiating parent-educator grid link..."
-                        : "[i] Initializing active spatial coordination..."}
-                    </motion.div>
-
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 1.2 }}
-                      className="space-y-1.5"
-                    >
-                      <div className="text-emerald-400/90 font-bold">✓ Coordinates Loaded (23.8103° N, 90.4125° E)</div>
-                      <div className="text-slate-400">
+                    {/* Status Message */}
+                    {showStatus && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-slate-500"
+                      >
                         {selectedRole === "parent"
-                          ? "🔍 Locating nearest active educators..."
-                          : "🔍 Fetching matching listings..."}
-                      </div>
-                    </motion.div>
+                          ? "[i] Initiating parent-educator grid link..."
+                          : "[i] Initializing active spatial coordination..."}
+                      </motion.div>
+                    )}
 
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 2.2 }}
-                      className="p-3 bg-slate-900/60 border border-slate-800 rounded-lg space-y-2 text-[11px] sm:text-xs"
-                    >
-                      {selectedRole === "parent" ? (
-                        <>
-                          <div className="flex justify-between text-slate-200">
-                            <span className="font-bold text-emerald-400">Tutor Profile Found</span>
-                            <span className="text-slate-500">Banani Sector 4</span>
-                          </div>
-                          <div className="h-px bg-slate-800" />
-                          <div className="text-slate-400 font-sans">
-                            <span className="font-bold text-slate-300 font-mono">Educator:</span> Fahim Rahman<br />
-                            <span className="font-bold text-slate-300 font-mono">Specs:</span> CSE Grad (BUET)<br />
-                            <span className="font-bold text-slate-300 font-mono">Expertise:</span> Math, Physics & ICT
-                          </div>
-                          <div className="flex items-center justify-between pt-1">
-                            <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 font-sans">
-                              ✓ University Verified
-                            </span>
-                            <span className="text-[10px] text-emerald-400 font-bold font-sans">Active Match</span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex justify-between text-slate-200">
-                            <span className="font-bold text-emerald-400">Listing Found</span>
-                            <span className="text-slate-500">Dhaka North</span>
-                          </div>
-                          <div className="h-px bg-slate-800" />
-                          <div className="text-slate-400 font-sans">
-                            <span className="font-bold text-slate-300 font-mono">Job:</span> Mathematics Tutor Required<br />
-                            <span className="font-bold text-slate-300 font-mono">Class:</span> O Level (EDEXCEL)<br />
-                            <span className="font-bold text-slate-300 font-mono">Salary:</span> 12,000 BDT/month
-                          </div>
-                          <div className="flex items-center justify-between pt-1">
-                            <span className="text-[10px] text-yellow-500 font-bold px-1.5 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 font-sans">Approximate Location Secured</span>
-                            <span className="text-[10px] text-emerald-400 font-bold font-sans">Ready</span>
-                          </div>
-                        </>
-                      )}
-                    </motion.div>
+                    {/* Coordinates & Location Status */}
+                    {showCoords && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-1.5"
+                      >
+                        <div className="text-emerald-400/90 font-bold">
+                          ✓ Coordinates Loaded ({selectedRole === "parent" ? mockTutors[mockIndex].coords : mockJobs[mockIndex].coords})
+                        </div>
+                        <div className="text-slate-400">
+                          {selectedRole === "parent"
+                            ? "🔍 Locating nearest active educators..."
+                            : "🔍 Fetching matching listings..."}
+                        </div>
+                      </motion.div>
+                    )}
 
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 3.5 }}
-                      className="flex items-center space-x-2 pt-1"
-                    >
-                      <span className="text-emerald-400">guest@tuition-console:~$</span>
-                      <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block" />
-                    </motion.div>
-                  </motion.div>
+                    {/* Search Results Card */}
+                    {showCard && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.98, y: 5 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                        className="p-3 bg-slate-900/60 border border-slate-800 rounded-lg space-y-2 text-[11px] sm:text-xs shadow-md"
+                      >
+                        {selectedRole === "parent" ? (
+                          <>
+                            <div className="flex justify-between text-slate-200">
+                              <span className="font-bold text-emerald-400">Tutor Profile Found</span>
+                              <span className="text-slate-500">{mockTutors[mockIndex].sector}</span>
+                            </div>
+                            <div className="h-px bg-slate-800" />
+                            <div className="text-slate-400 font-sans">
+                              <span className="font-bold text-slate-300 font-mono">Educator:</span> {mockTutors[mockIndex].name}<br />
+                              <span className="font-bold text-slate-300 font-mono">Specs:</span> {mockTutors[mockIndex].specs}<br />
+                              <span className="font-bold text-slate-300 font-mono">Expertise:</span> {mockTutors[mockIndex].expertise}
+                            </div>
+                            <div className="flex items-center justify-between pt-1">
+                              <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 font-sans">
+                                ✓ University Verified
+                              </span>
+                              <span className="text-[10px] text-emerald-400 font-bold font-sans">Active Match</span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex justify-between text-slate-200">
+                              <span className="font-bold text-emerald-400">Listing Found</span>
+                              <span className="text-slate-500">{mockJobs[mockIndex].sector}</span>
+                            </div>
+                            <div className="h-px bg-slate-800" />
+                            <div className="text-slate-400 font-sans">
+                              <span className="font-bold text-slate-300 font-mono">Job:</span> {mockJobs[mockIndex].title}<br />
+                              <span className="font-bold text-slate-300 font-mono">Class:</span> {mockJobs[mockIndex].grade}<br />
+                              <span className="font-bold text-slate-300 font-mono">Salary:</span> {mockJobs[mockIndex].salary}
+                            </div>
+                            <div className="flex items-center justify-between pt-1">
+                              <span className="text-[10px] text-yellow-500 font-bold px-1.5 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 font-sans">Approximate Location Secured</span>
+                              <span className="text-[10px] text-emerald-400 font-bold font-sans">Ready</span>
+                            </div>
+                          </>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {/* Bottom Blinking Prompt */}
+                    {showPrompt && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center space-x-2 pt-1"
+                      >
+                        <span className="text-emerald-400">guest@tuition-console:~$</span>
+                        <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block" />
+                      </motion.div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
