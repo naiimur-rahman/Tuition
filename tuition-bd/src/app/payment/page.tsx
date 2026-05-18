@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 
 function PaymentContent() {
@@ -14,6 +14,25 @@ function PaymentContent() {
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState("");
   const [verifySuccess, setVerifySuccess] = useState(false);
+
+  const [job, setJob] = useState<any>(null);
+  const [loadingJob, setLoadingJob] = useState(true);
+
+  useEffect(() => {
+    if (jobId) {
+      setLoadingJob(true);
+      fetch(`/api/jobs?jobId=${jobId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setJob(data);
+          setLoadingJob(false);
+        })
+        .catch((err) => {
+          console.error("Error loading job:", err);
+          setLoadingJob(false);
+        });
+    }
+  }, [jobId]);
 
   if (!jobId) {
     return (
@@ -34,8 +53,39 @@ function PaymentContent() {
     );
   }
 
+  if (loadingJob) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 shadow-2xl rounded-2xl p-8 max-w-md w-full text-center space-y-4">
+        <div className="animate-spin h-10 w-10 border-4 border-pink-500 border-t-transparent rounded-full mx-auto" />
+        <p className="text-slate-400 font-mono text-xs uppercase tracking-widest">Loading job billing parameters...</p>
+      </div>
+    );
+  }
+
+  if (!job) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 shadow-2xl rounded-2xl p-8 max-w-md w-full text-center space-y-4">
+        <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-2xl bg-red-500/10 text-red-400 border border-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.1)]">
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold text-white font-heading">Tuition Job Not Found</h2>
+        <p className="text-slate-400 text-sm">The requested job could not be retrieved from the database.</p>
+        <Link href="/dashboard" className="block pt-2">
+          <button className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition duration-200 cursor-pointer border-none">
+            Go to Dashboard
+          </button>
+        </Link>
+      </div>
+    );
+  }
+
+  // Matching Commission is exactly 20% of the tuition job salary
+  const matchCommissionFee = Math.floor(job.salary * 0.2);
+
   return (
-    <div className="bg-slate-900 border border-slate-800 shadow-2xl rounded-2xl p-6 sm:p-8 max-w-md w-full space-y-6 relative overflow-hidden">
+    <div className="bg-slate-900 border border-slate-800 shadow-2xl rounded-2xl p-6 sm:p-8 max-w-md w-full space-y-6 relative overflow-hidden text-left">
       {/* BKash Branding Top accent */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-pink-500 via-pink-600 to-pink-500" />
       
@@ -71,7 +121,7 @@ function PaymentContent() {
           </svg>
         </div>
         <p className="text-[11px] font-mono text-pink-400 uppercase tracking-widest">
-          Secured Location Coordinate Unlock Portal
+          Secure Job Match Commission checkout
         </p>
       </div>
 
@@ -81,11 +131,12 @@ function PaymentContent() {
       <div className="bg-slate-950/60 border border-slate-850 p-4 rounded-xl flex items-center justify-between font-sans">
         <div>
           <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-mono">Invoice Fee</span>
-          <span className="text-white font-heading font-extrabold text-base sm:text-lg">Coordinate Unlock</span>
+          <span className="text-white font-heading font-extrabold text-sm sm:text-base">{job.title}</span>
+          <span className="text-[10px] text-slate-500 block mt-0.5">Match Confirmation Commission (20%)</span>
         </div>
         <div className="text-right">
           <span className="text-[10px] text-slate-500 uppercase tracking-wider block font-mono">Amount</span>
-          <span className="text-pink-500 font-heading font-extrabold text-lg sm:text-xl">50.00 BDT</span>
+          <span className="text-pink-500 font-heading font-extrabold text-base sm:text-lg">{matchCommissionFee.toLocaleString()}.00 BDT</span>
         </div>
       </div>
 
@@ -96,14 +147,14 @@ function PaymentContent() {
           How to Pay via bKash:
         </h3>
         
-        <div className="space-y-2">
+        <div className="space-y-2 text-left">
           <div className="flex gap-2.5">
             <span className="font-mono text-pink-400 font-bold select-none">1.</span>
             <p>Open your bKash app or dial <span className="font-mono font-bold text-white">*247#</span></p>
           </div>
           <div className="flex gap-2.5">
             <span className="font-mono text-pink-400 font-bold select-none">2.</span>
-            <p>Choose <span className="font-bold text-white">Make Payment</span> (or Payment) and transfer BDT 50 to our merchant account:</p>
+            <p>Choose <span className="font-bold text-white">Make Payment</span>, transfer <span className="font-bold text-pink-500">{matchCommissionFee} BDT</span> to our merchant account, and write <span className="font-bold text-emerald-400">TCT-{String(job.jobSeq && job.jobSeq > 0 ? job.jobSeq : 1).padStart(3, '0')}</span> as Reference:</p>
           </div>
           <div className="pl-5">
             <div className="bg-black/60 border border-slate-800/80 px-3 py-1.5 rounded-lg flex items-center justify-between gap-2 max-w-[240px]">
@@ -125,7 +176,7 @@ function PaymentContent() {
 
       {/* Verification Input Form */}
       <div className="space-y-4">
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 text-left">
           <label className="text-[10px] text-slate-400 font-mono uppercase tracking-wider block font-bold">
             Enter bKash Transaction ID
           </label>
@@ -139,14 +190,14 @@ function PaymentContent() {
         </div>
 
         {verifyError && (
-          <div className="bg-red-500/10 border border-red-500/20 px-3 py-2.5 rounded-lg text-xs text-red-400 font-mono flex items-center gap-2">
+          <div className="bg-red-500/10 border border-red-500/20 px-3 py-2.5 rounded-lg text-xs text-red-400 font-mono flex items-center gap-2 text-left">
             <span className="font-bold text-sm select-none">✗</span>
             <span>{verifyError}</span>
           </div>
         )}
 
         {verifySuccess && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 px-3 py-2.5 rounded-lg text-xs text-emerald-400 font-mono flex items-center gap-2">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 px-3 py-2.5 rounded-lg text-xs text-emerald-400 font-mono flex items-center gap-2 text-left">
             <span className="font-bold text-sm select-none">✓</span>
             <span>Payment validated! Redirecting...</span>
           </div>
@@ -164,8 +215,8 @@ function PaymentContent() {
                 body: JSON.stringify({
                   jobId: jobId,
                   trxId: trxId.trim(),
-                  amount: 50
-                })
+                  amount: matchCommissionFee,
+                }),
               });
               if (res.ok) {
                 setVerifySuccess(true);
@@ -193,8 +244,8 @@ function PaymentContent() {
 
       <div className="h-px bg-slate-800" />
       
-      <Link href="/map" className="block text-center text-slate-500 hover:text-slate-300 font-mono text-[11px] transition">
-        ← Cancel transaction & return to map
+      <Link href="/dashboard" className="block text-center text-slate-500 hover:text-slate-300 font-mono text-[11px] transition">
+        ← Cancel transaction & return to dashboard
       </Link>
     </div>
   );

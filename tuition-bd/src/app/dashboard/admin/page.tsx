@@ -54,7 +54,7 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   // Tab switcher and basic loaders
-  const [activeTab, setActiveTab] = useState<"documents" | "tutors" | "parents" | "blacklist" | "payments">("documents");
+  const [activeTab, setActiveTab] = useState<"documents" | "tutors" | "parents" | "blacklist" | "payments" | "jobs">("documents");
   const [pendingProfiles, setPendingProfiles] = useState<any[]>([]);
   const [loadingProfiles, setLoadingProfiles] = useState(true);
   const [allProfiles, setAllProfiles] = useState<any[]>([]);
@@ -63,9 +63,12 @@ export default function AdminDashboard() {
   const [loadingBlacklist, setLoadingBlacklist] = useState(false);
   const [payments, setPayments] = useState<any[]>([]);
   const [loadingPayments, setLoadingPayments] = useState(false);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(false);
   const [previewDocuments, setPreviewDocuments] = useState<{
     nid: string | null;
     idCard: string | null;
+    selfie: string | null;
     name: string;
     profileId: string;
   } | null>(null);
@@ -191,6 +194,48 @@ export default function AdminDashboard() {
     }
   }, [session, activeTab]);
 
+  const fetchJobsList = () => {
+    setLoadingJobs(true);
+    fetch(`/api/admin/jobs?t=${Date.now()}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setJobs(Array.isArray(data) ? data : []);
+        setLoadingJobs(false);
+      })
+      .catch((err) => {
+        console.error("Load Jobs error:", err);
+        setLoadingJobs(false);
+      });
+  };
+
+  useEffect(() => {
+    if (session && (session.user as any).role === "ADMIN" && activeTab === "jobs") {
+      fetchJobsList();
+    }
+  }, [session, activeTab]);
+
+  const handleAssignTutor = async (jobId: string, tutorId: string) => {
+    if (!confirm("Are you sure you want to manually assign this tutor to this job (Pay Later term)?")) return;
+    try {
+      const res = await fetch("/api/admin/jobs", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jobId, action: "assign", tutorId }),
+      });
+      if (res.ok) {
+        alert("✓ Tutor assigned manually successfully (Pay Later active).");
+        fetchJobsList();
+      } else {
+        alert("Failed to assign tutor.");
+      }
+    } catch (err) {
+      console.error("Assign tutor error:", err);
+      alert("An error occurred while assigning tutor.");
+    }
+  };
+
   const handleVerifyPayment = async (paymentId: string, status: "SUCCESS" | "FAILED") => {
     if (!confirm(`Are you sure you want to mark this transaction as ${status}?`)) return;
     try {
@@ -232,6 +277,25 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error("Ban error:", err);
       alert("An error occurred while banning the user.");
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm("Are you sure you want to completely remove this user? Their profile and jobs will be deleted, but they can register again later. This action cannot be undone.")) return;
+
+    try {
+      const res = await fetch(`/api/admin/remove?userId=${userId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        alert("✓ User has been successfully deleted.");
+        fetchAllProfilesList();
+      } else {
+        alert("Failed to delete user.");
+      }
+    } catch (err) {
+      console.error("Delete user error:", err);
+      alert("An error occurred while deleting the user.");
     }
   };
 
@@ -494,6 +558,15 @@ export default function AdminDashboard() {
 
                       <button
                         type="button"
+                        onClick={() => handleDeleteUser(profile.user?.id)}
+                        className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold font-mono uppercase"
+                        title="Remove User completely (Can register again)"
+                      >
+                        🗑️ Remove
+                      </button>
+
+                      <button
+                        type="button"
                         onClick={() => handleBanUser(profile.user?.id)}
                         className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold font-mono uppercase"
                         title="Ban and Blacklist User"
@@ -540,13 +613,14 @@ export default function AdminDashboard() {
                       <p className="italic">
                         <strong className="text-slate-300 not-italic">Bio:</strong> "{profile.bio || "No biography loaded."}"
                       </p>
-                      {(profile.nidImageUrl || profile.universityIdImageUrl) && (
+                      {(profile.nidImageUrl || profile.universityIdImageUrl || profile.selfieImageUrl) && (
                         <div className="pt-2">
                           <button
                             type="button"
                             onClick={() => setPreviewDocuments({
                               nid: profile.nidImageUrl,
                               idCard: profile.universityIdImageUrl,
+                              selfie: profile.selfieImageUrl,
                               name: profile.user?.name || "Educator",
                               profileId: profile.id
                             })}
@@ -672,6 +746,17 @@ export default function AdminDashboard() {
           >
             ৳ bKash Transactions ({payments.filter((p) => p.status === "PENDING").length})
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("jobs")}
+            className={`px-6 py-3.5 font-bold font-mono text-xs uppercase tracking-wider transition-all duration-300 border-b-2 cursor-pointer ${
+              activeTab === "jobs"
+                ? "text-emerald-400 border-emerald-500 bg-emerald-500/5 shadow-[inset_0_-2px_0_rgba(16,185,129,1)]"
+                : "text-slate-400 border-transparent hover:text-slate-200"
+            }`}
+          >
+            📋 Tuition Jobs ({jobs.filter((j) => j.status === "OPEN" && j.tutorId).length})
+          </button>
         </div>
 
         {/* TAB Content Rendering */}
@@ -763,6 +848,7 @@ export default function AdminDashboard() {
                               onClick={() => setPreviewDocuments({
                                 nid: profile.nidImageUrl,
                                 idCard: profile.universityIdImageUrl,
+                                selfie: profile.selfieImageUrl,
                                 name: profile.user?.name || "Educator",
                                 profileId: profile.id
                               })}
@@ -1012,6 +1098,120 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+          {activeTab === "jobs" && (
+            <motion.div
+              key="jobsTab"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="bg-slate-900/50 border border-slate-800/80 p-6 md:p-8 rounded-3xl space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold font-heading text-emerald-400">Tuition Jobs Management Directory</h2>
+                    <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">
+                      Assign tutors manually and monitor tuition active statuses
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 bg-slate-950 px-4 py-2 rounded-2xl border border-slate-850 font-mono text-xs text-slate-400">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>{jobs.filter((j) => j.status === "OPEN" && j.tutorId).length} Pending Manual Assignments</span>
+                  </div>
+                </div>
+
+                <div className="h-px bg-slate-800/80" />
+
+                {loadingJobs ? (
+                  <div className="py-12 flex flex-col items-center justify-center space-y-3">
+                    <div className="animate-spin h-8 w-8 border-2 border-emerald-500 border-t-transparent rounded-full" />
+                    <span className="text-xs text-slate-400 font-mono">Fetching job listings...</span>
+                  </div>
+                ) : jobs.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500 font-mono text-sm">
+                    No tuition jobs have been posted on the platform yet.
+                  </div>
+                ) : (
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+                    {jobs.map((job) => {
+                      const isPendingManual = job.status === "OPEN" && job.tutorId;
+                      return (
+                        <div
+                          key={job.id}
+                          className={`bg-slate-950/60 border p-5 rounded-2xl flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between transition-all duration-300 ${
+                            isPendingManual ? "border-emerald-500/30 hover:border-emerald-500/50 shadow-[0_4px_16px_rgba(16,185,129,0.03)]" : "border-slate-850 hover:border-slate-800"
+                          }`}
+                        >
+                          <div className="space-y-3 flex-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-slate-900 text-slate-400 border-slate-800 font-extrabold uppercase">
+                                TCT-{String(job.jobSeq).padStart(3, '0')}
+                              </span>
+                              <span className="text-[9px] font-mono px-2 py-0.5 rounded-md border font-extrabold uppercase tracking-wider bg-black/40 text-pink-400 border-pink-500/20">
+                                ৳ {job.salary} BDT
+                              </span>
+                              <span className={`text-[9px] font-mono px-2 py-0.5 rounded-md border font-extrabold uppercase tracking-wider ${
+                                job.status === "ASSIGNED" 
+                                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                  : job.status === "COMPLETED"
+                                  ? "bg-slate-900 text-slate-500 border-slate-800"
+                                  : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                              }`}>
+                                {job.status}
+                              </span>
+                              {job.locationUnlocked && (
+                                <span className="text-[9px] font-mono px-2 py-0.5 rounded-md border font-extrabold uppercase tracking-wider bg-emerald-500 text-slate-950 border-emerald-500">
+                                  Unlocked
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6 text-xs bg-black/30 border border-slate-900 rounded-xl p-3.5">
+                              <div>
+                                <span className="text-[10px] text-slate-500 font-mono uppercase block">Tuition Job Title</span>
+                                <span className="text-slate-200 font-semibold">{job.title}</span>
+                                <span className="text-slate-400 text-[10px] block">{job.subject} - {job.classLevel}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-500 font-mono uppercase block">Parent (Creator)</span>
+                                <span className="text-slate-200 font-semibold">{job.parent?.name || "N/A"}</span>
+                                <span className="text-slate-400 text-[10px] font-mono block">Phone: {job.parent?.profile?.phone || "N/A"}</span>
+                              </div>
+                              <div>
+                                <span className="text-[10px] text-slate-500 font-mono uppercase block">Tutor Assignment</span>
+                                {job.tutor ? (
+                                  <div>
+                                    <span className="text-emerald-400 font-semibold font-mono">
+                                      TC-{String(job.tutor.profile?.tutorSeq || 1).padStart(3, '0')} - {job.tutor.name}
+                                    </span>
+                                    <span className="text-slate-400 text-[10px] font-mono block">Phone: {job.tutor.profile?.phone || "N/A"}</span>
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-500 italic">No tutor applied yet</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {isPendingManual && job.tutorId && (
+                            <div className="flex gap-2 shrink-0 items-center justify-end">
+                              <button
+                                onClick={() => handleAssignTutor(job.id, job.tutorId)}
+                                className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(16,185,129,0.1)] border-none"
+                              >
+                                Assign Tutor Manually
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -1323,7 +1523,7 @@ export default function AdminDashboard() {
               
               <div className="h-px bg-slate-800/80" />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* NID Document */}
                 <div className="space-y-3">
                   <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1.5">
@@ -1331,13 +1531,27 @@ export default function AdminDashboard() {
                   </h4>
                   <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-2.5 flex items-center justify-center min-h-[300px] overflow-hidden relative group">
                     {previewDocuments.nid ? (
-                      <img
-                        src={previewDocuments.nid}
-                        alt="National ID Card"
-                        className="max-h-[350px] object-contain rounded-xl shadow-lg border border-slate-800 hover:scale-105 transition-transform duration-300"
-                      />
+                      <div className="flex flex-col items-center w-full space-y-3">
+                        <img
+                          src={previewDocuments.nid}
+                          alt="National ID Card"
+                          className="max-h-[300px] object-contain rounded-xl shadow-lg border border-slate-800 hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="w-full bg-slate-950/80 border border-slate-850 p-2.5 rounded-xl flex flex-col space-y-1">
+                          <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider font-bold">Direct Document Link:</span>
+                          <a
+                            href={previewDocuments.nid}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-mono text-emerald-400 hover:text-emerald-300 hover:underline break-all block truncate text-left"
+                            title={previewDocuments.nid}
+                          >
+                            {previewDocuments.nid}
+                          </a>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="text-center text-xs text-slate-655 space-y-1">
+                      <div className="text-center text-xs text-slate-600 space-y-1">
                         <span>🚫</span>
                         <p>No NID Uploaded</p>
                       </div>
@@ -1352,15 +1566,64 @@ export default function AdminDashboard() {
                   </h4>
                   <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-2.5 flex items-center justify-center min-h-[300px] overflow-hidden relative group">
                     {previewDocuments.idCard ? (
-                      <img
-                        src={previewDocuments.idCard}
-                        alt="Student ID Card"
-                        className="max-h-[350px] object-contain rounded-xl shadow-lg border border-slate-800 hover:scale-105 transition-transform duration-300"
-                      />
+                      <div className="flex flex-col items-center w-full space-y-3">
+                        <img
+                          src={previewDocuments.idCard}
+                          alt="Student ID Card"
+                          className="max-h-[300px] object-contain rounded-xl shadow-lg border border-slate-800 hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="w-full bg-slate-950/80 border border-slate-850 p-2.5 rounded-xl flex flex-col space-y-1">
+                          <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider font-bold">Direct Document Link:</span>
+                          <a
+                            href={previewDocuments.idCard}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-mono text-emerald-400 hover:text-emerald-300 hover:underline break-all block truncate text-left"
+                            title={previewDocuments.idCard}
+                          >
+                            {previewDocuments.idCard}
+                          </a>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="text-center text-xs text-slate-655 space-y-1">
+                      <div className="text-center text-xs text-slate-600 space-y-1">
                         <span>🚫</span>
                         <p>No Student ID Uploaded</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Tutor Photo / Picture */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1.5">
+                    📸 Tutor Photo / Picture
+                  </h4>
+                  <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-2.5 flex items-center justify-center min-h-[300px] overflow-hidden relative group">
+                    {previewDocuments.selfie ? (
+                      <div className="flex flex-col items-center w-full space-y-3">
+                        <img
+                          src={previewDocuments.selfie}
+                          alt="Tutor Photo / Picture"
+                          className="max-h-[300px] object-contain rounded-xl shadow-lg border border-slate-800 hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="w-full bg-slate-950/80 border border-slate-850 p-2.5 rounded-xl flex flex-col space-y-1">
+                          <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider font-bold">Direct Document Link:</span>
+                          <a
+                            href={previewDocuments.selfie}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-mono text-emerald-400 hover:text-emerald-300 hover:underline break-all block truncate text-left"
+                            title={previewDocuments.selfie}
+                          >
+                            {previewDocuments.selfie}
+                          </a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center text-xs text-slate-600 space-y-1">
+                        <span>🚫</span>
+                        <p>No Selfie Uploaded</p>
                       </div>
                     )}
                   </div>

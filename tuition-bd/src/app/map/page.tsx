@@ -134,14 +134,21 @@ function MapSearchContent() {
             {/* Class / Medium Checkboxes */}
             <div className="space-y-3">
               <label className="block text-xs font-mono uppercase tracking-wider text-[var(--foreground)] opacity-75 font-bold">Class / Medium</label>
-              <div className="space-y-2 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar bg-slate-900/30 p-2.5 rounded-xl border border-slate-850">
+              <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar bg-slate-900/30 p-2.5 rounded-xl border border-slate-850">
                 {[
-                  "Class 1-5 (Bangla Medium)",
-                  "Class 6-8 (Bangla Medium)",
-                  "SSC (Bangla Medium)",
-                  "HSC (Bangla Medium)",
-                  "O Level",
-                  "A Level"
+                  "Play",
+                  "Nursery",
+                  "KG",
+                  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
+                  "Class 6", "Class 7", "Class 8",
+                  "Class 9",
+                  "Class 10 (SSC)",
+                  "Class 11 (HSC 1st Year)",
+                  "Class 12 (HSC 2nd Year)",
+                  "O-Level",
+                  "A-Level",
+                  "Admission Test",
+                  "University",
                 ].map((cl) => {
                   const isChecked = selectedClasses.includes(cl);
                   return (

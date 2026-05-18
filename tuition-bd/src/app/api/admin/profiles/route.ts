@@ -41,6 +41,7 @@ export async function GET(request: Request) {
         verificationStatus: profile?.verificationStatus || "UNVERIFIED",
         nidImageUrl: profile?.nidImageUrl || null,
         universityIdImageUrl: profile?.universityIdImageUrl || null,
+        selfieImageUrl: profile?.selfieImageUrl || null,
         latitude: profile?.latitude ?? null,
         longitude: profile?.longitude ?? null,
         approxLatitude: profile?.approxLatitude ?? null,

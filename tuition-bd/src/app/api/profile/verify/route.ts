@@ -12,9 +12,9 @@ export async function POST(request: Request) {
 
     const userId = (session.user as any).id;
     const body = await request.json();
-    const { nidImageUrl, universityIdImageUrl } = body;
+    const { nidImageUrl, universityIdImageUrl, selfieImageUrl } = body;
 
-    if (!nidImageUrl && !universityIdImageUrl) {
+    if (!nidImageUrl && !universityIdImageUrl && !selfieImageUrl) {
       return new NextResponse("Missing Image URL(s)", { status: 400 });
     }
 
@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       data: {
         ...(nidImageUrl && { nidImageUrl }),
         ...(universityIdImageUrl && { universityIdImageUrl }),
+        ...(selfieImageUrl && { selfieImageUrl }),
         verificationStatus: "PENDING",
         rejectionReason: null,
         rejectedAt: null,

@@ -27,14 +27,63 @@ export async function GET(request: Request) {
 
     let extraData = {};
     if (user?.role === "TUTOR") {
-      const confirmedJobsCount = await prisma.tuitionJob.count({
+      const assignedJobs = await prisma.tuitionJob.findMany({
         where: {
           tutorId: userId,
-          status: {
-            in: ["ASSIGNED", "COMPLETED"],
-          },
         },
+        include: {
+          parent: {
+            select: {
+              name: true,
+              email: true,
+              profile: {
+                select: {
+                  phone: true,
+                }
+              }
+            }
+          },
+          payments: {
+            where: {
+              tutorId: userId,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          }
+        }
       });
+
+      const confirmedJobsCount = assignedJobs.filter(j => j.status === "ASSIGNED" || j.status === "COMPLETED").length;
+
+      const tutorJobs = assignedJobs.map(job => ({
+        id: job.id,
+        jobSeq: job.jobSeq,
+        title: job.title,
+        subject: job.subject,
+        classLevel: job.classLevel,
+        salary: job.salary,
+        status: job.status,
+        locationUnlocked: job.locationUnlocked,
+        parent: job.locationUnlocked ? {
+          name: job.parent.name,
+          email: job.parent.email,
+          phone: job.parent.profile?.phone || "Not specified",
+          latitude: job.latitude,
+          longitude: job.longitude,
+        } : {
+          name: "Unlocked Pending Match Payment",
+          email: "hidden@tuition-console.net",
+          phone: "hidden",
+        },
+        payment: job.payments[0] ? {
+          amount: job.payments[0].amount,
+          status: job.payments[0].status,
+          trxId: job.payments[0].trxId,
+          createdAt: job.payments[0].createdAt,
+        } : null,
+      }));
 
       const reviews = await prisma.review.findMany({
         where: {
@@ -56,10 +105,34 @@ export async function GET(request: Request) {
         ? parseFloat((reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1))
         : 0.0;
 
+      const completedPayments = await prisma.payment.findMany({
+        where: {
+          tutorId: userId,
+          status: "SUCCESS"
+        },
+        include: {
+          job: {
+            select: {
+              jobSeq: true,
+              title: true,
+              subject: true,
+              classLevel: true,
+              salary: true,
+              updatedAt: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: "desc"
+        }
+      });
+
       extraData = {
         hasConfirmedTuition: confirmedJobsCount > 0 || reviews.length > 0,
         reviews,
         averageRating,
+        tutorJobs,
+        paymentHistory: completedPayments,
       };
     } else if (user?.role === "PARENT") {
       const assignedJobs = await prisma.tuitionJob.findMany({
@@ -74,10 +147,15 @@ export async function GET(request: Request) {
           tutor: {
             select: {
               id: true,
+              name: true,
+              email: true,
               profile: {
                 select: {
                   tutorSeq: true,
                   education: true,
+                  phone: true,
+                  selfieImageUrl: true,
+                  universityIdImageUrl: true,
                 },
               },
             },
@@ -90,9 +168,14 @@ export async function GET(request: Request) {
         if (job.tutor) {
           assignedTutorsMap.set(job.tutor.id, {
             id: job.tutor.id,
+            name: job.tutor.name || "Tutor",
+            email: job.tutor.email || "N/A",
+            phone: job.tutor.profile?.phone || "Not specified",
             tutorSeq: job.tutor.profile?.tutorSeq || 1,
             education: job.tutor.profile?.education || "Not specified",
             jobTitle: job.title,
+            selfieImageUrl: job.tutor.profile?.selfieImageUrl || null,
+            universityIdImageUrl: job.tutor.profile?.universityIdImageUrl || null,
           });
         }
       });
@@ -131,6 +214,12 @@ export async function POST(request: Request) {
       address, 
       bio, 
       education,
+      gender,
+      studentClass,
+      hoursRequired,
+      tutorGenderPreference,
+      salary,
+      numberOfChildren,
       latitude: reqLat,
       longitude: reqLng,
       actualLatitude: reqActualLat,
@@ -171,6 +260,12 @@ export async function POST(request: Request) {
       address: address || null,
       bio: bio || null,
       education: education || null,
+      gender: gender || null,
+      studentClass: studentClass || null,
+      hoursRequired: hoursRequired || null,
+      tutorGenderPreference: tutorGenderPreference || null,
+      salary: salary || null,
+      numberOfChildren: numberOfChildren || null,
       latitude: latitude || 23.8103,
       longitude: longitude || 90.4125,
       approxLatitude: approxLatitude || 23.8103,
@@ -182,6 +277,12 @@ export async function POST(request: Request) {
     let updateData: any = {
       phone: phone !== undefined ? phone : undefined,
       address: address !== undefined ? address : undefined,
+      gender: gender !== undefined ? gender : undefined,
+      studentClass: studentClass !== undefined ? studentClass : undefined,
+      hoursRequired: hoursRequired !== undefined ? hoursRequired : undefined,
+      tutorGenderPreference: tutorGenderPreference !== undefined ? tutorGenderPreference : undefined,
+      salary: salary !== undefined ? salary : undefined,
+      numberOfChildren: numberOfChildren !== undefined ? numberOfChildren : undefined,
       ...(latitude !== undefined ? { latitude, longitude, approxLatitude, approxLongitude } : {}),
       ...(actualLatitude !== undefined ? { actualLatitude, actualLongitude } : {}),
     };

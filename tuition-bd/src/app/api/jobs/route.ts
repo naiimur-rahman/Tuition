@@ -8,11 +8,34 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const jobId = searchParams.get("jobId");
     const subject = searchParams.get("subject");
     const classLevel = searchParams.get("classLevel");
 
+    // 1. Single Job Query Support
+    if (jobId) {
+      const job = await prisma.tuitionJob.findUnique({
+        where: { id: jobId },
+        include: {
+          parent: {
+            select: {
+              name: true,
+              email: true,
+              profile: {
+                select: {
+                  verificationStatus: true,
+                }
+              }
+            }
+          }
+        }
+      });
+      return NextResponse.json(job);
+    }
+
     const where: any = { status: "OPEN" };
-    
+    const mine = searchParams.get("mine");
+
     // Filter subject if specific
     if (subject && subject !== "All Subjects" && subject !== "Any") {
       where.subject = { contains: subject };
@@ -43,6 +66,15 @@ export async function GET(request: Request) {
 
     const session = await getServerSession(authOptions);
     const userId = (session?.user as any)?.id;
+
+    // Return only this parent's own jobs when mine=true
+    if (mine === "true" && userId) {
+      const myJobs = await prisma.tuitionJob.findMany({
+        where: { parentId: userId },
+        orderBy: { createdAt: "desc" },
+      });
+      return NextResponse.json(myJobs);
+    }
 
     // Securely sanitize exact addresses/coordinates unless unlocked or the current user is the owner
     const sanitizedJobs = jobs.map((job) => {
@@ -129,6 +161,59 @@ export async function POST(request: Request) {
     return NextResponse.json(job);
   } catch (error) {
     console.error("POST_JOBS_ERROR", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const userId = (session.user as any).id;
+    const body = await request.json();
+    const { jobId, action } = body;
+
+    if (action === "apply") {
+      const updatedJob = await prisma.tuitionJob.update({
+        where: { id: jobId },
+        data: {
+          tutorId: userId,
+          status: "OPEN", // Keep status as OPEN until matching payment is validated
+        }
+      });
+      return NextResponse.json(updatedJob);
+    }
+
+    return new NextResponse("Invalid action", { status: 400 });
+  } catch (error) {
+    console.error("PATCH_JOBS_ERROR", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+export async function DELETE(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+    const userId = (session.user as any).id;
+    const { searchParams } = new URL(request.url);
+    const jobId = searchParams.get("jobId");
+    if (!jobId) return new NextResponse("Job ID required", { status: 400 });
+
+    // Ensure the requester owns the job
+    const job = await prisma.tuitionJob.findUnique({ where: { id: jobId } });
+    if (!job || job.parentId !== userId) {
+      return new NextResponse("Forbidden", { status: 403 });
+    }
+
+    await prisma.tuitionJob.delete({ where: { id: jobId } });
+    return NextResponse.json({ message: "Job deleted" });
+  } catch (error) {
+    console.error("DELETE_JOBS_ERROR", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

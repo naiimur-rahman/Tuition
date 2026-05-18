@@ -22,9 +22,9 @@ export async function POST(request: Request) {
     // 1. Create a pending payment transaction record in the database
     const payment = await prisma.payment.create({
       data: {
-        amount: parseInt(amount) || 50,
+        amount: parseInt(amount),
         status: "PENDING",
-        type: "UNLOCK_FEE",
+        type: "SALARY_COMMISSION",
         trxId: trxId,
         jobId: jobId,
         tutorId: userId,

@@ -43,6 +43,13 @@ model Profile {
   verificationStatus  String   @default("UNVERIFIED") // UNVERIFIED, PENDING, VERIFIED, REJECTED
   nidImageUrl         String?
   universityIdImageUrl String?
+  selfieImageUrl       String?
+  gender              String?  // Male, Female, Other
+  studentClass        String?  // The class/grade the parent needs a tutor for
+  hoursRequired       String?  // Expected time commitment
+  tutorGenderPreference String? // Parent's preference for tutor gender
+  salary              String?  // Expected salary offered by parent
+  numberOfChildren    String?  // How many children the parent needs tutoring for
   latitude            Float?   // Exact location
   longitude           Float?   // Exact location
   approxLatitude      Float?   // Blurred location for public

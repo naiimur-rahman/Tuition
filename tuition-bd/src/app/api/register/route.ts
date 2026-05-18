@@ -16,6 +16,13 @@ export async function POST(request: Request) {
       education, 
       nidImageUrl,
       universityIdImageUrl,
+      selfieImageUrl,
+      gender,
+      studentClass,
+      hoursRequired,
+      tutorGenderPreference,
+      salary,
+      numberOfChildren,
       latitude: reqLat,
       longitude: reqLng,
       actualLatitude: reqActualLat,
@@ -27,8 +34,8 @@ export async function POST(request: Request) {
     }
 
     if (role === "TUTOR") {
-      if (!nidImageUrl || !universityIdImageUrl) {
-        return new NextResponse("Tutors must upload both NID and Student ID documents.", { status: 400 });
+      if (!nidImageUrl || !universityIdImageUrl || !selfieImageUrl) {
+        return new NextResponse("Tutors must upload National ID, Student ID, and Tutor Picture.", { status: 400 });
       }
     }
 
@@ -74,6 +81,13 @@ export async function POST(request: Request) {
             education: education || null,
             nidImageUrl: nidImageUrl || null,
             universityIdImageUrl: universityIdImageUrl || null,
+            selfieImageUrl: selfieImageUrl || null,
+            gender: gender || null,
+            studentClass: studentClass || null,
+            hoursRequired: hoursRequired || null,
+            tutorGenderPreference: tutorGenderPreference || null,
+            salary: salary || null,
+            numberOfChildren: numberOfChildren || null,
             verificationStatus,
             latitude,
             longitude,
@@ -92,6 +106,7 @@ export async function POST(request: Request) {
     return NextResponse.json(user);
   } catch (error: any) {
     console.log("REGISTRATION_ERROR", error);
+    require('fs').writeFileSync('/tmp/register-error.log', error?.stack || error?.toString() || 'Unknown error');
     return new NextResponse("Internal Error", { status: 500 });
   }
 }

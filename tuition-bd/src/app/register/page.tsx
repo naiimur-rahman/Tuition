@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { detectFaceInImage } from "@/lib/faceDetection";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 
@@ -50,6 +51,12 @@ export default function Register() {
     longitude: 90.4125,
     actualLatitude: undefined as number | undefined,
     actualLongitude: undefined as number | undefined,
+    gender: "",
+    studentClass: "",
+    hoursRequired: "",
+    tutorGenderPreference: "",
+    salary: "",
+    numberOfChildren: "",
   });
   const [nidImageUrl, setNidImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -60,6 +67,11 @@ export default function Register() {
   const [uploadingStudentId, setUploadingStudentId] = useState(false);
   const [uploadStatusStudentId, setUploadStatusStudentId] = useState<"idle" | "uploading" | "scanning" | "done" | "error">("idle");
   const [fileNameStudentId, setFileNameStudentId] = useState("");
+
+  const [selfieImageUrl, setSelfieImageUrl] = useState("");
+  const [uploadingSelfie, setUploadingSelfie] = useState(false);
+  const [uploadStatusSelfie, setUploadStatusSelfie] = useState<"idle" | "uploading" | "done" | "error">("idle");
+  const [fileNameSelfie, setFileNameSelfie] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [educationType, setEducationType] = useState("select"); // "select" or "custom"
@@ -205,6 +217,57 @@ export default function Register() {
     }
   };
 
+  const handleSelfieFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileNameSelfie(file.name);
+    
+    setUploadStatusSelfie("uploading");
+    setUploadingSelfie(true);
+    setError("");
+
+    try {
+      const isRealHuman = await detectFaceInImage(file);
+      if (!isRealHuman) {
+        setUploadStatusSelfie("error");
+        setError("Invalid Profile Picture: The uploaded image does not appear to be a real human photo or clear portrait shot. Please upload a clear photo of your face.");
+        setUploadingSelfie(false);
+        return;
+      }
+      await uploadSelfie(file);
+    } catch (err) {
+      console.error("Selfie upload error:", err);
+      setUploadStatusSelfie("error");
+      setError("Failed to upload Tutor Picture. Please try again.");
+      setUploadingSelfie(false);
+    }
+  };
+
+  const uploadSelfie = async (file: File) => {
+    setError("");
+
+    try {
+      const response = await fetch(`/api/upload?context=register&filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        body: file,
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const json = await response.json();
+      setSelfieImageUrl(json.url);
+      setUploadStatusSelfie("done");
+    } catch (err) {
+      console.error("SELFIE_UPLOAD_ERROR", err);
+      setUploadStatusSelfie("error");
+      setError("Failed to upload Tutor Picture. Please try again.");
+    } finally {
+      setUploadingSelfie(false);
+    }
+  };
+
   const registerUser = async (e: any) => {
     e.preventDefault();
     setLoading(true);
@@ -223,8 +286,8 @@ export default function Register() {
         setLoading(false);
         return;
       }
-      if (!nidImageUrl || !universityIdImageUrl) {
-        setError("Please upload both your National ID and Student ID documents to verify your tutor account.");
+      if (!nidImageUrl || !universityIdImageUrl || !selfieImageUrl) {
+        setError("Please upload your National ID, Student ID, and Tutor Picture to verify your tutor account.");
         setLoading(false);
         return;
       }
@@ -234,6 +297,7 @@ export default function Register() {
       ...data,
       nidImageUrl: data.role === "TUTOR" ? nidImageUrl : undefined,
       universityIdImageUrl: data.role === "TUTOR" ? universityIdImageUrl : undefined,
+      selfieImageUrl: data.role === "TUTOR" ? selfieImageUrl : undefined,
     };
 
     const response = await fetch("/api/register", {
@@ -248,7 +312,8 @@ export default function Register() {
     if (response.ok) {
       router.push("/login");
     } else {
-      setError("Registration failed. Email might already be configured.");
+      const errMsg = await response.text();
+      setError(errMsg || "Registration failed. Please check your inputs and try again.");
     }
   };
 
@@ -274,7 +339,7 @@ export default function Register() {
             Create Account
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm font-sans">
-            Provision a new operator profile inside our network
+            Create a new account on our platform
           </p>
         </div>
 
@@ -439,6 +504,21 @@ export default function Register() {
                       />
                     )}
                   </div>
+                  
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Gender</label>
+                    <select
+                      value={data.gender}
+                      required={data.role === "TUTOR"}
+                      onChange={(e) => setData({ ...data, gender: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select Gender --</option>
+                      <option value="Male" className="bg-slate-950 text-slate-100">Male</option>
+                      <option value="Female" className="bg-slate-950 text-slate-100">Female</option>
+                      <option value="Other" className="bg-slate-950 text-slate-100">Other</option>
+                    </select>
+                  </div>
 
                   <div className="space-y-1">
                     <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Specialization / Short Bio</label>
@@ -454,7 +534,7 @@ export default function Register() {
                 </div>
 
                 {/* Tutor Documents Upload Zone */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* NID Upload */}
                   <div className="space-y-2">
                     <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
@@ -495,15 +575,22 @@ export default function Register() {
                         </div>
                       )}
 
-                      {uploadStatus === "done" && (
-                        <div className="space-y-2 pointer-events-none flex flex-col items-center">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
+                      {uploadStatus === "done" && nidImageUrl && (
+                        <div className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden z-10 pointer-events-none">
+                          <img
+                            src={nidImageUrl}
+                            alt="NID Preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-slate-950/70 flex flex-col items-center justify-center p-3 text-center">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20 mb-1">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <p className="text-[10px] text-emerald-400 font-bold font-mono">✓ NID Uploaded</p>
+                            <p className="text-[8px] text-slate-300 truncate max-w-full px-1">{fileName}</p>
                           </div>
-                          <p className="text-[10px] text-emerald-400 font-bold font-mono text-center">✓ NID Uploaded</p>
-                          <p className="text-[9px] text-slate-500 max-w-full truncate px-2">{fileName}</p>
                         </div>
                       )}
 
@@ -560,15 +647,22 @@ export default function Register() {
                         </div>
                       )}
 
-                      {uploadStatusStudentId === "done" && (
-                        <div className="space-y-2 pointer-events-none flex flex-col items-center">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
+                      {uploadStatusStudentId === "done" && universityIdImageUrl && (
+                        <div className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden z-10 pointer-events-none">
+                          <img
+                            src={universityIdImageUrl}
+                            alt="Student ID Preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-slate-950/70 flex flex-col items-center justify-center p-3 text-center">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20 mb-1">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <p className="text-[10px] text-emerald-400 font-bold font-mono">✓ Student ID Uploaded</p>
+                            <p className="text-[8px] text-slate-300 truncate max-w-full px-1">{fileNameStudentId}</p>
                           </div>
-                          <p className="text-[10px] text-emerald-400 font-bold font-mono text-center">✓ Student ID Uploaded</p>
-                          <p className="text-[9px] text-slate-500 max-w-full truncate px-2">{fileNameStudentId}</p>
                         </div>
                       )}
 
@@ -583,6 +677,172 @@ export default function Register() {
                         </div>
                       )}
                     </div>
+                  </div>
+
+                  {/* Tutor Picture Upload */}
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                      Tutor Photo / Picture <span className="text-red-400">*</span>
+                    </label>
+                    
+                    <div className="border-2 border-dashed border-slate-800 hover:border-emerald-500/50 rounded-2xl p-5 text-center bg-slate-950/40 transition-colors duration-200 relative group flex flex-col items-center justify-center min-h-[140px] cursor-pointer">
+                      <input
+                        type="file"
+                        required={data.role === "TUTOR" && !selfieImageUrl}
+                        accept="image/*"
+                        onChange={handleSelfieFileChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer z-20"
+                      />
+
+                      {uploadStatusSelfie === "idle" && (
+                        <div className="space-y-2 pointer-events-none flex flex-col items-center">
+                          <svg className="w-8 h-8 text-slate-500 group-hover:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                          </svg>
+                          <p className="text-xs text-slate-400">
+                            Drop or <span className="text-emerald-400 font-semibold">browse Photo</span>
+                          </p>
+                        </div>
+                      )}
+
+                      {uploadStatusSelfie === "uploading" && (
+                        <div className="space-y-3 pointer-events-none flex flex-col items-center">
+                          <div className="animate-spin h-6 w-6 border-2 border-emerald-500 border-t-transparent rounded-full" />
+                          <p className="text-[10px] text-slate-400 font-mono">Uploading Picture...</p>
+                        </div>
+                      )}
+
+                      {uploadStatusSelfie === "done" && selfieImageUrl && (
+                        <div className="absolute inset-0 w-full h-full rounded-2xl overflow-hidden z-10 pointer-events-none">
+                          <img
+                            src={selfieImageUrl}
+                            alt="Tutor Photo Preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-slate-950/70 flex flex-col items-center justify-center p-3 text-center">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20 mb-1">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <p className="text-[10px] text-emerald-400 font-bold font-mono">✓ Photo Uploaded</p>
+                            <p className="text-[8px] text-slate-300 truncate max-w-full px-1">{fileNameSelfie}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {uploadStatusSelfie === "error" && (
+                        <div className="space-y-2 pointer-events-none flex flex-col items-center">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </div>
+                          <p className="text-[10px] text-red-400 font-semibold font-mono">Failed</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait">
+            {data.role === "PARENT" && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-4 overflow-hidden pt-2"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Student Class / Grade</label>
+                    <select
+                      value={data.studentClass}
+                      onChange={(e) => setData({ ...data, studentClass: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select Class --</option>
+                      <option value="Play" className="bg-slate-950 text-slate-100">Play</option>
+                      <option value="Nursery" className="bg-slate-950 text-slate-100">Nursery</option>
+                      <option value="KG" className="bg-slate-950 text-slate-100">Kindergarten (KG)</option>
+                      <option value="Class 1" className="bg-slate-950 text-slate-100">Class 1</option>
+                      <option value="Class 2" className="bg-slate-950 text-slate-100">Class 2</option>
+                      <option value="Class 3" className="bg-slate-950 text-slate-100">Class 3</option>
+                      <option value="Class 4" className="bg-slate-950 text-slate-100">Class 4</option>
+                      <option value="Class 5" className="bg-slate-950 text-slate-100">Class 5</option>
+                      <option value="Class 6" className="bg-slate-950 text-slate-100">Class 6</option>
+                      <option value="Class 7" className="bg-slate-950 text-slate-100">Class 7</option>
+                      <option value="Class 8" className="bg-slate-950 text-slate-100">Class 8</option>
+                      <option value="Class 9" className="bg-slate-950 text-slate-100">Class 9</option>
+                      <option value="Class 10 (SSC)" className="bg-slate-950 text-slate-100">Class 10 (SSC)</option>
+                      <option value="Class 11 (HSC 1st Year)" className="bg-slate-950 text-slate-100">Class 11 (HSC 1st Year)</option>
+                      <option value="Class 12 (HSC 2nd Year)" className="bg-slate-950 text-slate-100">Class 12 (HSC 2nd Year)</option>
+                      <option value="O-Level" className="bg-slate-950 text-slate-100">O-Level</option>
+                      <option value="A-Level" className="bg-slate-950 text-slate-100">A-Level</option>
+                      <option value="Admission Test" className="bg-slate-950 text-slate-100">Admission Test</option>
+                      <option value="University" className="bg-slate-950 text-slate-100">University</option>
+                      <option value="Other" className="bg-slate-950 text-slate-100">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Hours Required (Per Day)</label>
+                    <select
+                      value={data.hoursRequired}
+                      onChange={(e) => setData({ ...data, hoursRequired: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select Hours --</option>
+                      <option value="1 Hour" className="bg-slate-950 text-slate-100">1 Hour</option>
+                      <option value="1.5 Hours" className="bg-slate-950 text-slate-100">1.5 Hours</option>
+                      <option value="2 Hours" className="bg-slate-950 text-slate-100">2 Hours</option>
+                      <option value="3+ Hours" className="bg-slate-950 text-slate-100">3+ Hours</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Tutor Gender Preference</label>
+                    <select
+                      value={data.tutorGenderPreference}
+                      onChange={(e) => setData({ ...data, tutorGenderPreference: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select Preference --</option>
+                      <option value="Male" className="bg-slate-950 text-slate-100">Male Tutor</option>
+                      <option value="Female" className="bg-slate-950 text-slate-100">Female Tutor</option>
+                      <option value="Any" className="bg-slate-950 text-slate-100">Any (No Preference)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Expected Salary</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 5000 BDT/month"
+                      value={data.salary}
+                      onChange={(e) => setData({ ...data, salary: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Number of Children</label>
+                    <select
+                      value={data.numberOfChildren}
+                      onChange={(e) => setData({ ...data, numberOfChildren: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select --</option>
+                      <option value="1" className="bg-slate-950 text-slate-100">1 Child</option>
+                      <option value="2" className="bg-slate-950 text-slate-100">2 Children</option>
+                      <option value="3" className="bg-slate-950 text-slate-100">3 Children</option>
+                      <option value="4+" className="bg-slate-950 text-slate-100">4+ Children</option>
+                    </select>
                   </div>
                 </div>
               </motion.div>
@@ -604,10 +864,10 @@ export default function Register() {
               whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(16,185,129,0.3)" }}
               whileTap={{ scale: 0.98 }}
               type="submit"
-              disabled={loading || uploading || uploadingStudentId}
+              disabled={loading || uploading || uploadingStudentId || uploadingSelfie}
               className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-slate-950 bg-emerald-500 hover:bg-emerald-600 focus:outline-none transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Provisioning Profile..." : (uploading || uploadingStudentId) ? "Waiting for file upload..." : "Initialize Operator Profile"}
+              {loading ? "Creating Account..." : (uploading || uploadingStudentId || uploadingSelfie) ? "Waiting for file upload..." : "Create Account"}
             </motion.button>
           </div>
         </form>

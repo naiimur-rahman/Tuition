@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Circle, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371; // Radius of the earth in km
@@ -28,11 +29,43 @@ export default function MapComponent({
   subjects: string[];
   classLevels: string[];
 }) {
+  const { data: session } = useSession();
+  const userId = (session?.user as any)?.id || "";
+  const userRole = (session?.user as any)?.role || "";
+
   const [isMounted, setIsMounted] = useState(false);
   const [dbJobs, setDbJobs] = useState<any[]>([]);
   const [dbTutors, setDbTutors] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [searchRadius, setSearchRadius] = useState<1.5 | 3 | 5>(1.5);
+  const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
+  const [payLaterJob, setPayLaterJob] = useState<any>(null);
+
+  const handleApply = async (jobId: string) => {
+    if (!session) {
+      alert("Please login first to apply for jobs.");
+      return;
+    }
+    setApplyingJobId(jobId);
+    try {
+      const res = await fetch("/api/jobs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId, action: "apply" }),
+      });
+      if (res.ok) {
+        alert("✓ Applied successfully! Check your tutor dashboard assigned section to complete the commission match payment.");
+        window.location.reload();
+      } else {
+        alert("Failed to submit application. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error. Please try again.");
+    } finally {
+      setApplyingJobId(null);
+    }
+  };
 
   // Initialize client geolocation coordinates
   useEffect(() => {
@@ -361,13 +394,12 @@ export default function MapComponent({
             <Circle
               key={item.id}
               center={[item.approxLat, item.approxLng]}
-              radius={800} // 800 meters radius approximation
+              radius={120} // Small dot marker — no confusing large overlapping rings
               pathOptions={{
                 color: themeColor,
                 fillColor: themeColor,
-                fillOpacity: 0.15,
+                fillOpacity: 0.9,
                 weight: 2,
-                dashArray: "4 4",
               }}
             >
               <Popup>
@@ -380,7 +412,7 @@ export default function MapComponent({
                       }`}>
                         {isTutor
                           ? `TC-${String(item.tutorSeq && item.tutorSeq > 0 ? item.tutorSeq : 1).padStart(3, '0')}`
-                          : `TT-${String(item.jobSeq && item.jobSeq > 0 ? item.jobSeq : 1).padStart(4, '0')}`}
+                          : `TCT-${String(item.jobSeq && item.jobSeq > 0 ? item.jobSeq : 1).padStart(3, '0')}`}
                       </span>
                       <h3 className="font-bold text-sm text-white leading-tight font-heading mt-1 flex flex-wrap items-center gap-1.5">
                         {isTutor ? (
@@ -492,24 +524,86 @@ export default function MapComponent({
                         </div>
                       </div>
                     ) : (
-                      <>
+                      <div className="space-y-2">
                         <p className="text-[10px] text-yellow-500 mb-2 font-mono flex items-center gap-1">
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                           </svg>
-                          Approximate Area Overlay
+                          Tuition Match Console
                         </p>
-                        <Link href={`/payment?jobId=${item.id}`} className="block w-full">
+                        
+                        {item.tutorId === userId ? (
+                          <div className="space-y-2">
+                            {item.locationUnlocked ? (
+                              <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg text-center font-mono text-[10px] text-emerald-400 font-extrabold flex items-center justify-center gap-1.5">
+                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                Verified Match Unlocked!
+                              </div>
+                            ) : (
+                              <div className="space-y-2">
+                                <div className="bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-lg text-[9px] font-mono text-amber-500 leading-normal text-center">
+                                  Application received! Pay the 20% commission fee ({Math.floor(item.salary * 0.2)} BDT) to unlock parents exact details.
+                                </div>
+                                <div className="grid grid-cols-2 gap-1.5">
+                                  <Link href={`/payment?jobId=${item.id}`} className="block w-full">
+                                    <button className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2 py-1.5 rounded-lg text-[10px] font-bold w-full transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1 border-none h-8">
+                                      <span>Pay Now (Instant Access)</span>
+                                    </button>
+                                  </Link>
+                                  <button 
+                                    onClick={() => setPayLaterJob(item)}
+                                    className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg text-[10px] font-bold w-full transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1 border-none h-8"
+                                  >
+                                    <span>Pay Later</span>
+                                  </button>
+                                </div>
+                                <div className="text-center text-[8px] font-mono text-slate-500 mt-1">
+                                  Support Hotline: <span className="text-emerald-500 font-bold">096-96-847-847</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : item.tutorId !== null ? (
+                          <div className="bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg text-center font-mono text-[10px] text-red-400 font-extrabold">
+                            ✗ Tuition Match Assigned (Closed)
+                          </div>
+                        ) : userRole === "TUTOR" ? (
                           <button
-                            className="bg-emerald-500 text-slate-950 px-3 py-2 rounded-lg text-xs font-bold w-full hover:bg-emerald-600 transition duration-200 cursor-pointer shadow-[0_2px_8px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-1.5 border-none"
+                            onClick={() => handleApply(item.id)}
+                            disabled={applyingJobId === item.id}
+                            className="bg-emerald-500 text-slate-950 px-3 py-2 rounded-lg text-xs font-bold w-full hover:bg-emerald-600 transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1.5 border-none disabled:opacity-50"
                           >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            <span>Unlock Location (50 BDT)</span>
+                            {applyingJobId === item.id ? (
+                              <>
+                                <div className="animate-spin h-3.5 w-3.5 border-2 border-slate-950 border-t-transparent rounded-full" />
+                                <span>Applying...</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                                </svg>
+                                <span>Apply for Tuition (Free)</span>
+                              </>
+                            )}
                           </button>
-                        </Link>
-                      </>
+                        ) : !session ? (
+                          <Link href="/login" className="block w-full">
+                            <button className="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-bold w-full transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1.5 border-none">
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                              </svg>
+                              <span>Login as Tutor to Apply</span>
+                            </button>
+                          </Link>
+                        ) : (
+                          <div className="bg-slate-950 border border-slate-800 p-2.5 rounded-lg text-center font-mono text-[9px] text-slate-500">
+                            Available strictly for verified educators.
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -518,6 +612,55 @@ export default function MapComponent({
           );
         })}
       </MapContainer>
+
+      {/* Dynamic Pay Later Coordination Modal */}
+      {payLaterJob && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-[0_10px_40px_rgba(0,0,0,0.8)] text-center space-y-6 transform scale-100 transition-all duration-300">
+            {/* Decorative hotline icon header */}
+            <div className="mx-auto w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+              <svg className="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xl font-heading font-extrabold text-white">Pay Later Coordination</h3>
+              <p className="text-xs text-slate-400 leading-relaxed font-sans">
+                To activate the match coordinates for **{payLaterJob.title}** and settle the commission after matching, please contact the Tuition Console Hotline.
+              </p>
+            </div>
+
+            {/* Hotline information box */}
+            <div className="bg-slate-950/60 border border-slate-850 p-5 rounded-2xl space-y-2 text-center relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full filter blur-xl pointer-events-none" />
+              <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-mono">Official Hotline</span>
+              <a href="tel:09696847847" className="text-2xl font-heading font-black text-emerald-400 block hover:underline hover:text-emerald-300 transition duration-200">
+                096-96-847-847
+              </a>
+              <span className="text-[9px] text-slate-500 block font-mono">Available 24/7 for swift activation</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <a 
+                href="tel:09696847847"
+                className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1.5 border-none h-10"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <span>Call Support</span>
+              </a>
+              <button 
+                onClick={() => setPayLaterJob(null)}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 px-4 rounded-xl text-xs transition duration-200 cursor-pointer shadow-md flex items-center justify-center border-none h-10"
+              >
+                <span>Close Portal</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
