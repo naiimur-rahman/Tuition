@@ -24,6 +24,10 @@ function MapSearchContent() {
   const [activeSubjects, setActiveSubjects] = useState<string[]>([]);
   const [activeClasses, setActiveClasses] = useState<string[]>([]);
 
+  // Hoisted state from Map component to place controls outside the map
+  const [searchRadius, setSearchRadius] = useState<1.5 | 3 | 5>(1.5);
+  const [metrics, setMetrics] = useState({ total: 0, within: 0, outside: 0 });
+
   const handleApplyFilters = () => {
     setActiveSubjects(selectedSubjects);
     setActiveClasses(selectedClasses);
@@ -37,9 +41,9 @@ function MapSearchContent() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
+    <div className="max-w-[96%] mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
       {/* Page Header */}
-      <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-slate-200/60 dark:border-slate-800/80 pb-8 transition-colors duration-300">
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-slate-200/60 dark:border-slate-800/80 pb-6 transition-colors duration-300">
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--foreground)] tracking-tight">
             {type === "tutor" ? (
@@ -63,127 +67,242 @@ function MapSearchContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
-        {/* Filters Sidebar */}
-        <div className="lg:col-span-1 glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 h-fit space-y-6 transition-all duration-300">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold font-heading text-[var(--foreground)] flex items-center">
-                <svg className="w-5 h-5 mr-2 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                </svg>
-                Search Filters
-              </h2>
-              <p className="text-xs text-[var(--muted)] mt-0.5 font-mono uppercase tracking-wider">Multi-Select Parameters</p>
+        {/* Left Control Panel / Stacked Sidebar Cards */}
+        <div className="lg:col-span-1 space-y-6">
+          
+          {/* Card 1: Proximity Radius & Live Metrics */}
+          <div className="glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 space-y-4 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-extrabold">
+                Search Proximity Range
+              </span>
+              <span className="text-[9px] font-mono bg-slate-900 text-slate-500 px-1.5 py-0.5 rounded border border-slate-800/80">
+                Spatial Radius
+              </span>
             </div>
-            {(selectedSubjects.length > 0 || selectedClasses.length > 0) && (
+            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
+
+            {/* Radius Selection Buttons */}
+            <div className="flex items-center gap-2">
+              {([1.5, 3, 5] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setSearchRadius(r)}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold transition-all duration-200 cursor-pointer border ${
+                    searchRadius === r
+                      ? "bg-pink-600 border-pink-500 text-white shadow-[0_0_8px_rgba(236,72,153,0.35)]"
+                      : "bg-slate-900 border-slate-850 hover:border-slate-700 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {r} km
+                </button>
+              ))}
+            </div>
+
+            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
+
+            {/* Merged Live Metrics / Map Numbers */}
+            <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2 font-mono text-[10px]">
+              <div className="flex items-center justify-between text-slate-400">
+                <span>Total Items Loaded:</span>
+                <span className="text-white font-bold">{metrics.total}</span>
+              </div>
+              <div className="flex items-center justify-between text-slate-400">
+                <span>Within Active Proximity:</span>
+                <span className="text-emerald-400 font-bold">{metrics.within}</span>
+              </div>
+              <div className="flex items-center justify-between text-slate-400">
+                <span>Outside Query Range:</span>
+                <span className="text-amber-400 font-bold">{metrics.outside}</span>
+              </div>
+            </div>
+
+            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
+
+            {/* Legend Indicators */}
+            <div className="space-y-2 text-[10px] font-mono text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-pink-500 shrink-0" />
+                <span>Pink: Search Boundary ({searchRadius} km)</span>
+              </div>
+              {type !== "tutor" ? (
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0" />
+                  <span>Purple: Available Tuition Jobs</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                  <span>Green: Verified Tutors Directory</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Card 2: Map Navigation Guide */}
+          <div className="glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 space-y-4 transition-all duration-300">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-pink-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-[10px] font-mono text-white uppercase tracking-wider font-extrabold">
+                Navigation Guide
+              </span>
+            </div>
+            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
+            <div className="space-y-3 text-[11px] text-slate-400 leading-relaxed font-sans">
+              <div className="flex gap-2">
+                <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">1</span>
+                <p>
+                  <strong className="text-slate-300">Pan & Zoom:</strong> Drag maps or scroll to inspect target neighborhoods.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">2</span>
+                <p>
+                  <strong className="text-slate-300">Pulsing Beacons:</strong> Click on {type === "tutor" ? "green verified educators" : "purple jobs"} inside the {searchRadius} km radius.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">3</span>
+                <p>
+                  <strong className="text-slate-300">Details & Apply:</strong> Inspect credentials and apply directly from the popup.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Search Filters */}
+          <div className="glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 space-y-6 transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold font-heading text-[var(--foreground)] flex items-center">
+                  <svg className="w-4.5 h-4.5 mr-2 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                  </svg>
+                  Search Filters
+                </h2>
+                <p className="text-[10px] text-[var(--muted)] mt-0.5 font-mono uppercase tracking-wider">Multi-Select Parameters</p>
+              </div>
+              {(selectedSubjects.length > 0 || selectedClasses.length > 0) && (
+                <button
+                  type="button"
+                  onClick={handleClearFilters}
+                  className="text-[10px] text-pink-400 hover:text-pink-300 font-mono font-bold uppercase transition duration-150 cursor-pointer border-none bg-transparent"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+
+            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80 transition-colors duration-300" />
+
+            <div className="space-y-5">
+              {/* Subjects Checkboxes */}
+              <div className="space-y-2">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--foreground)] opacity-75 font-bold">Subjects</label>
+                <div className="space-y-2 max-h-[140px] overflow-y-auto pr-2 custom-scrollbar bg-slate-900/30 p-2.5 rounded-xl border border-slate-850 font-sans">
+                  {[
+                    "Bangla",
+                    "English",
+                    "Mathematics",
+                    "Higher Math",
+                    "Physics",
+                    "Chemistry",
+                    "Biology",
+                    "General Science",
+                    "ICT & Computing",
+                    "Accounting",
+                    "Finance & Banking",
+                    "Business Studies",
+                    "Economics",
+                    "Social Science"
+                  ].map((sub) => {
+                    const isChecked = selectedSubjects.includes(sub);
+                    return (
+                      <label key={sub} className="flex items-center space-x-2.5 text-xs text-slate-300 hover:text-white cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            if (isChecked) {
+                              setSelectedSubjects(selectedSubjects.filter((s) => s !== sub));
+                            } else {
+                              setSelectedSubjects([...selectedSubjects, sub]);
+                            }
+                          }}
+                          className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-950 w-4 h-4 cursor-pointer transition-all"
+                        />
+                        <span>{sub}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Class / Medium Checkboxes */}
+              <div className="space-y-2">
+                <label className="block text-[10px] font-mono uppercase tracking-wider text-[var(--foreground)] opacity-75 font-bold">Class / Medium</label>
+                <div className="space-y-2 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar bg-slate-900/30 p-2.5 rounded-xl border border-slate-850">
+                  {[
+                    "Play",
+                    "Nursery",
+                    "KG",
+                    "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
+                    "Class 6", "Class 7", "Class 8",
+                    "Class 9",
+                    "Class 10 (SSC)",
+                    "Class 11 (HSC 1st Year)",
+                    "Class 12 (HSC 2nd Year)",
+                    "O-Level",
+                    "A-Level",
+                    "Admission Test",
+                    "University",
+                  ].map((cl) => {
+                    const isChecked = selectedClasses.includes(cl);
+                    return (
+                      <label key={cl} className="flex items-center space-x-2.5 text-xs text-slate-300 hover:text-white cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            if (isChecked) {
+                              setSelectedClasses(selectedClasses.filter((c) => c !== cl));
+                            } else {
+                              setSelectedClasses([...selectedClasses, cl]);
+                            }
+                          }}
+                          className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-950 w-4 h-4 cursor-pointer transition-all"
+                        />
+                        <span>{cl}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
               <button
-                type="button"
-                onClick={handleClearFilters}
-                className="text-[10px] text-pink-400 hover:text-pink-300 font-mono font-bold uppercase transition duration-150 cursor-pointer border-none bg-transparent"
+                onClick={handleApplyFilters}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2 border-none"
               >
-                Reset
+                <span>Apply Filters</span>
               </button>
-            )}
+            </div>
           </div>
 
-          <div className="h-px bg-slate-200/60 dark:bg-slate-800/80 transition-colors duration-300" />
-
-          <div className="space-y-6">
-            {/* Subjects Checkboxes */}
-            <div className="space-y-3">
-              <label className="block text-xs font-mono uppercase tracking-wider text-[var(--foreground)] opacity-75 font-bold">Subjects</label>
-              <div className="space-y-2 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar bg-slate-900/30 p-2.5 rounded-xl border border-slate-850 font-sans">
-                {[
-                  "Bangla",
-                  "English",
-                  "Mathematics",
-                  "Higher Math",
-                  "Physics",
-                  "Chemistry",
-                  "Biology",
-                  "General Science",
-                  "ICT & Computing",
-                  "Accounting",
-                  "Finance & Banking",
-                  "Business Studies",
-                  "Economics",
-                  "Social Science"
-                ].map((sub) => {
-                  const isChecked = selectedSubjects.includes(sub);
-                  return (
-                    <label key={sub} className="flex items-center space-x-2.5 text-xs text-slate-300 hover:text-white cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => {
-                          if (isChecked) {
-                            setSelectedSubjects(selectedSubjects.filter((s) => s !== sub));
-                          } else {
-                            setSelectedSubjects([...selectedSubjects, sub]);
-                          }
-                        }}
-                        className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-950 w-4 h-4 cursor-pointer transition-all"
-                      />
-                      <span>{sub}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Class / Medium Checkboxes */}
-            <div className="space-y-3">
-              <label className="block text-xs font-mono uppercase tracking-wider text-[var(--foreground)] opacity-75 font-bold">Class / Medium</label>
-              <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar bg-slate-900/30 p-2.5 rounded-xl border border-slate-850">
-                {[
-                  "Play",
-                  "Nursery",
-                  "KG",
-                  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
-                  "Class 6", "Class 7", "Class 8",
-                  "Class 9",
-                  "Class 10 (SSC)",
-                  "Class 11 (HSC 1st Year)",
-                  "Class 12 (HSC 2nd Year)",
-                  "O-Level",
-                  "A-Level",
-                  "Admission Test",
-                  "University",
-                ].map((cl) => {
-                  const isChecked = selectedClasses.includes(cl);
-                  return (
-                    <label key={cl} className="flex items-center space-x-2.5 text-xs text-slate-300 hover:text-white cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => {
-                          if (isChecked) {
-                            setSelectedClasses(selectedClasses.filter((c) => c !== cl));
-                          } else {
-                            setSelectedClasses([...selectedClasses, cl]);
-                          }
-                        }}
-                        className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-950 w-4 h-4 cursor-pointer transition-all"
-                      />
-                      <span>{cl}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            <button
-              onClick={handleApplyFilters}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2"
-            >
-              <span>Apply Filters</span>
-            </button>
-          </div>
         </div>
 
-        {/* Map Area */}
+        {/* Right Side: Immensely Wide Map Container */}
         <div className="lg:col-span-3">
-          <MapComponent type={type} subjects={activeSubjects} classLevels={activeClasses} />
+          <MapComponent 
+            type={type} 
+            subjects={activeSubjects} 
+            classLevels={activeClasses} 
+            searchRadius={searchRadius}
+            setSearchRadius={setSearchRadius}
+            onMetricsChange={setMetrics}
+          />
         </div>
       </div>
     </div>

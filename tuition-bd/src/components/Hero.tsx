@@ -258,39 +258,75 @@ export default function Hero({ selectedRole }: HeroProps) {
             </motion.p>
 
             {/* CTAs */}
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4"
-            >
-              {/* Find a Tutor Button */}
-              {(!selectedRole || selectedRole === "parent") && (
-                <Link href="/map?type=tutor" className="w-full sm:w-auto">
-                  <motion.button
-                    whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(16,185,129,0.35)" }}
-                    whileTap={{ scale: 0.97 }}
-                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-8 py-4 rounded-xl text-base transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center"
-                  >
-                    Find a Tutor
-                    <svg className="w-5 h-5 ml-2 -mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </motion.button>
-                </Link>
-              )}
+            <div className="space-y-6 pt-6">
+              <motion.div
+                variants={itemVariants}
+                className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5"
+              >
+                {/* Find a Tutor Button */}
+                {(!selectedRole || selectedRole === "parent") && (
+                  <Link href="/map?type=tutor" className="w-full sm:w-auto">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="group relative w-full sm:w-auto bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 text-slate-950 font-black px-8 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(16,185,129,0.3)] border-none overflow-hidden flex items-center justify-center tracking-wide font-sans"
+                    >
+                      {/* Shimmer light effect */}
+                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" style={{ animationDuration: '1.5s' }} />
+                      
+                      <span>Find a Tutor</span>
+                      <svg className="w-5 h-5 ml-2.5 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </motion.button>
+                  </Link>
+                )}
 
-              {/* Find Tuition Jobs Button */}
-              {(!selectedRole || selectedRole === "tutor") && (
-                <Link href="/map" className="w-full sm:w-auto">
-                  <motion.button
-                    whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(16,185,129,0.35)" }}
-                    whileTap={{ scale: 0.97 }}
-                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-8 py-4 rounded-xl text-base transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center"
-                  >
-                    Find Tuition Jobs
-                  </motion.button>
-                </Link>
-              )}
-            </motion.div>
+                {/* Find Tuition Jobs Button */}
+                {(!selectedRole || selectedRole === "tutor") && (
+                  <Link href="/map" className="w-full sm:w-auto">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="group relative w-full sm:w-auto bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 text-slate-950 font-black px-8 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(16,185,129,0.3)] border-none overflow-hidden flex items-center justify-center tracking-wide font-sans"
+                    >
+                      {/* Shimmer light effect */}
+                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" style={{ animationDuration: '1.5s' }} />
+                      
+                      <span>Find Tuition Jobs</span>
+                      <svg className="w-5 h-5 ml-2.5 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </motion.button>
+                  </Link>
+                )}
+              </motion.div>
+
+              {/* Login / Signup Sub-pill */}
+              <motion.div
+                variants={itemVariants}
+                className="flex justify-center lg:justify-start"
+              >
+                <div className="glass-card flex items-center p-1.5 rounded-full border border-slate-800/80 bg-slate-950/80 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:border-emerald-500/20 transition-all duration-300 text-[10px] md:text-xs font-mono tracking-wider font-extrabold space-x-6 pl-5 pr-1.5">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
+                    <Link href="/login" className="text-slate-400 hover:text-white transition-colors uppercase tracking-widest cursor-pointer font-bold">
+                      Log in
+                    </Link>
+                  </div>
+                  <div className="h-4 w-px bg-slate-800" />
+                  <Link href="/register">
+                    <motion.button
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 px-6 py-2.5 rounded-full font-sans font-black tracking-widest uppercase transition-colors cursor-pointer text-[10px] md:text-xs border-none shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:brightness-110"
+                    >
+                      Sign up
+                    </motion.button>
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
           </motion.div>
 
           {/* Right Hero Content: Interactive Terminal Mock */}
@@ -304,7 +340,7 @@ export default function Hero({ selectedRole }: HeroProps) {
             <div className="absolute inset-0 bg-emerald-500/10 rounded-2xl filter blur-2xl pointer-events-none" />
 
             {/* Terminal Window Container */}
-            <div className="relative glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+            <div className="relative glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl keep-dark">
               {/* Terminal Titlebar */}
               <div className="bg-slate-950/80 px-4 py-3 border-b border-slate-800/80 flex items-center justify-between">
                 <div className="flex space-x-2">

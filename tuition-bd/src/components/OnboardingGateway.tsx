@@ -10,14 +10,17 @@ interface OnboardingGatewayProps {
 export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayProps) {
   const [isVisible, setIsVisible] = useState(true);
 
-  // Lock body scroll when selection modal is visible
+  // Lock both body and HTML scroll to absolutely prevent scroll bleeding on mobile viewports
   useEffect(() => {
     if (isVisible) {
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
     } else {
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     }
     return () => {
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     };
   }, [isVisible]);
@@ -87,9 +90,12 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight font-heading px-2"
+                className="tracking-tight font-heading px-2 flex flex-col items-center"
               >
-                Welcome to <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-sm">Tuition Console</span>
+                <span className="text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Welcome to</span>
+                <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-emerald-400 via-teal-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-sm mt-1 whitespace-nowrap">
+                  Tuition Console
+                </span>
               </motion.h1>
  
               <motion.p

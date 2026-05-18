@@ -1,10 +1,51 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Circle, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Circle, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+
+function RecenterControl({ userLocation }: { userLocation: [number, number] | null }) {
+  const map = useMap();
+  
+  if (!userLocation) return null;
+
+  return (
+    <div className="absolute bottom-6 right-6 z-[1000] pointer-events-auto">
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          map.setView(userLocation, 14, { animate: true });
+        }}
+        className="bg-slate-950/95 backdrop-blur-md hover:bg-slate-900 border border-slate-800 text-white px-3 py-2 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.6)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 hover:border-pink-500 hover:text-pink-400 group"
+        title="Recenter to my location"
+      >
+        <svg
+          className="w-4 h-4 text-pink-500 group-hover:scale-110 transition duration-200"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+          />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+        <span className="text-[10px] font-mono uppercase tracking-wider font-extrabold">My Location</span>
+      </button>
+    </div>
+  );
+}
 
 function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371; // Radius of the earth in km
@@ -24,10 +65,16 @@ export default function MapComponent({
   type,
   subjects,
   classLevels,
+  searchRadius,
+  setSearchRadius,
+  onMetricsChange,
 }: {
   type: string;
   subjects: string[];
   classLevels: string[];
+  searchRadius: 1.5 | 3 | 5;
+  setSearchRadius: (r: 1.5 | 3 | 5) => void;
+  onMetricsChange?: (metrics: { total: number; within: number; outside: number }) => void;
 }) {
   const { data: session } = useSession();
   const userId = (session?.user as any)?.id || "";
@@ -37,7 +84,6 @@ export default function MapComponent({
   const [dbJobs, setDbJobs] = useState<any[]>([]);
   const [dbTutors, setDbTutors] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [searchRadius, setSearchRadius] = useState<1.5 | 3 | 5>(1.5);
   const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
   const [payLaterJob, setPayLaterJob] = useState<any>(null);
 
@@ -163,6 +209,61 @@ export default function MapComponent({
     }
   }, [type, isMounted]);
 
+  // Sync calculated proximity metrics back to parent dashboard outside-of-map controls.
+  // Calculated at top level so that it runs unconditionally (no Rules of Hooks violations!).
+  useEffect(() => {
+    if (!onMetricsChange) return;
+
+    let items = type === "tutor" ? dbTutors : dbJobs;
+    if (type !== "tutor") {
+      items = items.filter((job: any) => !job.locationUnlocked && job.status === "OPEN");
+    }
+
+    if (subjects && subjects.length > 0) {
+      items = items.filter((item: any) => {
+        const itemSubject = (item.subject || item.bio || "").toLowerCase();
+        return subjects.some((sub) => itemSubject.includes(sub.toLowerCase()));
+      });
+    }
+
+    if (classLevels && classLevels.length > 0) {
+      items = items.filter((item: any) => {
+        const itemClass = (item.classLevel || item.education || "").toLowerCase();
+        return classLevels.some((cl) => {
+          const queryCl = cl.toLowerCase();
+          if (queryCl === "o level") {
+            return itemClass.includes("o level") || itemClass.includes("o-level") || itemClass.includes("english medium");
+          }
+          if (queryCl === "a level") {
+            return itemClass.includes("a level") || itemClass.includes("a-level") || itemClass.includes("english medium");
+          }
+          return itemClass.includes(queryCl);
+        });
+      });
+    }
+
+    const within = items.filter((item: any) => {
+      return userLocation
+        ? getDistanceInKm(userLocation[0], userLocation[1], item.approxLat, item.approxLng) <= searchRadius
+        : true;
+    }).length;
+
+    onMetricsChange({
+      total: items.length,
+      within,
+      outside: items.length - within,
+    });
+  }, [
+    dbTutors,
+    dbJobs,
+    type,
+    subjects,
+    classLevels,
+    userLocation,
+    searchRadius,
+    onMetricsChange
+  ]);
+
   if (!isMounted) {
     return (
       <div className="h-[750px] lg:h-[800px] w-full bg-slate-900/50 border border-slate-800 rounded-2xl animate-pulse flex flex-col items-center justify-center space-y-3">
@@ -215,117 +316,10 @@ export default function MapComponent({
 
   const outOfProximityCount = filteredItems.length - withinProximityCount;
 
+  // Proximity metrics synced cleanly via top-level unconditional useEffect
+
   return (
     <div className="h-[750px] lg:h-[800px] w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800 relative z-0">
-
-      {/* Floating Navigation & Usage Guide Panel */}
-      <div className="absolute bottom-4 left-4 z-[500] bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-2xl p-4 shadow-[0_8px_30px_rgba(0,0,0,0.7)] font-sans w-[280px] animate-fadeIn border-l-4 border-l-pink-500">
-        <div className="flex items-center gap-2 mb-2">
-          <svg className="w-4 h-4 text-pink-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span className="text-[11px] font-mono text-white uppercase tracking-wider font-extrabold">
-            Map Navigation Guide
-          </span>
-        </div>
-        <div className="space-y-2.5 text-[10px] text-slate-300 leading-relaxed font-sans">
-          <div className="flex gap-2">
-            <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono shrink-0">1</span>
-            <p className="text-slate-400">
-              <strong className="text-slate-200">Pan & Zoom:</strong> Drag the map or use your mouse wheel to navigate specific tuition sectors.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono shrink-0">2</span>
-            <p className="text-slate-400">
-              <strong className="text-slate-200">Pink Beacon:</strong> Represents your active location marker. Look for items inside the pink search radius line.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono shrink-0">3</span>
-            <p className="text-slate-400">
-              <strong className="text-slate-200">Explore Items:</strong> Click on any {type === "tutor" ? "green verified tutor" : "purple job"} circle to inspect coordinates and qualifications.
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono shrink-0">4</span>
-            <p className="text-slate-400">
-              <strong className="text-slate-200">Change Radius:</strong> Click the 1.5, 3, or 5 km buttons on the top right to expand your query Horizon boundary.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating Dynamic Proximity Search Range Panel */}
-      <div className="absolute top-4 right-4 z-[500] bg-slate-950/90 backdrop-blur-md border border-slate-800 rounded-xl px-4 py-3 flex flex-col gap-2.5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] font-sans w-[230px] animate-fadeIn">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-extrabold">
-            Search Range
-          </span>
-          <span className="text-[8px] font-mono bg-slate-900 text-slate-500 px-1.5 py-0.5 rounded border border-slate-800">
-            Legend
-          </span>
-        </div>
-        <div className="h-px bg-slate-900" />
-        
-        {/* Radius Selection Buttons */}
-        <div className="flex items-center gap-1.5">
-          {([1.5, 3, 5] as const).map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={() => setSearchRadius(r)}
-              className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all duration-200 cursor-pointer border ${
-                searchRadius === r
-                  ? "bg-pink-600 border-pink-500 text-white shadow-[0_0_8px_rgba(236,72,153,0.35)]"
-                  : "bg-slate-900 border-slate-850 hover:border-slate-700 text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              {r} km
-            </button>
-          ))}
-        </div>
-        
-        <div className="h-px bg-slate-900" />
-        
-        {/* Merged Live Metrics / Map Numbers */}
-        <div className="bg-slate-900/60 p-2.5 rounded-lg border border-slate-850 space-y-1.5 font-mono text-[9px]">
-          <div className="flex items-center justify-between text-slate-400">
-            <span>Total Loaded:</span>
-            <span className="text-white font-bold font-mono">{filteredItems.length}</span>
-          </div>
-          <div className="flex items-center justify-between text-slate-400">
-            <span>Within Your Area:</span>
-            <span className="text-emerald-400 font-bold font-mono">{withinProximityCount}</span>
-          </div>
-          <div className="flex items-center justify-between text-slate-400">
-            <span>Outside Area:</span>
-            <span className="text-amber-400 font-bold font-mono">{outOfProximityCount}</span>
-          </div>
-        </div>
-
-        <div className="h-px bg-slate-900" />
-
-        {/* Dynamic Legend Color Guides */}
-        <div className="space-y-1.5 text-[9px] font-mono text-slate-400">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-pink-500 animate-pulse shrink-0" />
-            <span>Pink: Your Area ({searchRadius} km)</span>
-          </div>
-          {type !== "tutor" && (
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
-              <span>Purple: Available Tuition Jobs</span>
-            </div>
-          )}
-          {type === "tutor" && (
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-              <span>Green: Verified Tutor Directory</span>
-            </div>
-          )}
-        </div>
-      </div>
 
       <MapContainer
         center={userLocation || center}
@@ -338,6 +332,8 @@ export default function MapComponent({
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+
+        <RecenterControl userLocation={userLocation} />
 
         {userLocation && (
           <>
@@ -356,12 +352,13 @@ export default function MapComponent({
             {/* Core User Beacon */}
             <Circle
               center={userLocation}
-              radius={120} // Core radius marker
+              radius={150} // Core radius marker (slightly larger)
               pathOptions={{
                 color: "#e2136e",
                 fillColor: "#e2136e",
                 fillOpacity: 0.85,
                 weight: 2,
+                className: "leaflet-animated-marker", // Pulse animation
               }}
             >
               <Popup>
@@ -394,12 +391,13 @@ export default function MapComponent({
             <Circle
               key={item.id}
               center={[item.approxLat, item.approxLng]}
-              radius={120} // Small dot marker — no confusing large overlapping rings
+              radius={180} // Increased from 120 to 180 meters for improved visibility
               pathOptions={{
                 color: themeColor,
                 fillColor: themeColor,
-                fillOpacity: 0.9,
+                fillOpacity: 0.8,
                 weight: 2,
+                className: "leaflet-animated-marker", // Pulse animation
               }}
             >
               <Popup>

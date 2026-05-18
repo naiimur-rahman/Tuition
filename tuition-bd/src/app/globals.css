@@ -223,3 +223,235 @@ h1, h2, h3, h4, h5, h6 {
 .leaflet-popup-close-button:hover {
   color: #10b981 !important;
 }
+
+/* Stunning Smooth Pulse Animation for Map Circle Beacons */
+@keyframes map-pulse-glow {
+  0% {
+    fill-opacity: 0.8;
+    stroke-opacity: 0.9;
+    stroke-width: 1.5px;
+  }
+  50% {
+    fill-opacity: 0.4;
+    stroke-opacity: 0.5;
+    stroke-width: 4px;
+  }
+  100% {
+    fill-opacity: 0.8;
+    stroke-opacity: 0.9;
+    stroke-width: 1.5px;
+  }
+}
+
+.leaflet-animated-marker {
+  animation: map-pulse-glow 2s infinite ease-in-out;
+  transform-origin: center;
+}
+
+/* Futuristic Shimmer Light Effect Animation */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.8s infinite;
+}
+
+/* Eradicate standard Leaflet and copyright branding labels across all maps completely */
+.leaflet-control-attribution,
+.leaflet-attribution-flag {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================
+   PREMIUM UNIVERSAL LIGHT THEME REDESIGN
+   ========================================== */
+.light body {
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 45%);
+  background-color: #f8fafc;
+  background-attachment: fixed;
+  color: #0f172a;
+}
+
+/* Force terminal & tactical radar elements to stay completely dark, neon, and high-fidelity */
+.light .keep-dark,
+.light .keep-dark * {
+  background-color: #020617 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.light .keep-dark span,
+.light .keep-dark div,
+.light .keep-dark h3,
+.light .keep-dark p,
+.light .keep-dark a {
+  color: #cbd5e1 !important;
+}
+
+/* Retain special green/indigo text in dark console elements */
+.light .keep-dark .text-emerald-400,
+.light .keep-dark .text-emerald-500,
+.light .keep-dark .text-emerald-500\/10,
+.light .keep-dark .bg-emerald-500\/10 {
+  color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.light .keep-dark .text-indigo-400,
+.light .keep-dark .text-indigo-500,
+.light .keep-dark .text-indigo-500\/10,
+.light .keep-dark .bg-indigo-500\/10 {
+  color: #818cf8 !important;
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+.light .keep-dark .text-slate-400,
+.light .keep-dark .text-slate-500 {
+  color: #64748b !important;
+}
+
+.light .keep-dark .bg-slate-900,
+.light .keep-dark .bg-slate-900\/60,
+.light .keep-dark .bg-slate-900\/90,
+.light .keep-dark .bg-slate-950,
+.light .keep-dark .bg-slate-950\/80,
+.light .keep-dark .bg-slate-950\/40 {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Universal solid white cards with soft elegant drop-shadows and thin slate borders */
+.light .bg-slate-900:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/60:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/40:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/30:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/10:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-955:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/40:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-955\/40:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/80:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/95:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/90:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/20:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/90:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/50:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/80:not(.keep-dark):not(.keep-dark *) {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+.light .glass-card:not(.keep-dark) {
+  background-color: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03) !important;
+}
+
+.light .glass-card:not(.keep-dark):hover {
+  background-color: #ffffff !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.06) !important;
+  transform: translateY(-2px);
+}
+
+
+
+/* Universal border corrections for dark utility border classes in Light Mode */
+.light .border-slate-800:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-800\/80:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-800\/60:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-800\/40:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-800\/20:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-800\/50:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-850:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-900:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-900\/80:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-900\/60:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-900\/40:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-950:not(.keep-dark):not(.keep-dark *) {
+  border-color: rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Text and Link readability, hierarchy & hover color transitions in Light Mode */
+.light .text-slate-50:not(.keep-dark *),
+.light .text-slate-100:not(.keep-dark *),
+.light .text-slate-200:not(.keep-dark *),
+.light .text-white:not(.keep-dark *) {
+  color: #020617 !important; /* Rich Dark Slate 950 */
+}
+
+.light .text-slate-300:not(.keep-dark *),
+.light .text-slate-400:not(.keep-dark *),
+.light .text-slate-400\/80:not(.keep-dark *) {
+  color: #334155 !important; /* Slate 700 */
+}
+
+.light .text-slate-500:not(.keep-dark *) {
+  color: #64748b !important; /* Slate 500 */
+}
+
+/* Stabilize active hover states to prevent invisible/white text on hover */
+.light .hover\:text-white:not(.keep-dark *):hover {
+  color: #020617 !important;
+}
+.light .hover\:text-slate-200:not(.keep-dark *):hover {
+  color: #0f172a !important;
+}
+.light .hover\:text-emerald-400:not(.keep-dark *):hover {
+  color: #059669 !important;
+}
+.light .hover\:text-indigo-400:not(.keep-dark *):hover {
+  color: #4f46e5 !important;
+}
+
+/* Modern, ultra-clean shadow system in Light Mode */
+.light .shadow-2xl,
+.light .shadow-xl,
+.light .shadow-lg,
+.light .shadow-md,
+.light [class*="shadow-[rgba"],
+.light [class*="shadow-[0_"] {
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.03) !important;
+}
+
+/* Button overrides for beautiful, highly readable aesthetic flow in Light Mode */
+.light button.bg-slate-900:not(.keep-dark *),
+.light .bg-slate-900\/40 button:not(.keep-dark *) {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+}
+
+.light button.bg-slate-900:not(.keep-dark *):hover {
+  background-color: #1e293b !important;
+}
+
+/* Dynamic role tabs, search panels & input selectors styling in Light Mode */
+.light input.glass-input,
+.light textarea.glass-input {
+  background-color: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
+  color: #0f172a !important;
+}
+
+.light input.glass-input:focus,
+.light textarea.glass-input:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.08) !important;
+}
+
+/* Soft, subtle borders and background on the navbar elements in Light Mode */
+.light .glass-panel {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.04) !important;
+}

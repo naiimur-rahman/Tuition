@@ -121,7 +121,7 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
           
           {/* Column 1: Tactical Radar (Left) */}
           <div className="lg:col-span-6 flex flex-col">
-            <div className="glass-card rounded-2xl p-6 border border-slate-800/80 flex-grow flex flex-col justify-between min-h-[380px] relative overflow-hidden">
+            <div className="glass-card rounded-2xl p-6 border border-slate-800/80 flex-grow flex flex-col justify-between min-h-[380px] relative overflow-hidden keep-dark">
               <div>
                 <span className="text-[10px] font-mono text-[var(--muted)] uppercase tracking-widest">Display Output 01 // Dhaka Sector Scan</span>
                 <h3 className="text-lg font-bold font-heading text-[var(--foreground)] mt-1">Satellite Navigation Module</h3>
@@ -184,7 +184,7 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
           <div className="lg:col-span-6 flex flex-col justify-between space-y-6">
             
             {/* Terminal Logs Panel */}
-            <div className="glass-card rounded-2xl p-6 border border-slate-800/80 flex-grow min-h-[180px] flex flex-col justify-between">
+            <div className="glass-card rounded-2xl p-6 border border-slate-800/80 flex-grow min-h-[180px] flex flex-col justify-between keep-dark">
               <div>
                 <span className="text-[10px] font-mono text-[var(--muted)] uppercase tracking-widest">Display Output 02 // Operation Logs</span>
                 <h3 className="text-lg font-bold font-heading text-[var(--foreground)] mt-1">Live Telemetry Console</h3>
