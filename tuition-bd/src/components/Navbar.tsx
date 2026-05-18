@@ -19,8 +19,33 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSectorDropdownOpen, setIsSectorDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [currentType, setCurrentType] = useState<string | null>(null);
 
-  const isLinkActive = (href: string) => pathname === href;
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setCurrentType(params.get("type"));
+    }
+  }, [pathname]);
+
+  const isLinkActive = (href: string) => {
+    if (href.includes("?")) {
+      const [path, query] = href.split("?");
+      if (pathname !== path) return false;
+      
+      const searchParamsObj = new URLSearchParams(query);
+      for (const [key, value] of searchParamsObj.entries()) {
+        if (currentType !== value) return false;
+      }
+      return true;
+    }
+    
+    if (href === "/map") {
+      return pathname === "/map" && !currentType;
+    }
+    
+    return pathname === href;
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -138,9 +163,9 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
             <div className="hidden sm:ml-10 sm:flex sm:space-x-8">
               {(!activeRole || activeRole === "tutor") && (
                 <Link
-                  href="/map"
+                  href="/map?type=tuition"
                   className={`relative inline-flex items-center px-1 pt-1 text-xs font-semibold uppercase tracking-wider transition-colors duration-200 group ${
-                    isLinkActive("/map")
+                    isLinkActive("/map?type=tuition")
                       ? "text-emerald-400"
                       : "text-slate-400 hover:text-slate-200"
                   }`}
@@ -149,7 +174,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                   </svg>
                   Find Tuition
-                  {isLinkActive("/map") && (
+                  {isLinkActive("/map?type=tuition") && (
                     <motion.div
                       layoutId="activeNavIndicator"
                       className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
@@ -278,7 +303,11 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                           sessionStorage.setItem("userRole", "parent");
                           setActiveRole("parent");
                           setIsSectorDropdownOpen(false);
-                          window.location.reload();
+                          if (window.location.pathname === "/map") {
+                            window.location.href = "/map?type=tutor";
+                          } else {
+                            window.location.reload();
+                          }
                         }}
                         className={`w-full px-3 py-2 rounded-lg text-left text-[10px] font-mono font-bold uppercase tracking-wider flex items-center justify-between cursor-pointer ${
                           activeRole === "parent"
@@ -294,7 +323,11 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                           sessionStorage.setItem("userRole", "tutor");
                           setActiveRole("tutor");
                           setIsSectorDropdownOpen(false);
-                          window.location.reload();
+                          if (window.location.pathname === "/map") {
+                            window.location.href = "/map?type=tuition";
+                          } else {
+                            window.location.reload();
+                          }
                         }}
                         className={`w-full px-3 py-2 rounded-lg text-left text-[10px] font-mono font-bold uppercase tracking-wider flex items-center justify-between cursor-pointer ${
                           activeRole === "tutor"
@@ -467,9 +500,9 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
               <div className="grid grid-cols-2 gap-2.5">
                 {(!activeRole || activeRole === "tutor") && (
                   <Link
-                    href="/map"
+                    href="/map?type=tuition"
                     className={`px-3 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-extrabold transition-all duration-200 flex items-center ${
-                      isLinkActive("/map")
+                      isLinkActive("/map?type=tuition")
                         ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
                         : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 border border-slate-900/60"
                     }`}

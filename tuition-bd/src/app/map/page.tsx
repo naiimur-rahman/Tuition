@@ -56,11 +56,11 @@ function MapSearchContent() {
               </>
             )}
           </h1>
-          <p className="text-[var(--muted)] text-sm max-w-2xl leading-relaxed">
+          <p className="text-[var(--muted)] text-xs max-w-2xl leading-relaxed font-mono">
             {type === "tutor" ? (
-              "Locations shown on the map are approximate (within ~800 meters) to protect privacy. Parents can view tutor credentials and unlock contact details inside their popup box."
+              "Browse elite local educators. Pins show approximate teaching zones to protect privacy. Click a pulsing marker to view credentials and request an unlock."
             ) : (
-              "Locations shown on the map are approximate (within ~800 meters) to protect privacy. Tutors can unlock exact coordinates and parent contacts inside their popup box."
+              "Explore live tuition postings. Pins show approximate student zones to protect privacy. Click a pulsing marker to view budget details and request an unlock."
             )}
           </p>
         </div>
