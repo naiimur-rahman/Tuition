@@ -6,9 +6,11 @@ import Link from "next/link";
  
 interface HeroProps {
   selectedRole?: "parent" | "tutor";
+  onSelectRole?: (role: "parent" | "tutor") => void;
+  onTriggerDemo?: () => void;
 }
  
-export default function Hero({ selectedRole }: HeroProps) {
+export default function Hero({ selectedRole, onSelectRole, onTriggerDemo }: HeroProps) {
   const words = useMemo(() => {
     return selectedRole === "parent"
       ? ["tutor near you", "home educator", "academic specialist", "matching mentor"]
@@ -58,8 +60,6 @@ export default function Hero({ selectedRole }: HeroProps) {
 
   // Single self-cleaning typewriter state machine loop to prevent race conditions & duplicate intervals
   useEffect(() => {
-    if (!selectedRole) return;
-
     // Reset all state values immediately before typing
     setTerminalText("");
     setTerminalPhase("typing");
@@ -68,9 +68,11 @@ export default function Hero({ selectedRole }: HeroProps) {
     setShowCard(false);
     setShowPrompt(false);
 
-    const command = selectedRole === "parent"
-      ? "tutor--search --verified --radius=1.5km"
-      : "tuition--search --dhaka --radius=1.5km";
+    const command = selectedRole
+      ? (selectedRole === "parent"
+        ? "tutor--search --verified --radius=1.5km"
+        : "tuition--search --dhaka --radius=1.5km")
+      : "tuition-console --live-scan --dhaka";
 
     let typingInterval: NodeJS.Timeout | null = null;
     let submitTimeout: NodeJS.Timeout | null = null;
@@ -261,7 +263,7 @@ export default function Hero({ selectedRole }: HeroProps) {
             <div className="space-y-6 pt-6">
               <motion.div
                 variants={itemVariants}
-                className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5"
+                className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 flex-wrap"
               >
                 {/* Find a Tutor Button */}
                 {(!selectedRole || selectedRole === "parent") && (
@@ -269,13 +271,13 @@ export default function Hero({ selectedRole }: HeroProps) {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="group relative w-full sm:w-auto bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 text-slate-950 font-black px-8 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(16,185,129,0.3)] border-none overflow-hidden flex items-center justify-center tracking-wide font-sans"
+                      className="group relative w-full sm:w-auto bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 text-slate-950 font-black px-7 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(16,185,129,0.3)] border-none overflow-hidden flex items-center justify-center tracking-wide font-sans"
                     >
                       {/* Shimmer light effect */}
                       <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" style={{ animationDuration: '1.5s' }} />
                       
                       <span>Find a Tutor</span>
-                      <svg className="w-5 h-5 ml-2.5 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                     </motion.button>
@@ -284,21 +286,41 @@ export default function Hero({ selectedRole }: HeroProps) {
 
                 {/* Find Tuition Jobs Button */}
                 {(!selectedRole || selectedRole === "tutor") && (
-                  <Link href="/map" className="w-full sm:w-auto">
+                  <Link href="/map?type=tuition" className="w-full sm:w-auto">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="group relative w-full sm:w-auto bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 text-slate-950 font-black px-8 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(16,185,129,0.3)] border-none overflow-hidden flex items-center justify-center tracking-wide font-sans"
+                      className={`group relative w-full sm:w-auto px-7 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer overflow-hidden flex items-center justify-center tracking-wide font-sans font-black ${
+                        selectedRole === "tutor"
+                          ? "bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-400 text-slate-950 border-none shadow-[0_8px_30px_rgba(16,185,129,0.3)]"
+                          : "bg-slate-950/60 hover:bg-slate-900 border border-indigo-500/30 text-indigo-400 hover:text-indigo-300 hover:border-indigo-400 shadow-[0_4px_15px_rgba(99,102,241,0.15)]"
+                      }`}
                     >
-                      {/* Shimmer light effect */}
-                      <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" style={{ animationDuration: '1.5s' }} />
-                      
+                      {selectedRole === "tutor" && (
+                        <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" style={{ animationDuration: '1.5s' }} />
+                      )}
                       <span>Find Tuition Jobs</span>
-                      <svg className="w-5 h-5 ml-2.5 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                     </motion.button>
                   </Link>
+                )}
+
+                {/* Optional Satellite Matching Video Demo button */}
+                {onTriggerDemo && (
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={onTriggerDemo}
+                    className="w-full sm:w-auto bg-slate-900/60 hover:bg-slate-800/80 text-emerald-400 border border-emerald-500/20 px-6 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer flex items-center justify-center tracking-wide font-sans font-bold"
+                  >
+                    <svg className="w-5 h-5 mr-2 animate-pulse text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>How it Works</span>
+                  </motion.button>
                 )}
               </motion.div>
 
@@ -356,116 +378,113 @@ export default function Hero({ selectedRole }: HeroProps) {
 
               {/* Terminal Contents */}
               <div className="p-6 font-mono text-xs sm:text-sm text-slate-300 space-y-4 h-[390px] overflow-hidden bg-slate-950/40">
-                {!selectedRole ? (
-                  <div className="flex items-center space-x-2">
+                <div className="space-y-4">
+                  {/* Command Input Prompt */}
+                  <div className="flex items-center space-x-2 flex-wrap">
                     <span className="text-emerald-400 font-bold flex-shrink-0 whitespace-nowrap">guest@tuition-console:~$</span>
-                    <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block flex-shrink-0" />
+                    <span className="text-white whitespace-nowrap overflow-hidden">
+                      {terminalText}
+                    </span>
+                    {(terminalPhase === "typing" || terminalPhase === "submitting") && (
+                      <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block align-middle flex-shrink-0" />
+                    )}
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Command Input Prompt */}
-                    <div className="flex items-center space-x-2 flex-wrap">
-                      <span className="text-emerald-400 font-bold flex-shrink-0 whitespace-nowrap">guest@tuition-console:~$</span>
-                      <span className="text-white whitespace-nowrap overflow-hidden">
-                        {terminalText}
-                      </span>
-                      {(terminalPhase === "typing" || terminalPhase === "submitting") && (
-                        <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block align-middle flex-shrink-0" />
-                      )}
-                    </div>
 
-                    {/* Status Message */}
-                    {showStatus && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-slate-500"
-                      >
-                        {selectedRole === "parent"
+                  {/* Status Message */}
+                  {showStatus && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-slate-500 text-[11px]"
+                    >
+                      {selectedRole
+                        ? (selectedRole === "parent"
                           ? "[i] Initiating parent-educator grid link..."
-                          : "[i] Initializing active spatial coordination..."}
-                      </motion.div>
-                    )}
+                          : "[i] Initializing active spatial coordination...")
+                        : (mockIndex % 2 === 0
+                          ? "[i] Scanning Dhaka sectors for verified tutors..."
+                          : "[i] Scanning Dhaka coordinates for live student requests...")}
+                    </motion.div>
+                  )}
 
-                    {/* Coordinates & Location Status */}
-                    {showCoords && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-1.5"
-                      >
-                        <div className="text-emerald-400/90 font-bold">
-                          ✓ Coordinates Loaded ({selectedRole === "parent" ? mockTutors[mockIndex].coords : mockJobs[mockIndex].coords})
-                        </div>
-                        <div className="text-slate-400">
-                          {selectedRole === "parent"
-                            ? "🔍 Locating nearest active educators..."
-                            : "🔍 Fetching matching listings..."}
-                        </div>
-                      </motion.div>
-                    )}
+                  {/* Coordinates & Location Status */}
+                  {showCoords && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-1.5 text-[11px]"
+                    >
+                      <div className="text-emerald-400/90 font-bold">
+                        ✓ Coordinates Loaded ({selectedRole === "parent" || (!selectedRole && mockIndex % 2 === 0) ? mockTutors[mockIndex].coords : mockJobs[mockIndex].coords})
+                      </div>
+                      <div className="text-slate-400">
+                        {selectedRole === "parent" || (!selectedRole && mockIndex % 2 === 0)
+                          ? "🔍 Locating nearest active educators..."
+                          : "🔍 Fetching matching listings..."}
+                      </div>
+                    </motion.div>
+                  )}
 
-                    {/* Search Results Card */}
-                    {showCard && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.98, y: 5 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ type: "spring", stiffness: 100, damping: 15 }}
-                        className="p-3 bg-slate-900/60 border border-slate-800 rounded-lg space-y-2 text-[11px] sm:text-xs shadow-md"
-                      >
-                        {selectedRole === "parent" ? (
-                          <>
-                            <div className="flex justify-between text-slate-200">
-                              <span className="font-bold text-emerald-400">Tutor Profile Found</span>
-                              <span className="text-slate-500">{mockTutors[mockIndex].sector}</span>
-                            </div>
-                            <div className="h-px bg-slate-800" />
-                            <div className="text-slate-400 font-sans">
-                              <span className="font-bold text-slate-300 font-mono">Educator:</span> {mockTutors[mockIndex].name}<br />
-                              <span className="font-bold text-slate-300 font-mono">Specs:</span> {mockTutors[mockIndex].specs}<br />
-                              <span className="font-bold text-slate-300 font-mono">Expertise:</span> {mockTutors[mockIndex].expertise}
-                            </div>
-                            <div className="flex items-center justify-between pt-1">
-                              <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 font-sans">
-                                ✓ University Verified
-                              </span>
-                              <span className="text-[10px] text-emerald-400 font-bold font-sans">Active Match</span>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex justify-between text-slate-200">
-                              <span className="font-bold text-emerald-400">Listing Found</span>
-                              <span className="text-slate-500">{mockJobs[mockIndex].sector}</span>
-                            </div>
-                            <div className="h-px bg-slate-800" />
-                            <div className="text-slate-400 font-sans">
-                              <span className="font-bold text-slate-300 font-mono">Job:</span> {mockJobs[mockIndex].title}<br />
-                              <span className="font-bold text-slate-300 font-mono">Class:</span> {mockJobs[mockIndex].grade}<br />
-                              <span className="font-bold text-slate-300 font-mono">Salary:</span> {mockJobs[mockIndex].salary}
-                            </div>
-                            <div className="flex items-center justify-between pt-1">
-                              <span className="text-[10px] text-yellow-500 font-bold px-1.5 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 font-sans">Approximate Location Secured</span>
-                              <span className="text-[10px] text-emerald-400 font-bold font-sans">Ready</span>
-                            </div>
-                          </>
-                        )}
-                      </motion.div>
-                    )}
+                  {/* Search Results Card */}
+                  {showCard && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.98, y: 5 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                      className="p-3 bg-slate-900/60 border border-slate-800 rounded-lg space-y-2 text-[11px] sm:text-xs shadow-md"
+                    >
+                      {selectedRole === "parent" || (!selectedRole && mockIndex % 2 === 0) ? (
+                        <>
+                          <div className="flex justify-between text-slate-200">
+                            <span className="font-bold text-emerald-400">Tutor Profile Found</span>
+                            <span className="text-slate-500">{mockTutors[mockIndex].sector}</span>
+                          </div>
+                          <div className="h-px bg-slate-800" />
+                          <div className="text-slate-400 font-sans">
+                            <span className="font-bold text-slate-300 font-mono">Educator:</span> {mockTutors[mockIndex].name}<br />
+                            <span className="font-bold text-slate-300 font-mono">Specs:</span> {mockTutors[mockIndex].specs}<br />
+                            <span className="font-bold text-slate-300 font-mono">Expertise:</span> {mockTutors[mockIndex].expertise}
+                          </div>
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[10px] text-emerald-400 font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 font-sans">
+                              ✓ University Verified
+                            </span>
+                            <span className="text-[10px] text-emerald-400 font-bold font-sans">Active Match</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex justify-between text-slate-200">
+                            <span className="font-bold text-emerald-400">Listing Found</span>
+                            <span className="text-slate-500">{mockJobs[mockIndex].sector}</span>
+                          </div>
+                          <div className="h-px bg-slate-800" />
+                          <div className="text-slate-400 font-sans">
+                            <span className="font-bold text-slate-300 font-mono">Job:</span> {mockJobs[mockIndex].title}<br />
+                            <span className="font-bold text-slate-300 font-mono">Class:</span> {mockJobs[mockIndex].grade}<br />
+                            <span className="font-bold text-slate-300 font-mono">Salary:</span> {mockJobs[mockIndex].salary}
+                          </div>
+                          <div className="flex items-center justify-between pt-1">
+                            <span className="text-[10px] text-yellow-500 font-bold px-1.5 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 font-sans">Approximate Location Secured</span>
+                            <span className="text-[10px] text-emerald-400 font-bold font-sans">Ready</span>
+                          </div>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
 
-                    {/* Bottom Blinking Prompt */}
-                    {showPrompt && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex items-center space-x-2 pt-1"
-                      >
-                        <span className="text-emerald-400">guest@tuition-console:~$</span>
-                        <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block" />
-                      </motion.div>
-                    )}
-                  </div>
-                )}
+                  {/* Bottom Blinking Prompt */}
+                  {showPrompt && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex items-center space-x-2 pt-1"
+                    >
+                      <span className="text-emerald-400">guest@tuition-console:~$</span>
+                      <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block" />
+                    </motion.div>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>

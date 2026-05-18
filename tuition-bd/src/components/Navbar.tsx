@@ -161,50 +161,47 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
 
             {/* Main Navigation Links (Desktop) */}
             <div className="hidden sm:ml-10 sm:flex sm:space-x-8">
-              {(!activeRole || activeRole === "tutor") && (
-                <Link
-                  href="/map?type=tuition"
-                  className={`relative inline-flex items-center px-1 pt-1 text-xs font-semibold uppercase tracking-wider transition-colors duration-200 group ${
-                    isLinkActive("/map?type=tuition")
-                      ? "text-emerald-400"
-                      : "text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  <svg className="w-3.5 h-3.5 mr-1.5 text-emerald-500/80 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
-                  Find Tuition
-                  {isLinkActive("/map?type=tuition") && (
-                    <motion.div
-                      layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              )}
-              {(!activeRole || activeRole === "parent") && (
-                <Link
-                  href="/map?type=tutor"
-                  className={`relative inline-flex items-center px-1 pt-1 text-xs font-semibold uppercase tracking-wider transition-colors duration-200 group ${
-                    isLinkActive("/map?type=tutor")
-                      ? "text-emerald-400"
-                      : "text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  <svg className="w-3.5 h-3.5 mr-1.5 text-emerald-500/80 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                  Find Tutors
-                  {isLinkActive("/map?type=tutor") && (
-                    <motion.div
-                      layoutId="activeNavIndicator"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              )}
+              <Link
+                href="/map?type=tuition"
+                className={`relative inline-flex items-center px-1 pt-1 text-xs font-semibold uppercase tracking-wider transition-colors duration-200 group ${
+                  isLinkActive("/map?type=tuition")
+                    ? "text-emerald-400"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                <svg className="w-3.5 h-3.5 mr-1.5 text-emerald-500/80 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                </svg>
+                Find Tuition
+                {isLinkActive("/map?type=tuition") && (
+                  <motion.div
+                    layoutId="activeNavIndicator"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </Link>
+
+              <Link
+                href="/map?type=tutor"
+                className={`relative inline-flex items-center px-1 pt-1 text-xs font-semibold uppercase tracking-wider transition-colors duration-200 group ${
+                  isLinkActive("/map?type=tutor")
+                    ? "text-emerald-400"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                <svg className="w-3.5 h-3.5 mr-1.5 text-emerald-500/80 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Find Tutors
+                {isLinkActive("/map?type=tutor") && (
+                  <motion.div
+                    layoutId="activeNavIndicator"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </Link>
 
               <Link
                 href="/about"
@@ -264,97 +261,6 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
 
           {/* Right Controls */}
           <div className="flex items-center space-x-4">
-            {/* Sector Selector Dropdown Button */}
-            {/* Sector Selector Dropdown Button (Desktop Only) */}
-            {activeRole && (
-              <div className="relative hidden sm:block">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsSectorDropdownOpen(!isSectorDropdownOpen)}
-                  className="px-2 py-1 rounded-lg border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors duration-200 cursor-pointer shadow-inner flex items-center space-x-1 text-[10px] font-mono font-extrabold uppercase tracking-wider"
-                  aria-label="Change active searching sector"
-                >
-                  {activeRole === "parent" ? (
-                    <svg className="w-3 h-3 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-3 h-3 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                  )}
-                  <span>{activeRole === "parent" ? "Tutors" : "Jobs"}</span>
-                  <svg className="w-3 h-3 text-slate-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </motion.button>
-                <AnimatePresence>
-                  {isSectorDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 8 }}
-                      className="absolute right-0 mt-2 w-48 rounded-xl bg-slate-950/95 border border-slate-800/80 shadow-2xl p-1.5 z-50 flex flex-col space-y-1 backdrop-blur-xl"
-                    >
-                      <button
-                        onClick={() => {
-                          sessionStorage.setItem("userRole", "parent");
-                          setActiveRole("parent");
-                          setIsSectorDropdownOpen(false);
-                          if (window.location.pathname === "/map") {
-                            window.location.href = "/map?type=tutor";
-                          } else {
-                            window.location.reload();
-                          }
-                        }}
-                        className={`w-full px-3 py-2 rounded-lg text-left text-[10px] font-mono font-bold uppercase tracking-wider flex items-center justify-between cursor-pointer ${
-                          activeRole === "parent"
-                            ? "text-emerald-400 bg-emerald-500/10"
-                            : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-                        }`}
-                      >
-                        <span>Search Tutors</span>
-                        {activeRole === "parent" && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
-                      </button>
-                      <button
-                        onClick={() => {
-                          sessionStorage.setItem("userRole", "tutor");
-                          setActiveRole("tutor");
-                          setIsSectorDropdownOpen(false);
-                          if (window.location.pathname === "/map") {
-                            window.location.href = "/map?type=tuition";
-                          } else {
-                            window.location.reload();
-                          }
-                        }}
-                        className={`w-full px-3 py-2 rounded-lg text-left text-[10px] font-mono font-bold uppercase tracking-wider flex items-center justify-between cursor-pointer ${
-                          activeRole === "tutor"
-                            ? "text-indigo-400 bg-indigo-500/10"
-                            : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-                        }`}
-                      >
-                        <span>Search Jobs</span>
-                        {activeRole === "tutor" && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
-                      </button>
-                      <div className="h-px bg-slate-900 my-1" />
-                      <button
-                        onClick={() => {
-                          sessionStorage.removeItem("userRole");
-                          setActiveRole(undefined);
-                          setIsSectorDropdownOpen(false);
-                          window.location.href = "/";
-                        }}
-                        className="w-full px-3 py-2 rounded-lg text-left text-[10px] font-mono font-bold uppercase tracking-wider text-red-400 hover:text-red-300 hover:bg-red-500/5 cursor-pointer"
-                      >
-                        Reset Role
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
 
             {/* Theme Toggle Button (Desktop Only) */}
             <motion.button
@@ -378,7 +284,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
             </motion.button>
 
             {/* Session Controls (Desktop-Only) */}
-            {session && (
+            {session ? (
               <div className="hidden sm:flex items-center space-x-4">
                 <Link
                   href="/dashboard"
@@ -399,6 +305,21 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 >
                   Sign Out
                 </motion.button>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center space-x-3">
+                <Link
+                  href="/login"
+                  className="text-xs font-mono uppercase tracking-wider font-extrabold px-3.5 py-2 text-slate-400 hover:text-slate-200 transition-colors duration-200 cursor-pointer"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/register"
+                  className="bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-sans font-black tracking-wider uppercase px-4 py-2 rounded-xl text-xs hover:brightness-110 shadow-[0_4px_12px_rgba(16,185,129,0.15)] transition-all cursor-pointer border-none"
+                >
+                  Sign Up
+                </Link>
               </div>
             )}
 

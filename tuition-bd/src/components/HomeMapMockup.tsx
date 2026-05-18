@@ -11,6 +11,8 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
   const [logs, setLogs] = useState<string[]>([]);
   const [paymentState, setPaymentState] = useState<"locked" | "processing" | "unlocked">("locked");
   const [unlockedDetails, setUnlockedDetails] = useState(false);
+  const [internalRole, setInternalRole] = useState<"parent" | "tutor">("parent");
+  const currentRole = selectedRole || internalRole;
 
   // Dynamic Console Logs simulation
   useEffect(() => {
@@ -18,7 +20,7 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
     setPaymentState("locked");
     setUnlockedDetails(false);
 
-    const initialLogs = selectedRole === "parent"
+    const initialLogs = currentRole === "parent"
       ? [
           "⚙ Onboarding Sector Alpha complete...",
           "🛰 Accessing secure parent portal console...",
@@ -28,7 +30,7 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
           "🛰 Connecting to secure coordinate network...",
         ];
 
-    const logsSequence = selectedRole === "parent"
+    const logsSequence = currentRole === "parent"
       ? [
           "📡 Scanning Dhaka sectors for verified tutors...",
           "🔍 Filter matches active: Banani, O/A Levels...",
@@ -57,18 +59,18 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
     }, 2500);
 
     return () => clearInterval(interval);
-  }, [selectedRole]);
+  }, [currentRole]);
 
   const triggerUnlock = () => {
     setPaymentState("processing");
-    const initMessage = selectedRole === "parent"
+    const initMessage = currentRole === "parent"
       ? "💳 Initiating parent credential screening..."
       : "💳 Initializing bKash payment gateway...";
 
     setLogs((prev) => [...prev, initMessage]);
 
     setTimeout(() => {
-      const stepMessage = selectedRole === "parent"
+      const stepMessage = currentRole === "parent"
         ? "🔑 Credentials accepted. Running matching algorithms..."
         : "💸 BDT 100.00 debit complete. Syncing ledger...";
       setLogs((prev) => [...prev, stepMessage]);
@@ -77,7 +79,7 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
     setTimeout(() => {
       setPaymentState("unlocked");
       setUnlockedDetails(true);
-      const successLogs = selectedRole === "parent"
+      const successLogs = currentRole === "parent"
         ? [
             "✓ ALGORITHMS SYNCED. Secured direct coordination link.",
             "🔓 Fahim Rahman's coordinates and schedule successfully unlocked!",
@@ -107,10 +109,10 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
             Platform Capabilities Showcase
           </div>
           <h2 className="text-3xl md:text-5xl font-extrabold font-heading text-[var(--foreground)] tracking-tight">
-            {selectedRole === "parent" ? "Tutor Coordinate Matcher" : "Tactical Map Coordinate Lock"}
+            {currentRole === "parent" ? "Tutor Coordinate Matcher" : "Tactical Map Coordinate Lock"}
           </h2>
           <p className="text-[var(--muted)] text-sm md:text-base font-sans">
-            {selectedRole === "parent"
+            {currentRole === "parent"
               ? "Parents can scan approximate verified educator markers on the radar scan console, toggle sector listings, and securely unlock matching schedules."
               : "Tutors can browse approximate match fields, pay a secure BDT 100 fee via bKash, and immediately unlock precision coordinates on the mapping console."}
           </p>
@@ -203,9 +205,40 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
             {/* Interactive Payment Switch Panel */}
             <div className="glass-card rounded-2xl p-6 border border-slate-800/80 flex flex-col justify-between">
               <div>
-                <span className="text-[10px] font-mono text-[var(--muted)] uppercase tracking-widest">Operations Switch</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-[var(--muted)] uppercase tracking-widest">Operations Switch</span>
+                  {/* Small inline switcher when no role is fixed */}
+                  {!selectedRole && (
+                    <div className="flex bg-slate-950 border border-slate-800 p-0.5 rounded-lg text-[9px] font-mono">
+                      <button
+                        onClick={() => {
+                          setInternalRole("parent");
+                          setPaymentState("locked");
+                          setUnlockedDetails(false);
+                        }}
+                        className={`px-2.5 py-1 rounded-md transition-colors border-none bg-transparent cursor-pointer ${
+                          internalRole === "parent" ? "bg-emerald-500/10 text-emerald-400 font-bold" : "text-slate-500 hover:text-slate-300"
+                        }`}
+                      >
+                        Parent
+                      </button>
+                      <button
+                        onClick={() => {
+                          setInternalRole("tutor");
+                          setPaymentState("locked");
+                          setUnlockedDetails(false);
+                        }}
+                        className={`px-2.5 py-1 rounded-md transition-colors border-none bg-transparent cursor-pointer ${
+                          internalRole === "tutor" ? "bg-indigo-500/10 text-indigo-400 font-bold" : "text-slate-500 hover:text-slate-300"
+                        }`}
+                      >
+                        Tutor
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <h3 className="text-lg font-bold font-heading text-[var(--foreground)] mt-0.5">
-                  {selectedRole === "parent" ? "Mock Credential Screener" : "Mock Coordinate Unlocker"}
+                  {currentRole === "parent" ? "Mock Credential Screener" : "Mock Coordinate Unlocker"}
                 </h3>
               </div>
 
@@ -215,12 +248,12 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
                     whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(16,185,129,0.3)" }}
                     whileTap={{ scale: 0.98 }}
                     onClick={triggerUnlock}
-                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3.5 rounded-xl text-sm transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2"
+                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3.5 rounded-xl text-sm transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2 border-none"
                   >
                     <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    {selectedRole === "parent" ? "Verify Credentials & Map Roster" : "Simulate bKash Unlock (BDT 100)"}
+                    {currentRole === "parent" ? "Verify Credentials & Map Roster" : "Simulate bKash Unlock (BDT 100)"}
                   </motion.button>
                 )}
 
@@ -228,7 +261,7 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
                   <div className="w-full bg-slate-900 border border-slate-800 py-3.5 rounded-xl text-sm text-slate-300 flex items-center justify-center space-x-2">
                     <div className="animate-spin h-4.5 w-4.5 border-2 border-emerald-500 border-t-transparent rounded-full" />
                     <span className="font-mono text-xs uppercase tracking-wider">
-                      {selectedRole === "parent" ? "Screening Parent Credentials..." : "Processing bKash Checkout..."}
+                      {currentRole === "parent" ? "Screening Parent Credentials..." : "Processing bKash Checkout..."}
                     </span>
                   </div>
                 )}
@@ -238,7 +271,7 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
                     <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    {selectedRole === "parent" ? "✓ Roster Mapping Unlocked" : "✓ Exact Target Unlocked"}
+                    {currentRole === "parent" ? "✓ Roster Mapping Unlocked" : "✓ Exact Target Unlocked"}
                   </div>
                 )}
               </div>

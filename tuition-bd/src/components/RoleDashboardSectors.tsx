@@ -4,10 +4,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 interface RoleDashboardSectorsProps {
-  selectedRole: "parent" | "tutor";
+  selectedRole?: "parent" | "tutor";
+  onSelectRole?: (role: "parent" | "tutor") => void;
 }
 
-export default function RoleDashboardSectors({ selectedRole }: RoleDashboardSectorsProps) {
+export default function RoleDashboardSectors({ selectedRole, onSelectRole }: RoleDashboardSectorsProps) {
+  const currentRole = selectedRole || "parent";
+
   const containerVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -36,7 +39,8 @@ export default function RoleDashboardSectors({ selectedRole }: RoleDashboardSect
       animate="visible"
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 z-10 relative"
     >
-      {selectedRole === "parent" ? (
+
+      {currentRole === "parent" ? (
         /* ================= PARENT PORTAL VIEW ================= */
         <div className="space-y-12">
           {/* Header */}

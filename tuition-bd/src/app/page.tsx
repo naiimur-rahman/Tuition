@@ -4,26 +4,26 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import HomeMapMockup from "@/components/HomeMapMockup";
-import OnboardingGateway from "@/components/OnboardingGateway";
 import RoleDashboardSectors from "@/components/RoleDashboardSectors";
 import MapPreviewIntro from "@/components/MapPreviewIntro";
-import FrontPageAdditions from "@/components/FrontPageAdditions";
 
 export default function Home() {
   const [selectedRole, setSelectedRole] = useState<"parent" | "tutor" | undefined>(undefined);
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const savedRole = sessionStorage.getItem("userRole");
     if (savedRole === "parent" || savedRole === "tutor") {
       setSelectedRole(savedRole);
-      setShowIntro(false); // Skip intro if user role is already active
-    } else {
-      setShowIntro(true); // Always display the premium matching intro animation if no role is active
     }
     setIsLoading(false);
   }, []);
+
+  const handleSelectRole = (role: "parent" | "tutor") => {
+    setSelectedRole(role);
+    sessionStorage.setItem("userRole", role);
+  };
 
   const handleResetRole = () => {
     sessionStorage.removeItem("userRole");
@@ -43,28 +43,26 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 flex flex-col relative">
-      {/* Animated Satellite Map Preview Onboarding Intro */}
+      <Navbar selectedRole={selectedRole} />
+      
+      <Hero 
+        selectedRole={selectedRole} 
+        onSelectRole={handleSelectRole}
+        onTriggerDemo={() => setShowIntro(true)}
+      />
+      
+      <RoleDashboardSectors 
+        selectedRole={selectedRole} 
+        onSelectRole={handleSelectRole}
+      />
+      
+      <HomeMapMockup selectedRole={selectedRole} />
+
+      {/* Animated Satellite Map Preview Onboarding Intro Overlay */}
       {showIntro && (
-        <MapPreviewIntro onComplete={() => {
-          setShowIntro(false);
-          sessionStorage.setItem("mapIntroPlayed", "true");
-        }} />
-      )}
-
-      {/* Onboarding gateway prompt */}
-      {!showIntro && !selectedRole && (
-        <OnboardingGateway onSelectRole={(role) => setSelectedRole(role)} />
-      )}
-
-      {!showIntro && selectedRole && (
-        <>
-          <Navbar selectedRole={selectedRole} />
-          <Hero selectedRole={selectedRole} />
-          <RoleDashboardSectors selectedRole={selectedRole} />
-          <HomeMapMockup selectedRole={selectedRole} />
-
-        </>
+        <MapPreviewIntro onComplete={() => setShowIntro(false)} />
       )}
     </div>
   );
 }
+

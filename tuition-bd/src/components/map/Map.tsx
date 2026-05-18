@@ -447,7 +447,7 @@ export default function MapComponent({
                         <>
                           <span>Tutor Profile</span>
                           <span className="select-none pointer-events-none filter blur-[4.5px] bg-slate-950 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-mono leading-none border border-slate-800/60 inline-block">
-                            undefined
+                            {item.name}
                           </span>
                         </>
                       ) : (
