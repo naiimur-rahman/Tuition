@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import Navbar from "@/components/Navbar";
+import NavbarWrapper from "@/components/NavbarWrapper";
 import FrontPageAdditions from "@/components/FrontPageAdditions";
 
 export default function AboutPage() {
@@ -26,7 +26,7 @@ export default function AboutPage() {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
 
-      <Navbar />
+      <NavbarWrapper />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 mt-12 sm:mt-20">
         {/* Page Header */}

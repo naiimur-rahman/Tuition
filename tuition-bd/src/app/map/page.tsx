@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import Navbar from "@/components/Navbar";
+import NavbarWrapper from "@/components/NavbarWrapper";
 import dynamic from "next/dynamic";
 
 const MapComponent = dynamic(() => import("@/components/map/Map"), {
@@ -70,7 +70,40 @@ function MapSearchContent() {
         {/* Left Control Panel / Stacked Sidebar Cards */}
         <div className="lg:col-span-1 space-y-6">
           
-          {/* Card 1: Proximity Radius & Live Metrics */}
+          {/* Card 1: Map Navigation Guide */}
+          <div className="glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 space-y-4 transition-all duration-300">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-pink-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-[10px] font-mono text-white uppercase tracking-wider font-extrabold">
+                Navigation Guide
+              </span>
+            </div>
+            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
+            <div className="space-y-3 text-[11px] text-slate-400 leading-relaxed font-sans">
+              <div className="flex gap-2">
+                <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">1</span>
+                <p>
+                  <strong className="text-slate-300">Pan & Zoom:</strong> Drag maps or scroll to inspect target neighborhoods.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">2</span>
+                <p>
+                  <strong className="text-slate-300">Pulsing Beacons:</strong> Click on {type === "tutor" ? "green verified educators" : "purple jobs"} inside the {searchRadius} km radius.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">3</span>
+                <p>
+                  <strong className="text-slate-300">Details & Apply:</strong> Inspect credentials and apply directly from the popup.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Proximity Radius & Live Metrics */}
           <div className="glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 space-y-4 transition-all duration-300">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-extrabold">
@@ -137,39 +170,6 @@ function MapSearchContent() {
                   <span>Green: Verified Tutors Directory</span>
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Card 2: Map Navigation Guide */}
-          <div className="glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 space-y-4 transition-all duration-300">
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-pink-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-[10px] font-mono text-white uppercase tracking-wider font-extrabold">
-                Navigation Guide
-              </span>
-            </div>
-            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
-            <div className="space-y-3 text-[11px] text-slate-400 leading-relaxed font-sans">
-              <div className="flex gap-2">
-                <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">1</span>
-                <p>
-                  <strong className="text-slate-300">Pan & Zoom:</strong> Drag maps or scroll to inspect target neighborhoods.
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">2</span>
-                <p>
-                  <strong className="text-slate-300">Pulsing Beacons:</strong> Click on {type === "tutor" ? "green verified educators" : "purple jobs"} inside the {searchRadius} km radius.
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">3</span>
-                <p>
-                  <strong className="text-slate-300">Details & Apply:</strong> Inspect credentials and apply directly from the popup.
-                </p>
-              </div>
             </div>
           </div>
 
@@ -312,7 +312,7 @@ function MapSearchContent() {
 export default function MapPage() {
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 flex flex-col relative">
-      <Navbar />
+      <NavbarWrapper />
       <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading spatial datasets...</div>}>
         <MapSearchContent />
       </Suspense>

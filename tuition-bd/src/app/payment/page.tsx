@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
+import NavbarWrapper from "@/components/NavbarWrapper";
 
 function PaymentContent() {
   const searchParams = useSearchParams();
@@ -254,7 +254,7 @@ function PaymentContent() {
 export default function StandalonePayment() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col animate-fade-in">
-      <Navbar />
+      <NavbarWrapper />
       <div className="flex-grow flex items-center justify-center p-4">
         <Suspense fallback={<div className="text-slate-400">Loading details...</div>}>
           <PaymentContent />

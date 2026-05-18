@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
+import NavbarWrapper from "@/components/NavbarWrapper";
 import Hero from "@/components/Hero";
 import HomeMapMockup from "@/components/HomeMapMockup";
 import RoleDashboardSectors from "@/components/RoleDashboardSectors";
@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 flex flex-col relative">
-      <Navbar selectedRole={selectedRole} />
+      <NavbarWrapper selectedRole={selectedRole} />
       
       <Hero 
         selectedRole={selectedRole} 

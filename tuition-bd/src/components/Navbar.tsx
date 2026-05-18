@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface NavbarProps {
@@ -19,14 +19,8 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSectorDropdownOpen, setIsSectorDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [currentType, setCurrentType] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      setCurrentType(params.get("type"));
-    }
-  }, [pathname]);
+  const searchParams = useSearchParams();
+  const currentType = searchParams ? searchParams.get("type") : (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("type") : null);
 
   const isLinkActive = (href: string) => {
     if (href.includes("?")) {
