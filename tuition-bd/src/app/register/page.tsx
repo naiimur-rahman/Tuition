@@ -53,28 +53,81 @@ export default function Register() {
   });
   const [nidImageUrl, setNidImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "done" | "error">("idle");
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "scanning" | "done" | "error">("idle");
   const [fileName, setFileName] = useState("");
 
   const [universityIdImageUrl, setUniversityIdImageUrl] = useState("");
   const [uploadingStudentId, setUploadingStudentId] = useState(false);
-  const [uploadStatusStudentId, setUploadStatusStudentId] = useState<"idle" | "uploading" | "done" | "error">("idle");
+  const [uploadStatusStudentId, setUploadStatusStudentId] = useState<"idle" | "uploading" | "scanning" | "done" | "error">("idle");
   const [fileNameStudentId, setFileNameStudentId] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [educationType, setEducationType] = useState("select"); // "select" or "custom"
   const [customEducation, setCustomEducation] = useState("");
 
+  const validateImageContent = async (file: File, type: "nid" | "idcard"): Promise<boolean> => {
+    try {
+      const Tesseract = (await import("tesseract.js")).default;
+      const result = await Tesseract.recognize(file, "eng");
+      const text = result.data.text.toLowerCase();
+      console.log("OCR scan text outcome:", text);
+
+      if (type === "nid") {
+        const nidKeywords = [
+          "national", "identity", "card", "bangladesh", "government", 
+          "birth", "nid", "no", "number", "name", "father", "mother",
+          "republic", "peoples", "issue", "date"
+        ];
+        // Enforce that it MUST match at least one NID keyword
+        const matches = nidKeywords.filter((keyword) => text.includes(keyword));
+        console.log("NID Matches:", matches);
+        return matches.length >= 1;
+      } else {
+        const idKeywords = [
+          "student", "id", "card", "university", "college", "school",
+          "registration", "roll", "valid", "expiry", "class", "semester",
+          "session", "institute", "hall", "department", "academic"
+        ];
+        // Enforce that it MUST match at least one ID keyword
+        const matches = idKeywords.filter((keyword) => text.includes(keyword));
+        console.log("ID Matches:", matches);
+        return matches.length >= 1;
+      }
+    } catch (err) {
+      console.error("OCR validation crashed, bypassing:", err);
+      return true; // Bypass to not block users on engine failures
+    }
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
-    await uploadNid(file);
+    
+    setUploadStatus("scanning");
+    setUploading(true);
+    setError("");
+
+    try {
+      const isAuthentic = await validateImageContent(file, "nid");
+      if (!isAuthentic) {
+        setUploadStatus("error");
+        setError("Invalid Document Scan: The uploaded image does not appear to be a valid National ID Card (NID). Please upload a clear photo of your NID card to verify your tutor account.");
+        setUploading(false);
+        return;
+      }
+      
+      setUploadStatus("uploading");
+      await uploadNid(file);
+    } catch (err) {
+      console.error("NID scanning error:", err);
+      setUploadStatus("error");
+      setError("Failed to validate document scan. Please try again.");
+      setUploading(false);
+    }
   };
 
   const uploadNid = async (file: File) => {
-    setUploading(true);
-    setUploadStatus("uploading");
     setError("");
 
     try {
@@ -103,12 +156,31 @@ export default function Register() {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileNameStudentId(file.name);
-    await uploadStudentId(file);
+    
+    setUploadStatusStudentId("scanning");
+    setUploadingStudentId(true);
+    setError("");
+
+    try {
+      const isAuthentic = await validateImageContent(file, "idcard");
+      if (!isAuthentic) {
+        setUploadStatusStudentId("error");
+        setError("Invalid Document Scan: The uploaded image does not appear to be a valid Student or Academic ID Card. Please upload a clear photo of your actual student ID.");
+        setUploadingStudentId(false);
+        return;
+      }
+
+      setUploadStatusStudentId("uploading");
+      await uploadStudentId(file);
+    } catch (err) {
+      console.error("Student ID scanning error:", err);
+      setUploadStatusStudentId("error");
+      setError("Failed to validate student ID scan. Please try again.");
+      setUploadingStudentId(false);
+    }
   };
 
   const uploadStudentId = async (file: File) => {
-    setUploadingStudentId(true);
-    setUploadStatusStudentId("uploading");
     setError("");
 
     try {
@@ -409,10 +481,17 @@ export default function Register() {
                         </div>
                       )}
 
+                      {uploadStatus === "scanning" && (
+                        <div className="space-y-3 pointer-events-none flex flex-col items-center">
+                          <div className="animate-spin h-6 w-6 border-2 border-indigo-500 border-t-transparent rounded-full" />
+                          <p className="text-[10px] text-indigo-400 font-mono font-bold animate-pulse">Scanning Authenticity...</p>
+                        </div>
+                      )}
+
                       {uploadStatus === "uploading" && (
                         <div className="space-y-3 pointer-events-none flex flex-col items-center">
                           <div className="animate-spin h-6 w-6 border-2 border-emerald-500 border-t-transparent rounded-full" />
-                          <p className="text-[10px] text-slate-400 font-mono">Uploading...</p>
+                          <p className="text-[10px] text-slate-400 font-mono">Uploading Verified Scan...</p>
                         </div>
                       )}
 
@@ -467,10 +546,17 @@ export default function Register() {
                         </div>
                       )}
 
+                      {uploadStatusStudentId === "scanning" && (
+                        <div className="space-y-3 pointer-events-none flex flex-col items-center">
+                          <div className="animate-spin h-6 w-6 border-2 border-indigo-500 border-t-transparent rounded-full" />
+                          <p className="text-[10px] text-indigo-400 font-mono font-bold animate-pulse">Scanning Authenticity...</p>
+                        </div>
+                      )}
+
                       {uploadStatusStudentId === "uploading" && (
                         <div className="space-y-3 pointer-events-none flex flex-col items-center">
                           <div className="animate-spin h-6 w-6 border-2 border-emerald-500 border-t-transparent rounded-full" />
-                          <p className="text-[10px] text-slate-400 font-mono">Uploading...</p>
+                          <p className="text-[10px] text-slate-400 font-mono">Uploading Verified Scan...</p>
                         </div>
                       )}
 

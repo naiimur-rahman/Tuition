@@ -21,7 +21,16 @@ export default function Hero({ selectedRole }: HeroProps) {
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [typingSpeed, setTypingSpeed] = useState(100);
+  const [isMobile, setIsMobile] = useState(true);
  
+  // Detect mobile screens to disable expensive blur animations
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Reset typewriter when user changes their role dynamically
   useEffect(() => {
     setCurrentWordIndex(0);
@@ -30,14 +39,6 @@ export default function Hero({ selectedRole }: HeroProps) {
   }, [selectedRole]);
  
   useEffect(() => {
-    // Hold typewriter initialization until the user selects a tactical workspace role
-    if (!selectedRole) {
-      if (currentText !== "") {
-        setCurrentText("");
-      }
-      return;
-    }
-
     let timer: NodeJS.Timeout;
     const handleType = () => {
       if (words.length === 0) return;
@@ -91,7 +92,7 @@ export default function Hero({ selectedRole }: HeroProps) {
       {/* Background Decorative Glowing Blobs */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <motion.div
-          animate={{
+          animate={isMobile ? undefined : {
             x: [0, 40, -20, 0],
             y: [0, -50, 30, 0],
             scale: [1, 1.15, 0.9, 1],
@@ -104,7 +105,7 @@ export default function Hero({ selectedRole }: HeroProps) {
           className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full filter blur-[100px]"
         />
         <motion.div
-          animate={{
+          animate={isMobile ? undefined : {
             x: [0, -30, 40, 0],
             y: [0, 60, -40, 0],
             scale: [1, 0.9, 1.1, 1],

@@ -61,6 +61,12 @@ export default function AdminDashboard() {
   const [loadingAllProfiles, setLoadingAllProfiles] = useState(false);
   const [blacklisted, setBlacklisted] = useState<any[]>([]);
   const [loadingBlacklist, setLoadingBlacklist] = useState(false);
+  const [previewDocuments, setPreviewDocuments] = useState<{
+    nid: string | null;
+    idCard: string | null;
+    name: string;
+    profileId: string;
+  } | null>(null);
 
   // Interaction tracking state hooks
   const [expandedMapProfileId, setExpandedMapProfileId] = useState<string | null>(null);
@@ -492,6 +498,22 @@ export default function AdminDashboard() {
                       <p className="italic">
                         <strong className="text-slate-300 not-italic">Bio:</strong> "{profile.bio || "No biography loaded."}"
                       </p>
+                      {(profile.nidImageUrl || profile.universityIdImageUrl) && (
+                        <div className="pt-2">
+                          <button
+                            type="button"
+                            onClick={() => setPreviewDocuments({
+                              nid: profile.nidImageUrl,
+                              idCard: profile.universityIdImageUrl,
+                              name: profile.user?.name || "Educator",
+                              profileId: profile.id
+                            })}
+                            className="bg-slate-900 hover:bg-slate-850 text-[10px] text-slate-300 border border-slate-850 px-2.5 py-1.5 rounded-lg font-mono uppercase font-bold tracking-wider cursor-pointer"
+                          >
+                            🔍 Inspect Document Scans
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -664,37 +686,20 @@ export default function AdminDashboard() {
                             </p>
                           </div>
 
-                          {/* Dual Scan Inspections links */}
-                          <div className="grid grid-cols-2 gap-3 pt-2">
-                            {profile.nidImageUrl ? (
-                              <a
-                                href={profile.nidImageUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center space-x-1.5 bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 py-2 rounded-xl text-[10px] font-bold font-mono uppercase tracking-wider transition duration-200"
-                              >
-                                📂 Inspect NID
-                              </a>
-                            ) : (
-                              <span className="flex items-center justify-center bg-slate-900/20 text-slate-600 border border-slate-900 py-2 rounded-xl text-[10px] font-bold font-mono uppercase tracking-wider cursor-not-allowed">
-                                🚫 No NID Scan
-                              </span>
-                            )}
-
-                            {profile.universityIdImageUrl ? (
-                              <a
-                                href={profile.universityIdImageUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center space-x-1.5 bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 py-2 rounded-xl text-[10px] font-bold font-mono uppercase tracking-wider transition duration-200"
-                              >
-                                🎓 Inspect Student ID
-                              </a>
-                            ) : (
-                              <span className="flex items-center justify-center bg-slate-900/20 text-slate-600 border border-slate-900 py-2 rounded-xl text-[10px] font-bold font-mono uppercase tracking-wider cursor-not-allowed">
-                                🚫 No Student ID
-                              </span>
-                            )}
+                          {/* Premium Document Preview Trigger */}
+                          <div className="pt-2">
+                            <button
+                              type="button"
+                              onClick={() => setPreviewDocuments({
+                                nid: profile.nidImageUrl,
+                                idCard: profile.universityIdImageUrl,
+                                name: profile.user?.name || "Educator",
+                                profileId: profile.id
+                              })}
+                              className="w-full flex items-center justify-center space-x-2 bg-slate-900 hover:bg-slate-850 text-slate-200 border border-slate-800 py-2.5 rounded-xl text-xs font-bold font-mono uppercase tracking-wider transition duration-200 cursor-pointer"
+                            >
+                              🔍 Preview Uploaded Documents
+                            </button>
                           </div>
                         </div>
 
@@ -1099,6 +1104,116 @@ export default function AdminDashboard() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* PREMIUM HIGH-FIDELITY DOCUMENT PREVIEW MODAL */}
+      <AnimatePresence>
+        {previewDocuments && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md animate-fadeIn">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="glass-card border border-slate-800 p-6 md:p-8 rounded-3xl max-w-5xl w-full scale-100 shadow-2xl space-y-6 relative bg-slate-950 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Document Credentials Audit: {previewDocuments.name}</h3>
+                  <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">
+                    Inspect uploaded scans side-by-side to authenticate profile accuracy
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDocuments(null)}
+                  className="text-slate-400 hover:text-white bg-slate-900 border border-slate-800 p-2 rounded-xl transition duration-200 cursor-pointer text-xs"
+                >
+                  ✕ Close
+                </button>
+              </div>
+              
+              <div className="h-px bg-slate-800/80" />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* NID Document */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1.5">
+                    🪪 National ID Card (NID)
+                  </h4>
+                  <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-2.5 flex items-center justify-center min-h-[300px] overflow-hidden relative group">
+                    {previewDocuments.nid ? (
+                      <img
+                        src={previewDocuments.nid}
+                        alt="National ID Card"
+                        className="max-h-[350px] object-contain rounded-xl shadow-lg border border-slate-800 hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="text-center text-xs text-slate-655 space-y-1">
+                        <span>🚫</span>
+                        <p>No NID Uploaded</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Student ID Document */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold flex items-center gap-1.5">
+                    🎓 Student ID / Academic ID
+                  </h4>
+                  <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-2.5 flex items-center justify-center min-h-[300px] overflow-hidden relative group">
+                    {previewDocuments.idCard ? (
+                      <img
+                        src={previewDocuments.idCard}
+                        alt="Student ID Card"
+                        className="max-h-[350px] object-contain rounded-xl shadow-lg border border-slate-800 hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="text-center text-xs text-slate-655 space-y-1">
+                        <span>🚫</span>
+                        <p>No Student ID Uploaded</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action buttons inside document viewer to speed up workflow */}
+              <div className="flex space-x-3 pt-3 border-t border-slate-900 justify-end">
+                {pendingProfiles.some((p) => p.id === previewDocuments.profileId) && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleVerify(previewDocuments.profileId, "VERIFIED");
+                        setPreviewDocuments(null);
+                      }}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-6 py-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2"
+                    >
+                      ✓ Approve Tutor
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRejectionPromptProfileId(previewDocuments.profileId);
+                        setPreviewDocuments(null);
+                      }}
+                      className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-6 py-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer"
+                    >
+                      ✕ Reject Tutor
+                    </button>
+                  </>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setPreviewDocuments(null)}
+                  className="bg-slate-900 hover:bg-slate-850 text-slate-400 border border-slate-800 px-6 py-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer"
+                >
+                  Close Viewer
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
