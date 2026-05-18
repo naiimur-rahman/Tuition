@@ -18,7 +18,7 @@ export default function RoleDashboardSectors({ selectedRole }: RoleDashboardSect
         delayChildren: 0.1,
       },
     },
-  };
+  } as const;
 
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -27,7 +27,7 @@ export default function RoleDashboardSectors({ selectedRole }: RoleDashboardSect
       y: 0,
       transition: { type: "spring", stiffness: 100, damping: 15 },
     },
-  };
+  } as const;
 
   return (
     <motion.div
