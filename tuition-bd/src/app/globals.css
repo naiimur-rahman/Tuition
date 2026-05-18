@@ -180,6 +180,10 @@ h1, h2, h3, h4, h5, h6 {
   color: #10b981 !important;
 }
 
+.leaflet-popup {
+  z-index: 2000 !important;
+}
+
 .leaflet-popup-content-wrapper {
   background: rgba(15, 23, 42, 0.85) !important;
   backdrop-filter: blur(12px) !important;

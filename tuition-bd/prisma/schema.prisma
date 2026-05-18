@@ -38,6 +38,8 @@ model Profile {
   address             String?
   bio                 String?
   education           String?
+  pendingBio          String?
+  pendingEducation    String?
   verificationStatus  String   @default("UNVERIFIED") // UNVERIFIED, PENDING, VERIFIED, REJECTED
   nidImageUrl         String?
   universityIdImageUrl String?
@@ -97,6 +99,7 @@ model Payment {
   trxId         String?  @unique
   jobId         String
   job           TuitionJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  tutorId       String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }

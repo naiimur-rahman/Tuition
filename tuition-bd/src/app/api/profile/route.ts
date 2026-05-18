@@ -74,7 +74,12 @@ export async function GET(request: Request) {
           tutor: {
             select: {
               id: true,
-              name: true,
+              profile: {
+                select: {
+                  tutorSeq: true,
+                  education: true,
+                },
+              },
             },
           },
         },
@@ -85,7 +90,8 @@ export async function GET(request: Request) {
         if (job.tutor) {
           assignedTutorsMap.set(job.tutor.id, {
             id: job.tutor.id,
-            name: job.tutor.name,
+            tutorSeq: job.tutor.profile?.tutorSeq || 1,
+            education: job.tutor.profile?.education || "Not specified",
             jobTitle: job.title,
           });
         }
@@ -101,6 +107,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       ...(profile || {}),
+      bio: profile?.pendingBio || profile?.bio || null,
+      education: profile?.pendingEducation || profile?.education || null,
       ...extraData,
     });
   } catch (error) {
@@ -151,31 +159,53 @@ export async function POST(request: Request) {
       approxLongitude = longitude + (Math.random() - 0.5) * 0.008;
     }
 
+    const existingProfile = await prisma.profile.findUnique({
+      where: { userId: userId },
+    });
+
+    const isCurrentlyVerified = existingProfile?.verificationStatus === "VERIFIED";
+
+    let createData: any = {
+      userId,
+      phone: phone || null,
+      address: address || null,
+      bio: bio || null,
+      education: education || null,
+      latitude: latitude || 23.8103,
+      longitude: longitude || 90.4125,
+      approxLatitude: approxLatitude || 23.8103,
+      approxLongitude: approxLongitude || 90.4125,
+      actualLatitude,
+      actualLongitude,
+    };
+
+    let updateData: any = {
+      phone: phone !== undefined ? phone : undefined,
+      address: address !== undefined ? address : undefined,
+      ...(latitude !== undefined ? { latitude, longitude, approxLatitude, approxLongitude } : {}),
+      ...(actualLatitude !== undefined ? { actualLatitude, actualLongitude } : {}),
+    };
+
+    if (isCurrentlyVerified) {
+      if (bio !== undefined && bio !== existingProfile.bio) {
+        updateData.pendingBio = bio;
+        updateData.verificationStatus = "PENDING";
+      }
+      if (education !== undefined && education !== existingProfile.education) {
+        updateData.pendingEducation = education;
+        updateData.verificationStatus = "PENDING";
+      }
+    } else {
+      if (bio !== undefined) updateData.bio = bio;
+      if (education !== undefined) updateData.education = education;
+    }
+
     const profile = await prisma.profile.upsert({
       where: {
         userId: userId,
       },
-      create: {
-        userId,
-        phone: phone || null,
-        address: address || null,
-        bio: bio || null,
-        education: education || null,
-        latitude: latitude || 23.8103,
-        longitude: longitude || 90.4125,
-        approxLatitude: approxLatitude || 23.8103,
-        approxLongitude: approxLongitude || 90.4125,
-        actualLatitude,
-        actualLongitude,
-      },
-      update: {
-        phone: phone !== undefined ? phone : undefined,
-        address: address !== undefined ? address : undefined,
-        bio: bio !== undefined ? bio : undefined,
-        education: education !== undefined ? education : undefined,
-        ...(latitude !== undefined ? { latitude, longitude, approxLatitude, approxLongitude } : {}),
-        ...(actualLatitude !== undefined ? { actualLatitude, actualLongitude } : {}),
-      },
+      create: createData,
+      update: updateData,
     });
 
     return NextResponse.json(profile);

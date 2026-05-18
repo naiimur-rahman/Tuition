@@ -15,6 +15,9 @@ export async function GET(request: Request) {
     const tutors = await prisma.user.findMany({
       where: {
         role: "TUTOR",
+        profile: {
+          verificationStatus: "VERIFIED",
+        },
       },
       select: {
         id: true,

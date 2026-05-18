@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import Navbar from "@/components/Navbar";
 import dynamic from "next/dynamic";
@@ -17,17 +17,23 @@ const MapComponent = dynamic(() => import("@/components/map/Map"), {
 
 function MapSearchContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const type = searchParams.get("type") || "tuition"; // 'tuition' or 'tutor'
 
-  const [subject, setSubject] = useState("All Subjects");
-  const [classLevel, setClassLevel] = useState("Any");
-  const [activeSubject, setActiveSubject] = useState("All Subjects");
-  const [activeClassLevel, setActiveClassLevel] = useState("Any");
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
+  const [activeSubjects, setActiveSubjects] = useState<string[]>([]);
+  const [activeClasses, setActiveClasses] = useState<string[]>([]);
 
   const handleApplyFilters = () => {
-    setActiveSubject(subject);
-    setActiveClassLevel(classLevel);
+    setActiveSubjects(selectedSubjects);
+    setActiveClasses(selectedClasses);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedSubjects([]);
+    setSelectedClasses([]);
+    setActiveSubjects([]);
+    setActiveClasses([]);
   };
 
   return (
@@ -59,61 +65,118 @@ function MapSearchContent() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 sm:gap-8">
         {/* Filters Sidebar */}
         <div className="lg:col-span-1 glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 h-fit space-y-6 transition-all duration-300">
-          <div>
-            <h2 className="text-lg font-bold font-heading text-[var(--foreground)] flex items-center">
-              <svg className="w-5 h-5 mr-2 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-              Search Filters
-            </h2>
-            <p className="text-xs text-[var(--muted)] mt-1 font-mono uppercase tracking-wider">Filter parameters</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold font-heading text-[var(--foreground)] flex items-center">
+                <svg className="w-5 h-5 mr-2 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                Search Filters
+              </h2>
+              <p className="text-xs text-[var(--muted)] mt-0.5 font-mono uppercase tracking-wider">Multi-Select Parameters</p>
+            </div>
+            {(selectedSubjects.length > 0 || selectedClasses.length > 0) && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="text-[10px] text-pink-400 hover:text-pink-300 font-mono font-bold uppercase transition duration-150 cursor-pointer border-none bg-transparent"
+              >
+                Reset
+              </button>
+            )}
           </div>
 
           <div className="h-px bg-slate-200/60 dark:bg-slate-800/80 transition-colors duration-300" />
 
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <label className="block text-xs font-mono uppercase tracking-wider text-[var(--foreground)] opacity-70 font-semibold">Subject</label>
-              <select
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="w-full glass-input focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
-              >
-                <option value="All Subjects" className="bg-[var(--background)] text-[var(--foreground)]">All Subjects</option>
-                <option value="Mathematics" className="bg-[var(--background)] text-[var(--foreground)]">Mathematics</option>
-                <option value="English" className="bg-[var(--background)] text-[var(--foreground)]">English</option>
-                <option value="Physics" className="bg-[var(--background)] text-[var(--foreground)]">Physics</option>
-                <option value="Chemistry" className="bg-[var(--background)] text-[var(--foreground)]">Chemistry</option>
-              </select>
+          <div className="space-y-6">
+            {/* Subjects Checkboxes */}
+            <div className="space-y-3">
+              <label className="block text-xs font-mono uppercase tracking-wider text-[var(--foreground)] opacity-75 font-bold">Subjects</label>
+              <div className="space-y-2 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar bg-slate-900/30 p-2.5 rounded-xl border border-slate-850 font-sans">
+                {[
+                  "Bangla",
+                  "English",
+                  "Mathematics",
+                  "Higher Math",
+                  "Physics",
+                  "Chemistry",
+                  "Biology",
+                  "General Science",
+                  "ICT & Computing",
+                  "Accounting",
+                  "Finance & Banking",
+                  "Business Studies",
+                  "Economics",
+                  "Social Science"
+                ].map((sub) => {
+                  const isChecked = selectedSubjects.includes(sub);
+                  return (
+                    <label key={sub} className="flex items-center space-x-2.5 text-xs text-slate-300 hover:text-white cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => {
+                          if (isChecked) {
+                            setSelectedSubjects(selectedSubjects.filter((s) => s !== sub));
+                          } else {
+                            setSelectedSubjects([...selectedSubjects, sub]);
+                          }
+                        }}
+                        className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-950 w-4 h-4 cursor-pointer transition-all"
+                      />
+                      <span>{sub}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="block text-xs font-mono uppercase tracking-wider text-[var(--foreground)] opacity-70 font-semibold">Class / Medium</label>
-              <select
-                value={classLevel}
-                onChange={(e) => setClassLevel(e.target.value)}
-                className="w-full glass-input focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
-              >
-                <option value="Any" className="bg-[var(--background)] text-[var(--foreground)]">Any</option>
-                <option value="Class 1-5 (Bangla Medium)" className="bg-[var(--background)] text-[var(--foreground)]">Class 1-5 (Bangla Medium)</option>
-                <option value="Class 6-8 (Bangla Medium)" className="bg-[var(--background)] text-[var(--foreground)]">Class 6-8 (Bangla Medium)</option>
-                <option value="O Level" className="bg-[var(--background)] text-[var(--foreground)]">O Level</option>
-                <option value="A Level" className="bg-[var(--background)] text-[var(--foreground)]">A Level</option>
-              </select>
+            {/* Class / Medium Checkboxes */}
+            <div className="space-y-3">
+              <label className="block text-xs font-mono uppercase tracking-wider text-[var(--foreground)] opacity-75 font-bold">Class / Medium</label>
+              <div className="space-y-2 max-h-[160px] overflow-y-auto pr-2 custom-scrollbar bg-slate-900/30 p-2.5 rounded-xl border border-slate-850">
+                {[
+                  "Class 1-5 (Bangla Medium)",
+                  "Class 6-8 (Bangla Medium)",
+                  "SSC (Bangla Medium)",
+                  "HSC (Bangla Medium)",
+                  "O Level",
+                  "A Level"
+                ].map((cl) => {
+                  const isChecked = selectedClasses.includes(cl);
+                  return (
+                    <label key={cl} className="flex items-center space-x-2.5 text-xs text-slate-300 hover:text-white cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => {
+                          if (isChecked) {
+                            setSelectedClasses(selectedClasses.filter((c) => c !== cl));
+                          } else {
+                            setSelectedClasses([...selectedClasses, cl]);
+                          }
+                        }}
+                        className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-slate-950 w-4 h-4 cursor-pointer transition-all"
+                      />
+                      <span>{cl}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
 
             <button
               onClick={handleApplyFilters}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.1)] flex items-center justify-center space-x-2"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm transition-all duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2"
             >
-              <span>Apply Config</span>
+              <span>Apply Filters</span>
             </button>
           </div>
         </div>
 
         {/* Map Area */}
         <div className="lg:col-span-3">
-          <MapComponent type={type} subject={activeSubject} classLevel={activeClassLevel} />
+          <MapComponent type={type} subjects={activeSubjects} classLevels={activeClasses} />
         </div>
       </div>
     </div>

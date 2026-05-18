@@ -46,13 +46,33 @@ export async function PATCH(request: Request) {
       return new NextResponse("Invalid request", { status: 400 });
     }
 
+    const currentProfile = await prisma.profile.findUnique({
+      where: { id: profileId }
+    });
+
+    const updateData: any = {
+      verificationStatus: status,
+      rejectionReason: status === "REJECTED" ? (rejectionReason || "No reason specified by administrator.") : null,
+      rejectedAt: status === "REJECTED" ? new Date() : null,
+    };
+
+    if (status === "VERIFIED" && currentProfile) {
+      if (currentProfile.pendingBio) {
+        updateData.bio = currentProfile.pendingBio;
+        updateData.pendingBio = null;
+      }
+      if (currentProfile.pendingEducation) {
+        updateData.education = currentProfile.pendingEducation;
+        updateData.pendingEducation = null;
+      }
+    } else if (status === "REJECTED" && currentProfile) {
+      updateData.pendingBio = null;
+      updateData.pendingEducation = null;
+    }
+
     const profile = await prisma.profile.update({
       where: { id: profileId },
-      data: { 
-        verificationStatus: status,
-        rejectionReason: status === "REJECTED" ? (rejectionReason || "No reason specified by administrator.") : null,
-        rejectedAt: status === "REJECTED" ? new Date() : null,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(profile);
