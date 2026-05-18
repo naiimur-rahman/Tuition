@@ -102,7 +102,7 @@ export default function Hero({ selectedRole }: HeroProps) {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full filter blur-[100px]"
+          className="hidden md:block absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full filter blur-[100px]"
         />
         <motion.div
           animate={isMobile ? undefined : {
@@ -115,7 +115,7 @@ export default function Hero({ selectedRole }: HeroProps) {
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-indigo-500/10 rounded-full filter blur-[120px]"
+          className="hidden md:block absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-indigo-500/10 rounded-full filter blur-[120px]"
         />
       </div>
 

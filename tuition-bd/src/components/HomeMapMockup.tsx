@@ -97,8 +97,8 @@ export default function HomeMapMockup({ selectedRole }: HomeMapMockupProps) {
   return (
     <section className="py-20 relative overflow-hidden bg-slate-950/20 border-y border-slate-800/20">
       {/* Dynamic Background Glow Blobs */}
-      <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-[350px] h-[350px] bg-emerald-500/5 rounded-full filter blur-[100px] pointer-events-none" />
-      <div className="absolute top-1/3 right-1/4 -translate-y-1/2 w-[300px] h-[300px] bg-indigo-500/5 rounded-full filter blur-[100px] pointer-events-none" />
+      <div className="hidden md:block absolute top-1/2 left-1/3 -translate-y-1/2 w-[350px] h-[350px] bg-emerald-500/5 rounded-full filter blur-[100px] pointer-events-none" />
+      <div className="hidden md:block absolute top-1/3 right-1/4 -translate-y-1/2 w-[300px] h-[300px] bg-indigo-500/5 rounded-full filter blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Title Block */}

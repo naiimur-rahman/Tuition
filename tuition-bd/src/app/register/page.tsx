@@ -255,7 +255,7 @@ export default function Register() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4 md:py-16 bg-slate-950 text-slate-100 relative overflow-hidden">
       {/* Background Decorative Blob */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[450px] h-[450px] bg-emerald-500/5 rounded-full filter blur-[100px] pointer-events-none" />
+      <div className="hidden md:block absolute top-1/4 left-1/2 -translate-x-1/2 w-[450px] h-[450px] bg-emerald-500/5 rounded-full filter blur-[100px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
