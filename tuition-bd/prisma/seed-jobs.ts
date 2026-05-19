@@ -35,7 +35,7 @@ async function main() {
       email: "farhana.parent@tuition-console.net",
       profile: {
         phone: "+8801711556677",
-        address: "House 12, Road 5, Dhanmondi, Dhaka",
+        address: "House 12, Road 5, Dhanmondi, Bangladesh",
         studentClass: "Class 10 (SSC)",
         hoursRequired: "1.5 Hours",
         tutorGenderPreference: "Female",
@@ -50,7 +50,7 @@ async function main() {
       email: "shafiqul.parent@tuition-console.net",
       profile: {
         phone: "+8801811223344",
-        address: "Flat 4B, Gulshan Avenue, Dhaka",
+        address: "Flat 4B, Gulshan Avenue, Bangladesh",
         studentClass: "Class 12 (HSC 2nd Year)",
         hoursRequired: "2 Hours",
         tutorGenderPreference: "Male",
@@ -65,7 +65,7 @@ async function main() {
       email: "anika.parent@tuition-console.net",
       profile: {
         phone: "+8801911445566",
-        address: "Block G, Bashundhara R/A, Dhaka",
+        address: "Block G, Bashundhara R/A, Bangladesh",
         studentClass: "Class 3",
         hoursRequired: "1 Hour",
         tutorGenderPreference: "Any",
@@ -80,7 +80,7 @@ async function main() {
       email: "kamal.parent@tuition-console.net",
       profile: {
         phone: "+8801511667788",
-        address: "Mirpur DOHS, Dhaka",
+        address: "Mirpur DOHS, Bangladesh",
         studentClass: "Admission Test",
         hoursRequired: "3+ Hours",
         tutorGenderPreference: "Male",
@@ -95,7 +95,7 @@ async function main() {
       email: "rokeya.parent@tuition-console.net",
       profile: {
         phone: "+8801611334455",
-        address: "Khilgaon Chowdhury Para, Dhaka",
+        address: "Khilgaon Chowdhury Para, Bangladesh",
         studentClass: "Nursery",
         hoursRequired: "1 Hour",
         tutorGenderPreference: "Female",
@@ -249,7 +249,7 @@ async function main() {
       profile: {
         gender: "Male",
         phone: "+8801711223344",
-        address: "Road 11, Banani, Dhaka",
+        address: "Road 11, Banani, Bangladesh",
         bio: "BUET graduate. Specialises in O/A-Level Math & Physics. 4+ years of home tutoring experience.",
         education: "B.Sc in Industrial & Production Engineering (BUET)",
         verificationStatus: "VERIFIED",
@@ -262,9 +262,9 @@ async function main() {
       profile: {
         gender: "Female",
         phone: "+8801811998877",
-        address: "Lalmatia Block D, Dhaka",
+        address: "Lalmatia Block D, Bangladesh",
         bio: "DU English Literature graduate. Expert in IELTS, SAT prep, and English-medium school syllabus.",
-        education: "BA & MA in English Literature (University of Dhaka)",
+        education: "BA & MA in English Literature (University of Bangladesh)",
         verificationStatus: "VERIFIED",
         latitude: 23.7535, longitude: 90.3654, approxLatitude: 23.7550, approxLongitude: 90.3680,
       },
@@ -275,7 +275,7 @@ async function main() {
       profile: {
         gender: "Male",
         phone: "+8801912445566",
-        address: "Bashundhara R/A Block C, Dhaka",
+        address: "Bashundhara R/A Block C, Bangladesh",
         bio: "CSE undergraduate at NSU. Passionate about ICT, Math, and Chemistry. Lab-focused teaching style.",
         education: "B.Sc in Computer Science & Engineering (North South University)",
         verificationStatus: "VERIFIED",
@@ -288,9 +288,9 @@ async function main() {
       profile: {
         gender: "Male",
         phone: "+8801511223399",
-        address: "Tejgaon near Farmgate, Dhaka",
-        bio: "MBBS student at Dhaka Medical College. Biology and Chemistry specialist for SSC/HSC standards.",
-        education: "MBBS candidate (Dhaka Medical College)",
+        address: "Tejgaon near Farmgate, Bangladesh",
+        bio: "MBBS student at Bangladesh Medical College. Biology and Chemistry specialist for SSC/HSC standards.",
+        education: "MBBS candidate (Bangladesh Medical College)",
         verificationStatus: "VERIFIED",
         latitude: 23.7555, longitude: 90.3878, approxLatitude: 23.7580, approxLongitude: 90.3900,
       },
@@ -301,7 +301,7 @@ async function main() {
       profile: {
         gender: "Female",
         phone: "+8801611001122",
-        address: "Khilgaon Area, Dhaka",
+        address: "Khilgaon Area, Bangladesh",
         bio: "Professional school teacher. Maths, Algebra, and Science coaching for Class 1–8. Caring and systematic approach.",
         education: "B.Ed in Science (National University)",
         verificationStatus: "VERIFIED",
@@ -314,9 +314,9 @@ async function main() {
       profile: {
         gender: "Male",
         phone: "+8801712334455",
-        address: "Uttara Sector 7, Dhaka",
-        bio: "Dhaka University Economics graduate. Specialises in HSC Accounting, Finance, and Business Studies.",
-        education: "BBA in Accounting (University of Dhaka)",
+        address: "Uttara Sector 7, Bangladesh",
+        bio: "Bangladesh University Economics graduate. Specialises in HSC Accounting, Finance, and Business Studies.",
+        education: "BBA in Accounting (University of Bangladesh)",
         verificationStatus: "VERIFIED",
         latitude: 23.8759, longitude: 90.3984, approxLatitude: 23.8784, approxLongitude: 90.4010,
       },

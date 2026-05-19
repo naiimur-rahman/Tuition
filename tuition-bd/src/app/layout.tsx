@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/providers/SessionProvider";
 import BackButton from "@/components/BackButton";
+import Footer from "@/components/Footer";
 
 const headingFont = Bricolage_Grotesque({
   variable: "--font-heading",
@@ -53,6 +54,7 @@ export default function RootLayout({
         <SessionProvider>
           <BackButton />
           {children}
+          <Footer />
         </SessionProvider>
       </body>
     </html>

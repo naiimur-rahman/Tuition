@@ -16,9 +16,9 @@ export default function AboutPage() {
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
           backgroundImage: `
-            radial-gradient(circle, rgba(16,185,129,0.15) 1px, transparent 1px),
-            linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
+            radial-gradient(circle, rgba(99,102,241,0.1) 1px, transparent 1px),
+            linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px)
           `,
           backgroundSize: "40px 40px, 20px 20px, 20px 20px"
         }}
@@ -35,7 +35,7 @@ export default function AboutPage() {
             Our Mission
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--foreground)] mt-4">
-            About <span className="bg-gradient-to-r from-[#10b981] via-[#06b6d4] to-[#6366f1] bg-clip-text text-transparent">Tuition Console</span>
+            About <span className="text-emerald-400">Tuition Console</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed font-sans">
             Tuition Console is the first platform in Bangladesh designed to match parents and tutors securely using state-of-the-art real-time live location.
@@ -55,7 +55,7 @@ export default function AboutPage() {
               {activeRole === "parent" && (
                 <motion.div
                   layoutId="activeRoleTab"
-                  className="absolute inset-0 bg-emerald-500/10 border border-emerald-500/30 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.15)] -z-10"
+                  className="absolute inset-0 bg-emerald-500/10 border border-emerald-500/30 rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.15)] -z-10"
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 />
               )}
@@ -94,7 +94,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {/* Feature 1: Map-Based Discovery */}
             <div className="glass-panel p-8 rounded-2xl border border-slate-800/80 bg-slate-900/30 flex gap-6">
-              <div className="flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <div className="flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_15px_rgba(99,102,241,0.1)]">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -156,7 +156,7 @@ export default function AboutPage() {
 
             {/* Feature 4: Reviews & Ratings */}
             <div className="glass-panel p-8 rounded-2xl border border-slate-800/80 bg-slate-900/30 flex gap-6">
-              <div className="flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <div className="flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 shadow-[0_0_15px_rgba(99,102,241,0.1)]">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.252.583 1.882l-3.978 2.89a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.978-2.89a1 1 0 00-1.176 0l-3.978 2.89c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118l-3.978-2.89c-.77-.63-.372-1.882.583-1.882h4.908a1 1 0 00.95-.69l1.519-4.674z" />
                 </svg>
@@ -168,6 +168,122 @@ export default function AboutPage() {
                     ? "Read authentic reviews and five-star quality ratings left by other local families to hire the most trusted and capable tutors for your children."
                     : "Receive honest feedback and five-star quality ratings from parents and students, establishing a strong academic reputation to land premium vacancies."}
                 </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Trust & Safety Framework Section */}
+        <section className="py-16 border-t border-slate-900 relative mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center max-w-5xl mx-auto">
+            {/* Left side text */}
+            <div className="lg:col-span-6 space-y-6">
+              <span className="text-[10px] tracking-[0.2em] font-mono font-extrabold uppercase bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-full">
+                Trust & Safety
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-[var(--foreground)] leading-tight">
+                Privacy First: <br />
+                <span className="text-emerald-400">
+                  How We Protect Matches
+                </span>
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-sans">
+                Tuition Console was designed with user security as our top priority. We implement privacy-first features tailored specifically for the tutoring ecosystem in Bangladesh, ensuring peace of mind for both parents and educators.
+              </p>
+              <div className="space-y-4 text-xs">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-[var(--foreground)] font-sans">Approximate Map Locations</h4>
+                    <p className="text-slate-400 mt-0.5 leading-relaxed">Exact household coordinates are strictly masked. The live search map displays randomized approximate boundaries to protect student privacy.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-[var(--foreground)] font-sans">Institutional Credentials Verification</h4>
+                    <p className="text-slate-400 mt-0.5 leading-relaxed">Tutors must submit verified university registrations or National ID cards before being permitted to apply for active positions.</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-[var(--foreground)] font-sans">Protected Contact Pipelines</h4>
+                    <p className="text-slate-400 mt-0.5 leading-relaxed">Direct phone numbers are hidden behind a secure matched verification, preventing spam calls and scraping bots.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Right side Secure Card Component */}
+            <div className="lg:col-span-6 w-full">
+              <div className="relative glass-card rounded-2xl border border-slate-800/80 p-6 bg-slate-900/20 backdrop-blur-xl shadow-xl space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                  <div className="flex items-center space-x-2.5">
+                    <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                    <span className="text-xs font-mono font-bold tracking-wider text-slate-300 uppercase">Verification Shield</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-extrabold uppercase bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">
+                    Audit Passed
+                  </span>
+                </div>
+
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700/50 flex items-center justify-center text-slate-450 text-lg font-bold">
+                    FR
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-sm font-extrabold text-[var(--foreground)] font-sans">Fahim Rahman</h4>
+                      <span className="flex h-4 w-4 bg-emerald-500/10 border border-emerald-500/35 rounded-full items-center justify-center text-emerald-400 text-[8px] font-bold">✓</span>
+                    </div>
+                    <p className="text-xs text-slate-400 font-mono">B.Sc. in CSE, BUET</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div className="bg-slate-950/40 border border-slate-900 p-3.5 rounded-xl space-y-1">
+                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-widest">NID verification</span>
+                    <span className="font-extrabold text-emerald-400 flex items-center space-x-1 font-sans text-xs">
+                      <span>✓ Document Verified</span>
+                    </span>
+                  </div>
+                  <div className="bg-slate-950/40 border border-slate-900 p-3.5 rounded-xl space-y-1">
+                    <span className="block text-[8px] font-mono text-slate-500 uppercase tracking-widest">Student ID Scan</span>
+                    <span className="font-extrabold text-emerald-400 flex items-center space-x-1 font-sans text-xs">
+                      <span>✓ BUET Checked</span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-950/60 border border-slate-900 rounded-xl p-4 space-y-2 text-xs">
+                  <div className="flex justify-between items-center text-[10px] text-slate-400 uppercase font-mono">
+                    <span>Protected Location Coordinates</span>
+                    <span className="text-emerald-400 font-extrabold">Masked</span>
+                  </div>
+                  <div className="space-y-1.5 font-mono text-xs">
+                    <div className="flex justify-between text-slate-400">
+                      <span>Exact Latitude:</span>
+                      <span className="text-slate-500">23.82xxxx N (Encrypted)</span>
+                    </div>
+                    <div className="flex justify-between text-slate-400">
+                      <span>Exact Longitude:</span>
+                      <span className="text-slate-500">90.36xxxx E (Encrypted)</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -188,3 +304,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

@@ -53,7 +53,7 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
                 whileHover={{ scale: 1.05 }}
-                className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)] cursor-pointer"
+                className="flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(var(--theme-rgb),0.15)] cursor-pointer"
               >
                 <svg className="w-9 h-9" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   {/* A premium map marker shape */}
@@ -93,7 +93,7 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                 className="tracking-tight font-heading px-2 flex flex-col items-center"
               >
                 <span className="text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Welcome to</span>
-                <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-emerald-400 via-teal-400 to-indigo-400 bg-clip-text text-transparent drop-shadow-sm mt-1 whitespace-nowrap">
+                <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-emerald-400 drop-shadow-sm mt-1 whitespace-nowrap">
                   Tuition Console
                 </span>
               </motion.h1>
@@ -119,12 +119,12 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                 onClick={() => handleSelection("parent")}
                 className="glass-card group border border-slate-800 hover:border-emerald-500/50 p-5 sm:p-8 rounded-2xl text-left cursor-pointer transition-all duration-300 relative overflow-hidden shadow-2xl flex flex-col justify-between min-h-[200px] sm:min-h-[260px]"
               >
-                {/* Glowing Hover Background Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                {/* Glowing Hover Background */}
+                <div className="absolute inset-0 bg-emerald-500/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
  
                  <div className="space-y-3 sm:space-y-4">
                   {/* Icon */}
-                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:border-emerald-500/50 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.25)] flex items-center justify-center transition-all duration-300">
+                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:border-emerald-500/50 group-hover:shadow-[0_0_15px_rgba(var(--theme-rgb),0.25)] flex items-center justify-center transition-all duration-300">
                     <svg className="w-5 h-5 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -158,8 +158,8 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                 onClick={() => handleSelection("tutor")}
                 className="glass-card group border border-slate-800 hover:border-indigo-500/50 p-5 sm:p-8 rounded-2xl text-left cursor-pointer transition-all duration-300 relative overflow-hidden shadow-2xl flex flex-col justify-between min-h-[200px] sm:min-h-[260px]"
               >
-                {/* Glowing Hover Background Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/0 via-indigo-500/0 to-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                {/* Glowing Hover Background */}
+                <div className="absolute inset-0 bg-indigo-500/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
   
                  <div className="space-y-3 sm:space-y-4">
                   {/* Icon */}
@@ -174,7 +174,7 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                       I am a Tutor / Educator
                     </h3>
                     <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-sans">
-                      Discover active tuition jobs in Dhaka. Browse student requests and secure teaching vacancies.
+                      Discover active tuition jobs in Bangladesh. Browse student requests and secure teaching vacancies.
                     </p>
                   </div>
                 </div>

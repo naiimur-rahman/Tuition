@@ -22,11 +22,11 @@ function RecenterControl({ userLocation }: { userLocation: [number, number] | nu
           e.stopPropagation();
           map.setView(userLocation, 14, { animate: true });
         }}
-        className="bg-slate-950/95 backdrop-blur-md hover:bg-slate-900 border border-slate-800 text-white px-3 py-2 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.6)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 hover:border-pink-500 hover:text-pink-400 group"
+        className="bg-slate-950/95 backdrop-blur-md hover:bg-slate-900 border border-slate-800 text-white px-3 py-2 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.6)] transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 hover:border-emerald-500 hover:text-emerald-400 group"
         title="Recenter to my location"
       >
         <svg
-          className="w-4 h-4 text-pink-500 group-hover:scale-110 transition duration-200"
+          className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition duration-200"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -104,6 +104,94 @@ export default function MapComponent({
   const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
   const [payLaterJob, setPayLaterJob] = useState<any>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(14);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [activePostsCount, setActivePostsCount] = useState<number | null>(null);
+  const [tutorGender, setTutorGender] = useState<string | null>(null);
+
+  const [myActiveJobs, setMyActiveJobs] = useState<any[]>([]);
+  const [requestingJobId, setRequestingJobId] = useState<string>("");
+  const [isRequesting, setIsRequesting] = useState<boolean>(false);
+  const [requestSuccess, setRequestSuccess] = useState<string>("");
+
+  useEffect(() => {
+    if (session && userRole === "PARENT") {
+      fetch("/api/jobs?mine=true")
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            const activeJobs = data.filter((j: any) => j.status === "OPEN");
+            setActivePostsCount(activeJobs.length);
+            setMyActiveJobs(activeJobs);
+          } else {
+            setActivePostsCount(0);
+            setMyActiveJobs([]);
+          }
+        })
+        .catch(() => {
+          setActivePostsCount(0);
+          setMyActiveJobs([]);
+        });
+    }
+  }, [session, userRole]);
+
+  useEffect(() => {
+    if (session && userRole === "TUTOR") {
+      fetch("/api/profile")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.gender) {
+            setTutorGender(data.gender);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [session, userRole]);
+
+  const handleRequestTutor = async (tutorId: string) => {
+    if (!requestingJobId) {
+      alert("Please select one of your tuition posts to request the tutor.");
+      return;
+    }
+    setIsRequesting(true);
+    setRequestSuccess("");
+    try {
+      const res = await fetch("/api/jobs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId: requestingJobId,
+          tutorId,
+          action: "request"
+        })
+      });
+      if (res.ok) {
+        setRequestSuccess("Request sent successfully to tutor!");
+        // Clear active jobs list of this job by removing it
+        setMyActiveJobs((prev) => prev.filter((j) => j.id !== requestingJobId));
+        setActivePostsCount((prev) => (prev ? prev - 1 : 0));
+        setRequestingJobId("");
+      } else {
+        const txt = await res.text();
+        alert(txt || "Failed to send request.");
+      }
+    } catch (e) {
+      alert("Error sending request.");
+    } finally {
+      setIsRequesting(false);
+    }
+  };
+
+  const handleItemClick = (item: any) => {
+    setRequestSuccess("");
+    setRequestingJobId("");
+    if (type === "tutor") {
+      if (session && userRole === "PARENT" && activePostsCount === 0) {
+        alert("You currently have no active tuition posts.");
+        return;
+      }
+    }
+    setSelectedItem(item);
+  };
 
   const handleApply = async (jobId: string) => {
     if (!session) {
@@ -121,7 +209,8 @@ export default function MapComponent({
         alert("✓ Applied successfully! Check your tutor dashboard assigned section to complete the commission match payment.");
         window.location.reload();
       } else {
-        alert("Failed to submit application. Please try again.");
+        const errorText = await res.text();
+        alert(errorText || "Failed to submit application. Please try again.");
       }
     } catch (err) {
       console.error(err);
@@ -139,7 +228,7 @@ export default function MapComponent({
           setUserLocation([position.coords.latitude, position.coords.longitude]);
         },
         (error) => {
-          console.warn("GPS access blocked or unavailable, centering on central Dhaka coordinates.", error);
+          console.warn("GPS access blocked or unavailable, centering on central Bangladesh coordinates.", error);
           setUserLocation([23.8103, 90.4125]);
         }
       );
@@ -174,7 +263,7 @@ export default function MapComponent({
         .then((res) => res.json())
         .then((data) => {
           const mapTutors = data
-            .filter((u: any) => u.profile)
+            .filter((u: any) => u.profile && u.profile.is_active !== false)
             .map((u: any) => {
               const reviews = u.receivedReviews || [];
               const confirmedCount = u.appliedJobs?.length || 0;
@@ -190,6 +279,9 @@ export default function MapComponent({
                 approxLng: u.profile.approxLongitude || 90.3928,
                 verified: u.profile.verificationStatus === "VERIFIED",
                 subject: u.profile.bio || "Various Subjects",
+                education: u.profile.education || "Dhaka University",
+                gender: u.profile.gender || "Male",
+                preferable_time: u.profile.preferable_time || "Available All Day",
                 hasConfirmedTuition,
                 avgRating,
                 reviews,
@@ -207,6 +299,9 @@ export default function MapComponent({
                 approxLng: 90.3928,
                 verified: true,
                 subject: "Physics, Advanced Mathematics",
+                education: "Dhaka University",
+                gender: "Male",
+                preferable_time: "Evening (4:00 PM - 8:00 PM)",
                 tutorSeq: 1,
               },
               {
@@ -216,6 +311,9 @@ export default function MapComponent({
                 approxLng: 90.4078,
                 verified: false,
                 subject: "English Literature, IELTS Preparation",
+                education: "North South University",
+                gender: "Female",
+                preferable_time: "Available All Day",
                 tutorSeq: 2,
               },
             ]);
@@ -291,7 +389,7 @@ export default function MapComponent({
     );
   }
 
-  const center: [number, number] = [23.8103, 90.4125]; // Central Dhaka Center
+  const center: [number, number] = [23.8103, 90.4125]; // Central Bangladesh Center
 
   // Filter coordinates based on proximity range and unlock status
   let filteredItems = type === "tutor" ? dbTutors : dbJobs;
@@ -334,10 +432,14 @@ export default function MapComponent({
 
   const outOfProximityCount = filteredItems.length - withinProximityCount;
 
-  // Proximity metrics synced cleanly via top-level unconditional useEffect
+  const isGenderMismatch =
+    selectedItem &&
+    type !== "tutor" &&
+    selectedItem.parent?.tutorGenderPreference === "Female" &&
+    tutorGender === "Male";
 
   return (
-    <div className="h-[750px] lg:h-[800px] w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800 relative z-0">
+    <div className="h-[450px] sm:h-[600px] lg:h-[800px] w-full rounded-2xl overflow-hidden shadow-2xl border border-slate-800 relative z-0">
 
       <MapContainer
         center={userLocation || center}
@@ -361,8 +463,8 @@ export default function MapComponent({
               center={userLocation}
               radius={searchRadius * 1000} // Dynamic search radius in meters
               pathOptions={{
-                color: "#e2136e",
-                fillColor: "#e2136e",
+                color: "#14b8a6",
+                fillColor: "#14b8a6",
                 fillOpacity: 0.03,
                 weight: 1.5,
                 dashArray: "6 8",
@@ -373,8 +475,8 @@ export default function MapComponent({
               center={userLocation}
               radius={150} // Core radius marker (slightly larger)
               pathOptions={{
-                color: "#e2136e",
-                fillColor: "#e2136e",
+                color: "#14b8a6",
+                fillColor: "#14b8a6",
                 fillOpacity: 0.85,
                 weight: 2,
                 className: "leaflet-animated-marker", // Pulse animation
@@ -382,35 +484,30 @@ export default function MapComponent({
             >
               <Popup>
                 <div className="p-2.5 font-sans min-w-[160px] text-slate-200">
-                  <p className="font-bold text-pink-400 font-mono text-[11px] uppercase tracking-wider mb-1 flex items-center gap-1">
+                  <p className="font-bold text-emerald-400 font-mono text-[11px] uppercase tracking-wider mb-1 flex items-center gap-1">
                     <span className="flex h-2 w-2 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-500" />
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                     </span>
                     User Position
                   </p>
                   <div className="h-px bg-slate-800 my-1.5" />
                   <p className="text-[10px] text-slate-400 leading-relaxed font-sans">
-                    A <span className="text-pink-400 font-extrabold font-mono">{searchRadius} km range</span> is established around your location. Scan markers within this sector.
+                    A <span className="text-emerald-400 font-extrabold font-mono">{searchRadius} km range</span> is established around your location. Scan markers within this sector.
                   </p>
                 </div>
               </Popup>
             </Circle>
           </>
-        )}
-
-        {filteredItems.map((item: any) => {
+        )}        {filteredItems.map((item: any) => {
           const isTutor = type === "tutor";
-          const themeColor = isTutor ? "#10b981" : "#8b5cf6"; // Emerald for Tutors, Purple for Jobs
-          const isWithinRadius = userLocation
-            ? getDistanceInKm(userLocation[0], userLocation[1], item.approxLat, item.approxLng) <= searchRadius
-            : true;
+          const themeColor = isTutor ? "#14b8a6" : "#2dd4bf"; // Teal/Cyan theme colors
 
           const customIcon = L ? L.divIcon({
             className: "custom-map-pin",
             html: `
               <div class="flex items-center justify-center w-8 h-8 rounded-full bg-slate-950 border-2 ${
-                isTutor ? "border-emerald-400 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.6)]" : "border-purple-400 text-purple-400 shadow-[0_0_15px_rgba(139,92,246,0.6)]"
+                isTutor ? "border-emerald-400 text-emerald-400 shadow-[0_0_15px_rgba(var(--theme-rgb),0.6)]" : "border-cyan-400 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.6)]"
               }">
                 ${isTutor ? `
                   <svg class="w-4 h-4 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -429,224 +526,16 @@ export default function MapComponent({
             popupAnchor: [0, -16],
           }) : null;
 
-          const popupContent = (
-            <Popup>
-              <div className="p-3 font-sans min-w-[220px] text-slate-200">
-                  <div className="flex flex-col gap-1.5 mb-2">
-                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded border w-fit font-extrabold ${
-                      isTutor
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-purple-500/10 text-purple-400 border-purple-500/20"
-                    }`}>
-                      {isTutor
-                        ? `TC-${String(item.tutorSeq && item.tutorSeq > 0 ? item.tutorSeq : 1).padStart(3, '0')}`
-                        : `TCT-${String(item.jobSeq && item.jobSeq > 0 ? item.jobSeq : 1).padStart(3, '0')}`}
-                    </span>
-                    <h3 className="font-bold text-sm text-white leading-tight font-heading mt-1 flex flex-wrap items-center gap-1.5">
-                      {isTutor ? (
-                        <>
-                          <span>Tutor Profile</span>
-                          <span className="select-none pointer-events-none filter blur-[4.5px] bg-slate-950 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-mono leading-none border border-slate-800/60 inline-block">
-                            {item.name}
-                          </span>
-                        </>
-                      ) : (
-                        item.title
-                      )}
-                    </h3>
-                  </div>
-
-                <div className="h-px bg-slate-800 my-2" />
-
-                <div className="text-xs space-y-1.5 text-slate-300">
-                  {item.salary && (
-                    <p className="flex justify-between">
-                      <span className="text-slate-500 font-mono">Salary:</span>
-                      <span className="font-bold text-white">{item.salary} BDT</span>
-                    </p>
-                  )}
-                  {item.classLevel && (
-                    <p className="flex justify-between">
-                      <span className="text-slate-500 font-mono">Class:</span>
-                      <span className="text-slate-200">{item.classLevel}</span>
-                    </p>
-                  )}
-                  {item.subject && (
-                    <p className="flex flex-col gap-0.5 mt-1">
-                      <span className="text-slate-500 font-mono">Subject/Bio:</span>
-                      <span className="text-slate-200 text-[11px] leading-relaxed bg-slate-950 border border-slate-800 p-1.5 rounded-lg font-mono">
-                        {item.subject}
-                      </span>
-                    </p>
-                  )}
-
-                  {/* Rating system appears only after tuition has been confirmed */}
-                  {item.hasConfirmedTuition && (
-                    <div className="bg-emerald-500/5 border border-emerald-500/10 p-2.5 rounded-lg space-y-1 mt-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-slate-500 font-mono text-[9px] uppercase">Educator Rating</span>
-                        <span className="text-emerald-400 font-bold flex items-center gap-1 font-mono text-[11px]">
-                          ★ {item.avgRating}
-                        </span>
-                      </div>
-                      {item.reviews && item.reviews.length > 0 && (
-                        <div className="text-[10px] text-slate-400 italic mt-1 max-h-[50px] overflow-y-auto border-t border-slate-900 pt-1 leading-normal font-sans">
-                          "{item.reviews[0].comment}"
-                          <span className="block text-[8px] text-slate-500 not-italic mt-0.5 font-mono text-right flex items-center justify-end gap-1">
-                            — 
-                            <span className="select-none pointer-events-none filter blur-[3px] bg-slate-800/40 text-slate-500 px-1 py-px rounded text-[8px] font-mono leading-none border border-slate-700/20 inline-block">
-                              {item.reviews[0].author?.name || "Parent"}
-                            </span>
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                  {item.verified && (
-                    <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] px-2 py-0.5 rounded font-mono uppercase tracking-wider font-extrabold">
-                      Verified Credentials
-                    </span>
-                  )}
-                  <span className={`text-[10px] px-2 py-0.5 rounded font-mono uppercase tracking-wider font-extrabold border ${
-                    isWithinRadius 
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
-                      : "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                  }`}>
-                    {isWithinRadius ? "Within Proximity" : "Out of Proximity"}
-                  </span>
-                </div>
-
-                <div className="mt-4 pt-3 border-t border-slate-800">
-                  {isTutor ? (
-                    <div className="space-y-2">
-                      <p className="text-[10px] text-emerald-400 font-mono font-bold flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        Parent Verification Access
-                      </p>
-                      <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 space-y-1.5 font-mono text-[10px]">
-                        <div className="flex justify-between">
-                          <span className="text-slate-500">Tutor Code:</span>
-                          <span className="text-emerald-400 font-bold">TC-{String(item.tutorSeq && item.tutorSeq > 0 ? item.tutorSeq : 1).padStart(3, '0')}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-500">Coordination Status:</span>
-                          <span className={isWithinRadius ? "text-emerald-400 font-bold" : "text-amber-400 font-bold"}>
-                            {isWithinRadius ? "Active Match" : "Out of Proximity"}
-                          </span>
-                        </div>
-                      </div>
-                      <div className={`p-2.5 rounded-xl text-[9px] font-mono leading-relaxed border ${
-                        isWithinRadius
-                          ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-400/90"
-                          : "bg-amber-500/5 border-amber-500/10 text-amber-400/90"
-                      }`}>
-                        {isWithinRadius 
-                          ? "Request coordinate matching for this educator from the Tuition Console portal. Direct contact details are securely managed."
-                          : `This educator is located outside your active search boundary (${searchRadius} km). You can still coordinate matching via our admin desks.`
-                        }
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="text-[10px] text-yellow-500 mb-2 font-mono flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        Tuition Match Console
-                      </p>
-                      
-                      {item.tutorId === userId ? (
-                        <div className="space-y-2">
-                          {item.locationUnlocked ? (
-                            <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg text-center font-mono text-[10px] text-emerald-400 font-extrabold flex items-center justify-center gap-1.5">
-                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                              </svg>
-                              Verified Match Unlocked!
-                            </div>
-                          ) : (
-                            <div className="space-y-2">
-                              <div className="bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-lg text-[9px] font-mono text-amber-500 leading-normal text-center">
-                                Application received! Pay the 20% commission fee ({Math.floor(item.salary * 0.2)} BDT) to unlock parents exact details.
-                              </div>
-                              <div className="grid grid-cols-2 gap-1.5">
-                                <Link href={`/payment?jobId=${item.id}`} className="block w-full">
-                                  <button className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2 py-1.5 rounded-lg text-[10px] font-bold w-full transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1 border-none h-8">
-                                    <span>Pay Now (Instant Access)</span>
-                                  </button>
-                                </Link>
-                                <button 
-                                  onClick={() => setPayLaterJob(item)}
-                                  className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg text-[10px] font-bold w-full transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1 border-none h-8"
-                                >
-                                  <span>Pay Later</span>
-                                </button>
-                              </div>
-                              <div className="text-center text-[8px] font-mono text-slate-500 mt-1">
-                                Support Hotline: <span className="text-emerald-500 font-bold">096-96-847-847</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ) : item.tutorId !== null ? (
-                        <div className="bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg text-center font-mono text-[10px] text-red-400 font-extrabold">
-                          ✗ Tuition Match Assigned (Closed)
-                        </div>
-                      ) : userRole === "TUTOR" ? (
-                        <button
-                          onClick={() => handleApply(item.id)}
-                          disabled={applyingJobId === item.id}
-                          className="bg-emerald-500 text-slate-950 px-3 py-2 rounded-lg text-xs font-bold w-full hover:bg-emerald-600 transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1.5 border-none disabled:opacity-50"
-                        >
-                          {applyingJobId === item.id ? (
-                            <>
-                              <div className="animate-spin h-3.5 w-3.5 border-2 border-slate-950 border-t-transparent rounded-full" />
-                              <span>Applying...</span>
-                            </>
-                          ) : (
-                            <>
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                              </svg>
-                              <span>Apply for Tuition (Free)</span>
-                            </>
-                          )}
-                        </button>
-                      ) : !session ? (
-                        <Link href="/login" className="block w-full">
-                          <button className="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-bold w-full transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1.5 border-none">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                            </svg>
-                            <span>Login as Tutor to Apply</span>
-                          </button>
-                        </Link>
-                      ) : (
-                        <div className="bg-slate-950 border border-slate-800 p-2.5 rounded-lg text-center font-mono text-[9px] text-slate-500">
-                          Available strictly for verified educators.
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Popup>
-          );
-
           if (zoomLevel <= 13) {
             return (
               <Marker
                 key={item.id}
                 position={[item.approxLat, item.approxLng]}
                 icon={customIcon}
-              >
-                {popupContent}
-              </Marker>
+                eventHandlers={{
+                  click: () => handleItemClick(item)
+                }}
+              />
             );
           }
 
@@ -654,27 +543,408 @@ export default function MapComponent({
             <Circle
               key={item.id}
               center={[item.approxLat, item.approxLng]}
-              radius={180} // Increased from 120 to 180 meters for improved visibility
+              radius={180}
               pathOptions={{
                 color: themeColor,
                 fillColor: themeColor,
                 fillOpacity: 0.8,
                 weight: 2,
-                className: "leaflet-animated-marker", // Pulse animation
+                className: "leaflet-animated-marker",
               }}
-            >
-              {popupContent}
-            </Circle>
+              eventHandlers={{
+                click: () => handleItemClick(item)
+              }}
+            />
           );
         })}
       </MapContainer>
+
+      {/* Side Drawer (Desktop) */}
+      {selectedItem && (
+        <div className="hidden md:flex absolute right-4 top-4 bottom-4 w-[350px] bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-2xl p-5 z-[1000] flex-col shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 animate-slideInRight overflow-y-auto custom-scrollbar">
+          {type === "tutor" ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-extrabold">
+                  TC-{String(selectedItem.tutorSeq && selectedItem.tutorSeq > 0 ? selectedItem.tutorSeq : 1).padStart(3, '0')}
+                </span>
+                <button onClick={() => setSelectedItem(null)} className="text-slate-400 hover:text-white transition cursor-pointer bg-transparent border-none">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <h3 className="text-sm font-bold font-heading text-white">Tutor Profile Details</h3>
+              <div className="h-px bg-slate-800" />
+              <div className="space-y-4 text-xs">
+                <div className="flex flex-col gap-1 bg-slate-900/50 border border-slate-850 p-3 rounded-xl">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider">University</span>
+                  <span className="text-white font-sans text-sm font-semibold">
+                    {selectedItem.education}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1 bg-slate-900/50 border border-slate-850 p-3 rounded-xl">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider">Subject</span>
+                  <span className="text-white font-sans text-sm font-semibold">
+                    {selectedItem.subject}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1 bg-slate-900/50 border border-slate-850 p-3 rounded-xl">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider">Preferable Time</span>
+                  <span className="text-emerald-400 font-sans text-sm font-semibold">
+                    {selectedItem.preferable_time}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-1 bg-slate-900/50 border border-slate-850 p-3 rounded-xl">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono tracking-wider">Gender</span>
+                  <span className="text-white font-sans text-sm font-semibold">
+                    {selectedItem.gender}
+                  </span>
+                </div>
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/25 p-3 rounded-xl text-amber-400 font-mono text-[11px] leading-relaxed text-center font-semibold">
+                To get full details, please call us at 096-96-847-847.
+              </div>
+              {userRole === "PARENT" && (
+                <div className="pt-2 border-t border-slate-800 space-y-3">
+                  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Direct Tutor Request</span>
+                  {requestSuccess ? (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg text-center font-mono text-[10px] text-emerald-400 font-extrabold">
+                      {requestSuccess}
+                    </div>
+                  ) : myActiveJobs.length === 0 ? (
+                    <div className="bg-slate-900/40 border border-slate-850 p-2.5 rounded-lg text-[9px] font-mono text-slate-500 text-center">
+                      No active open jobs available to assign.
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <select
+                        value={requestingJobId}
+                        onChange={(e) => setRequestingJobId(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-800 focus:border-emerald-500/80 rounded-lg p-2 text-xs text-white placeholder-slate-600 focus:outline-none transition cursor-pointer"
+                      >
+                        <option value="">-- Select Active Job --</option>
+                        {myActiveJobs.map((j) => (
+                          <option key={j.id} value={j.id}>
+                            TCT-{String(j.jobSeq).padStart(3, '0')} - {j.title}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => handleRequestTutor(selectedItem.userId)}
+                        disabled={isRequesting || !requestingJobId}
+                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs transition duration-200 cursor-pointer border-none flex items-center justify-center"
+                      >
+                        {isRequesting ? "Sending Request..." : "Request Tutor"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-cyan-500/10 text-cyan-400 border-cyan-500/20 font-extrabold">
+                  TCT-{String(selectedItem.jobSeq && selectedItem.jobSeq > 0 ? selectedItem.jobSeq : 1).padStart(3, '0')}
+                </span>
+                <button onClick={() => setSelectedItem(null)} className="text-slate-400 hover:text-white transition cursor-pointer bg-transparent border-none">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <h3 className="text-sm font-bold font-heading text-white">{selectedItem.title}</h3>
+              <div className="h-px bg-slate-800" />
+              <div className="space-y-3 font-mono text-xs text-slate-300">
+                <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Class</span>
+                  <span className="text-white font-sans text-sm font-semibold">{selectedItem.classLevel}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Time</span>
+                  <span className="text-white font-sans text-sm font-semibold">{selectedItem.parent?.preferable_time || "Flexible"}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Salary</span>
+                  <span className="text-emerald-400 font-sans text-sm font-bold">{selectedItem.salary} BDT</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Duration</span>
+                  <span className="text-white font-sans text-sm font-semibold">{selectedItem.parent?.hoursRequired || "Not Specified"}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Student Gender</span>
+                  <span className="text-white font-sans text-sm font-semibold">{selectedItem.parent?.gender || "Not Specified"}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Students</span>
+                  <span className="text-white font-sans text-sm font-semibold">{selectedItem.parent?.numberOfChildren || "1"}</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-slate-900 pb-2">
+                  <span className="text-slate-500 text-[10px] uppercase font-mono">Tutor Requirement</span>
+                  <span className="text-white font-sans text-sm font-semibold text-right max-w-[180px] truncate">{selectedItem.tutorRequirement || "Any University / Department"}</span>
+                </div>
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/25 p-3 rounded-xl text-amber-400 font-mono text-[11px] leading-relaxed text-center font-semibold">
+                To get full details, please call us at 096-96-847-847.
+              </div>
+
+              <div className="pt-2">
+                {selectedItem.tutorId === userId ? (
+                  <div className="space-y-2">
+                    {selectedItem.locationUnlocked ? (
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-lg text-center font-mono text-[10px] text-emerald-400 font-extrabold flex items-center justify-center gap-1.5">
+                        Verified Match Unlocked!
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-lg text-[9px] font-mono text-amber-500 leading-normal text-center">
+                          Application received! Pay 20% commission fee ({Math.floor(selectedItem.salary * 0.2)} BDT) to unlock parents exact details.
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <Link href={`/payment?jobId=${selectedItem.id}`} className="block w-full">
+                            <button className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2 py-1.5 rounded-lg text-[10px] font-bold w-full transition duration-200 cursor-pointer h-8 border-none flex items-center justify-center">
+                              Pay Now
+                            </button>
+                          </Link>
+                          <button 
+                            onClick={() => setPayLaterJob(selectedItem)}
+                            className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg text-[10px] font-bold w-full transition duration-200 cursor-pointer h-8 border-none flex items-center justify-center"
+                          >
+                            Pay Later
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : selectedItem.tutorId !== null ? (
+                  <div className="bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg text-center font-mono text-[10px] text-red-400 font-extrabold">
+                    ✗ Tuition Match Assigned (Closed)
+                  </div>
+                ) : isGenderMismatch ? (
+                  <button
+                    disabled={true}
+                    className="bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-2.5 rounded-xl text-xs font-bold w-full cursor-not-allowed flex items-center justify-center gap-1.5"
+                  >
+                    Gender Mismatch (Requires Female Tutor)
+                  </button>
+                ) : userRole === "TUTOR" ? (
+                  <button
+                    onClick={() => handleApply(selectedItem.id)}
+                    disabled={applyingJobId === selectedItem.id}
+                    className="bg-emerald-500 text-slate-950 px-3 py-2.5 rounded-xl text-xs font-bold w-full hover:bg-emerald-600 transition duration-200 cursor-pointer border-none flex items-center justify-center gap-1.5"
+                  >
+                    {applyingJobId === selectedItem.id ? "Applying..." : "Apply for Tuition (Free)"}
+                  </button>
+                ) : !session ? (
+                  <Link href="/login" className="block w-full">
+                    <button className="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2.5 rounded-xl text-xs font-bold w-full transition duration-200 cursor-pointer border-none flex items-center justify-center">
+                      Login as Tutor to Apply
+                    </button>
+                  </Link>
+                ) : (
+                  <div className="bg-slate-950 border border-slate-800 p-2.5 rounded-lg text-center font-mono text-[9px] text-slate-500">
+                    Available strictly for verified educators.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bottom Sheet (Mobile) */}
+      {selectedItem && (
+        <div className="md:hidden absolute bottom-4 left-4 right-4 bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-2xl p-5 z-[1000] flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 animate-slideUp overflow-y-auto max-h-[320px] custom-scrollbar">
+          {type === "tutor" ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-extrabold">
+                  TC-{String(selectedItem.tutorSeq && selectedItem.tutorSeq > 0 ? selectedItem.tutorSeq : 1).padStart(3, '0')}
+                </span>
+                <button onClick={() => setSelectedItem(null)} className="text-slate-400 hover:text-white transition cursor-pointer bg-transparent border-none">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="flex flex-col gap-0.5 bg-slate-900/50 border border-slate-850 p-2.5 rounded-xl">
+                  <span className="text-slate-500 text-[9px] uppercase font-mono tracking-wider">University</span>
+                  <span className="text-white font-sans font-semibold truncate">{selectedItem.education}</span>
+                </div>
+                <div className="flex flex-col gap-0.5 bg-slate-900/50 border border-slate-850 p-2.5 rounded-xl">
+                  <span className="text-slate-500 text-[9px] uppercase font-mono tracking-wider">Subject</span>
+                  <span className="text-white font-sans font-semibold truncate">{selectedItem.subject}</span>
+                </div>
+                <div className="flex flex-col gap-0.5 bg-slate-900/50 border border-slate-850 p-2.5 rounded-xl">
+                  <span className="text-slate-500 text-[9px] uppercase font-mono tracking-wider">Preferable Time</span>
+                  <span className="text-emerald-400 font-sans font-semibold truncate">{selectedItem.preferable_time}</span>
+                </div>
+                <div className="flex flex-col gap-0.5 bg-slate-900/50 border border-slate-850 p-2.5 rounded-xl">
+                  <span className="text-slate-500 text-[9px] uppercase font-mono tracking-wider">Gender</span>
+                  <span className="text-white font-sans font-semibold truncate">{selectedItem.gender}</span>
+                </div>
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/25 p-2.5 rounded-xl text-amber-400 font-mono text-[10px] leading-relaxed text-center font-semibold mb-1">
+                To get full details, please call us at 096-96-847-847.
+              </div>
+              {userRole === "PARENT" && (
+                <div className="pt-2 border-t border-slate-800 space-y-2">
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Direct Tutor Request</span>
+                  {requestSuccess ? (
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-lg text-center font-mono text-[9px] text-emerald-400 font-extrabold">
+                      {requestSuccess}
+                    </div>
+                  ) : myActiveJobs.length === 0 ? (
+                    <div className="bg-slate-900/40 border border-slate-850 p-2 rounded-lg text-[8px] font-mono text-slate-500 text-center">
+                      No active open jobs available.
+                    </div>
+                  ) : (
+                    <div className="flex gap-2">
+                      <select
+                        value={requestingJobId}
+                        onChange={(e) => setRequestingJobId(e.target.value)}
+                        className="flex-1 bg-slate-900 border border-slate-800 focus:border-emerald-500/80 rounded-lg p-1.5 text-[10px] text-white placeholder-slate-600 focus:outline-none transition cursor-pointer"
+                      >
+                        <option value="">-- Select Job --</option>
+                        {myActiveJobs.map((j) => (
+                          <option key={j.id} value={j.id}>
+                            TCT-{String(j.jobSeq).padStart(3, '0')} - {j.title}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => handleRequestTutor(selectedItem.userId)}
+                        disabled={isRequesting || !requestingJobId}
+                        className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-800 disabled:text-slate-500 text-slate-950 font-bold py-1.5 px-3 rounded-lg text-[10px] transition duration-200 cursor-pointer border-none shrink-0"
+                      >
+                        {isRequesting ? "..." : "Request"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-cyan-500/10 text-cyan-400 border-cyan-500/20 font-extrabold">
+                  TCT-{String(selectedItem.jobSeq && selectedItem.jobSeq > 0 ? selectedItem.jobSeq : 1).padStart(3, '0')}
+                </span>
+                <button onClick={() => setSelectedItem(null)} className="text-slate-400 hover:text-white transition cursor-pointer bg-transparent border-none">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <h3 className="text-xs font-bold text-white truncate">{selectedItem.title}</h3>
+              <div className="grid grid-cols-2 gap-2 font-mono text-[10px] text-slate-300">
+                <div className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded-lg">
+                  <span className="text-slate-500">Class:</span>
+                  <span className="text-white font-sans truncate ml-1">{selectedItem.classLevel}</span>
+                </div>
+                <div className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded-lg">
+                  <span className="text-slate-500">Time:</span>
+                  <span className="text-white font-sans truncate ml-1">{selectedItem.parent?.preferable_time || "Flexible"}</span>
+                </div>
+                <div className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded-lg">
+                  <span className="text-slate-500">Salary:</span>
+                  <span className="text-emerald-400 font-sans font-bold truncate ml-1">{selectedItem.salary} BDT</span>
+                </div>
+                <div className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded-lg">
+                  <span className="text-slate-500">Duration:</span>
+                  <span className="text-white font-sans truncate ml-1">{selectedItem.parent?.hoursRequired || "Not Specified"}</span>
+                </div>
+                <div className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded-lg">
+                  <span className="text-slate-500">Gender:</span>
+                  <span className="text-white font-sans truncate ml-1">{selectedItem.parent?.gender || "Not Specified"}</span>
+                </div>
+                <div className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded-lg">
+                  <span className="text-slate-500">Students:</span>
+                  <span className="text-white font-sans truncate ml-1">{selectedItem.parent?.numberOfChildren || "1"}</span>
+                </div>
+                <div className="flex justify-between items-center bg-slate-900/50 p-1.5 rounded-lg col-span-2">
+                  <span className="text-slate-500">Requirement:</span>
+                  <span className="text-white font-sans truncate ml-1">{selectedItem.tutorRequirement || "Any University / Department"}</span>
+                </div>
+              </div>
+              <div className="bg-amber-500/10 border border-amber-500/25 p-2.5 rounded-xl text-amber-400 font-mono text-[10px] leading-relaxed text-center font-semibold mb-1">
+                To get full details, please call us at 096-96-847-847.
+              </div>
+
+              <div className="pt-1">
+                {selectedItem.tutorId === userId ? (
+                  <div className="space-y-1.5">
+                    {selectedItem.locationUnlocked ? (
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 p-2 rounded-lg text-center font-mono text-[9px] text-emerald-400 font-extrabold">
+                        Verified Match Unlocked!
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        <div className="bg-amber-500/5 border border-amber-500/10 p-2 rounded-lg text-[8px] font-mono text-amber-500 text-center">
+                          Pay 20% commission fee ({Math.floor(selectedItem.salary * 0.2)} BDT) to unlock.
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <Link href={`/payment?jobId=${selectedItem.id}`} className="block w-full">
+                            <button className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2 py-1 rounded-lg text-[9px] font-bold w-full transition duration-200 cursor-pointer h-7 border-none">
+                              Pay Now
+                            </button>
+                          </Link>
+                          <button 
+                            onClick={() => setPayLaterJob(selectedItem)}
+                            className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1 rounded-lg text-[9px] font-bold w-full transition duration-200 cursor-pointer h-7 border-none"
+                          >
+                            Pay Later
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : selectedItem.tutorId !== null ? (
+                  <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-lg text-center font-mono text-[9px] text-red-400 font-extrabold">
+                    ✗ Closed
+                  </div>
+                ) : isGenderMismatch ? (
+                  <button
+                    disabled={true}
+                    className="bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-xl text-xs font-bold w-full cursor-not-allowed flex items-center justify-center"
+                  >
+                    Gender Mismatch
+                  </button>
+                ) : userRole === "TUTOR" ? (
+                  <button
+                    onClick={() => handleApply(selectedItem.id)}
+                    disabled={applyingJobId === selectedItem.id}
+                    className="bg-emerald-500 text-slate-950 px-3 py-1.5 rounded-xl text-xs font-bold w-full hover:bg-emerald-600 transition duration-200 cursor-pointer border-none flex items-center justify-center"
+                  >
+                    {applyingJobId === selectedItem.id ? "Applying..." : "Apply (Free)"}
+                  </button>
+                ) : !session ? (
+                  <Link href="/login" className="block w-full">
+                    <button className="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold w-full transition duration-200 cursor-pointer border-none">
+                      Login as Tutor
+                    </button>
+                  </Link>
+                ) : (
+                  <div className="bg-slate-950 border border-slate-800 p-2 rounded-lg text-center font-mono text-[8px] text-slate-500">
+                    Verified educators only.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
 
       {/* Dynamic Pay Later Coordination Modal */}
       {payLaterJob && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-[0_10px_40px_rgba(0,0,0,0.8)] text-center space-y-6 transform scale-100 transition-all duration-300">
             {/* Decorative hotline icon header */}
-            <div className="mx-auto w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+            <div className="mx-auto w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(var(--theme-rgb),0.15)]">
               <svg className="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>

@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617; /* Slate 950 */
-  --foreground: #f8fafc; /* Slate 50 */
-  --muted: #94a3b8; /* Slate 400 */
+  --background: #000000; /* Absolute fully dark black background */
+  --foreground: #f8fafc;
+  --muted: #94a3b8;
   --font-sans: var(--font-body), ui-sans-serif, system-ui;
   --font-serif: var(--font-heading), ui-serif, Georgia;
+  --theme-rgb: 20, 184, 166;
+  
+  /* Slate system overrides for pure-dark experience */
+  --slate-800: #121214;
+  --slate-850: #09090b;
+  --slate-900: #050507;
+  --slate-950: #000000;
 }
 
 /* Light Theme Variable Overrides */
 .light {
-  --background: #f8fafc; /* Slate 50 */
-  --foreground: #0f172a; /* Slate 900 */
-  --muted: #64748b; /* Slate 500 */
+  --background: #f1f5f9;
+  --foreground: #0f172a;
+  --muted: #475569;
+  
+  --slate-800: #1e293b;
+  --slate-850: #0f172a;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --font-sans: var(--font-body), sans-serif;
   --font-heading: var(--font-heading), serif;
+
+  /* Remap slate colors dynamically */
+  --color-slate-800: var(--slate-800);
+  --color-slate-850: var(--slate-850);
+  --color-slate-900: var(--slate-900);
+  --color-slate-950: var(--slate-950);
+
+  /* Redefine emerald to Teal (#14b8a6) */
+  --color-emerald-50: #f0fdfa;
+  --color-emerald-100: #ccfbf1;
+  --color-emerald-200: #99f6e4;
+  --color-emerald-300: #5eead4;
+  --color-emerald-400: #2dd4bf;
+  --color-emerald-500: #14b8a6;
+  --color-emerald-600: #0d9488;
+  --color-emerald-700: #0f766e;
+  --color-emerald-800: #115e59;
+  --color-emerald-900: #134e4a;
+  --color-emerald-950: #042f2e;
+
+  /* Redefine teal to Teal (#14b8a6) */
+  --color-teal-50: #f0fdfa;
+  --color-teal-100: #ccfbf1;
+  --color-teal-200: #99f6e4;
+  --color-teal-300: #5eead4;
+  --color-teal-400: #2dd4bf;
+  --color-teal-500: #14b8a6;
+  --color-teal-600: #0d9488;
+  --color-teal-700: #0f766e;
+  --color-teal-800: #115e59;
+  --color-teal-900: #134e4a;
+  --color-teal-950: #042f2e;
 }
 
 body {
@@ -37,23 +81,23 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Glassmorphism Styles */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(8, 8, 10, 0.85);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
   transition: background 0.3s, border-color 0.3s;
 }
 
 .light .glass-panel {
-  background: rgba(241, 245, 249, 0.8); /* Light Slate 100 */
+  background: rgba(241, 245, 249, 0.8);
   border-color: rgba(15, 23, 42, 0.08);
   box-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.08);
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.3);
+  background: rgba(10, 10, 12, 0.45);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -64,15 +108,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .glass-card:hover {
   background: rgba(30, 41, 59, 0.55);
-  border-color: rgba(16, 185, 129, 0.25); /* Emerald */
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.12);
+  border-color: rgba(var(--theme-rgb), 0.25);
+  box-shadow: 0 0 30px rgba(var(--theme-rgb), 0.12);
   transform: translateY(-3px);
 }
 
 .light .glass-card:hover {
   background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(16, 185, 129, 0.3);
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.08);
+  border-color: rgba(var(--theme-rgb), 0.3);
+  box-shadow: 0 0 30px rgba(var(--theme-rgb), 0.08);
 }
 
 .glass-input {
@@ -93,15 +137,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .glass-input:focus {
   outline: none;
-  border-color: #10b981; /* Emerald 500 */
+  border-color: var(--color-emerald-500);
   background: rgba(15, 23, 42, 0.8);
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 15px rgba(var(--theme-rgb), 0.2);
 }
 
 .light .glass-input:focus {
   background: #ffffff;
-  border-color: #10b981;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+  border-color: var(--color-emerald-500);
+  box-shadow: 0 0 15px rgba(var(--theme-rgb), 0.1);
 }
 
 /* Custom Scrollbars */
@@ -147,7 +191,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .light .leaflet-tile {
-  filter: none !important; /* Pure OSM tile colors in light theme! */
+  filter: none !important;
 }
 
 .leaflet-bar {
@@ -172,12 +216,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .leaflet-bar a:hover {
   background-color: #1e293b !important;
-  color: #10b981 !important;
+  color: #14b8a6 !important;
 }
 
 .light .leaflet-bar a:hover {
   background-color: #f1f5f9 !important;
-  color: #10b981 !important;
+  color: #0d9488 !important;
 }
 
 .leaflet-popup {
@@ -221,7 +265,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .leaflet-popup-close-button:hover {
-  color: #10b981 !important;
+  color: #14b8a6 !important;
 }
 
 /* Stunning Smooth Pulse Animation for Map Circle Beacons */
@@ -272,11 +316,8 @@ h1, h2, h3, h4, h5, h6 {
    PREMIUM UNIVERSAL LIGHT THEME REDESIGN
    ========================================== */
 .light body {
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 45%);
-  background-color: #f8fafc;
-  background-attachment: fixed;
+  background-image: none !important;
+  background-color: var(--background);
   color: #0f172a;
 }
 
@@ -296,21 +337,21 @@ h1, h2, h3, h4, h5, h6 {
   color: #cbd5e1 !important;
 }
 
-/* Retain special green/indigo text in dark console elements */
+/* Retain special teal text in dark console elements */
 .light .keep-dark .text-emerald-400,
 .light .keep-dark .text-emerald-500,
 .light .keep-dark .text-emerald-500\/10,
 .light .keep-dark .bg-emerald-500\/10 {
-  color: #10b981 !important;
-  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: #14b8a6 !important;
+  background-color: rgba(20, 184, 166, 0.1) !important;
 }
 
 .light .keep-dark .text-indigo-400,
 .light .keep-dark .text-indigo-500,
 .light .keep-dark .text-indigo-500\/10,
 .light .keep-dark .bg-indigo-500\/10 {
-  color: #818cf8 !important;
-  background-color: rgba(99, 102, 241, 0.1) !important;
+  color: #2dd4bf !important;
+  background-color: rgba(20, 184, 166, 0.1) !important;
 }
 
 .light .keep-dark .text-slate-400,
@@ -322,6 +363,10 @@ h1, h2, h3, h4, h5, h6 {
 .light .keep-dark .bg-slate-900\/60,
 .light .keep-dark .bg-slate-900\/90,
 .light .keep-dark .bg-slate-950,
+.light .keep-dark .bg-slate-955,
+.light .keep-dark .bg-slate-955\/80,
+.light .keep-dark .bg-slate-955\/40,
+.light .keep-dark .bg-slate-955\/20,
 .light .keep-dark .bg-slate-950\/80,
 .light .keep-dark .bg-slate-950\/40 {
   background-color: rgba(15, 23, 42, 0.6) !important;
@@ -335,13 +380,16 @@ h1, h2, h3, h4, h5, h6 {
 .light .bg-slate-900\/40:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-900\/30:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-900\/10:not(.keep-dark):not(.keep-dark *),
-.light .bg-slate-950:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-955:not(.keep-dark):not(.keep-dark *),
-.light .bg-slate-950\/40:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-955\/40:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-955\/20:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/40:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-950\/80:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-950\/95:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-950\/90:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-955\/95:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-955\/90:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-950\/20:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-900\/90:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-900\/50:not(.keep-dark):not(.keep-dark *),
@@ -359,12 +407,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .light .glass-card:not(.keep-dark):hover {
   background-color: #ffffff !important;
-  border-color: rgba(16, 185, 129, 0.3) !important;
-  box-shadow: 0 15px 40px rgba(16, 185, 129, 0.06) !important;
+  border-color: rgba(var(--theme-rgb), 0.3) !important;
+  box-shadow: 0 15px 40px rgba(var(--theme-rgb), 0.06) !important;
   transform: translateY(-2px);
 }
-
-
 
 /* Universal border corrections for dark utility border classes in Light Mode */
 .light .border-slate-800:not(.keep-dark):not(.keep-dark *),
@@ -378,6 +424,7 @@ h1, h2, h3, h4, h5, h6 {
 .light .border-slate-900\/80:not(.keep-dark):not(.keep-dark *),
 .light .border-slate-900\/60:not(.keep-dark):not(.keep-dark *),
 .light .border-slate-900\/40:not(.keep-dark):not(.keep-dark *),
+.light .border-slate-955:not(.keep-dark):not(.keep-dark *),
 .light .border-slate-950:not(.keep-dark):not(.keep-dark *) {
   border-color: rgba(15, 23, 42, 0.06) !important;
 }
@@ -393,11 +440,11 @@ h1, h2, h3, h4, h5, h6 {
 .light .text-slate-300:not(.keep-dark *),
 .light .text-slate-400:not(.keep-dark *),
 .light .text-slate-400\/80:not(.keep-dark *) {
-  color: #334155 !important; /* Slate 700 */
+  color: #1e293b !important; /* Rich Dark Slate 800 */
 }
 
 .light .text-slate-500:not(.keep-dark *) {
-  color: #64748b !important; /* Slate 500 */
+  color: #475569 !important; /* Medium Slate 600 */
 }
 
 /* Stabilize active hover states to prevent invisible/white text on hover */
@@ -408,10 +455,10 @@ h1, h2, h3, h4, h5, h6 {
   color: #0f172a !important;
 }
 .light .hover\:text-emerald-400:not(.keep-dark *):hover {
-  color: #059669 !important;
+  color: #0d9488 !important;
 }
 .light .hover\:text-indigo-400:not(.keep-dark *):hover {
-  color: #4f46e5 !important;
+  color: #0d9488 !important;
 }
 
 /* Modern, ultra-clean shadow system in Light Mode */
@@ -426,13 +473,18 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Button overrides for beautiful, highly readable aesthetic flow in Light Mode */
 .light button.bg-slate-900:not(.keep-dark *),
-.light .bg-slate-900\/40 button:not(.keep-dark *) {
-  background-color: #0f172a !important;
-  color: #ffffff !important;
+.light .bg-slate-900\/40 button:not(.keep-dark *),
+.light button.bg-slate-950:not(.keep-dark *),
+.light button.bg-slate-800:not(.keep-dark *) {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(15, 23, 42, 0.1) !important;
 }
 
-.light button.bg-slate-900:not(.keep-dark *):hover {
-  background-color: #1e293b !important;
+.light button.bg-slate-900:not(.keep-dark *):hover,
+.light button.bg-slate-950:not(.keep-dark *):hover,
+.light button.bg-slate-800:not(.keep-dark *):hover {
+  background-color: #f1f5f9 !important;
 }
 
 /* Dynamic role tabs, search panels & input selectors styling in Light Mode */
@@ -445,8 +497,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .light input.glass-input:focus,
 .light textarea.glass-input:focus {
-  border-color: #10b981 !important;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.08) !important;
+  border-color: var(--color-emerald-500) !important;
+  box-shadow: 0 0 15px rgba(var(--theme-rgb), 0.08) !important;
 }
 
 /* Soft, subtle borders and background on the navbar elements in Light Mode */
@@ -462,3 +514,15 @@ h1, h2, h3, h4, h5, h6 {
   border: none !important;
 }
 
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar-sweep {
+  animation: radar-sweep 5s linear infinite;
+}

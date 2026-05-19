@@ -46,7 +46,7 @@ export default function Login() {
         <div className="text-center space-y-2">
           {/* Logo Badge */}
           <Link href="/" className="inline-block">
-            <div className="text-emerald-400 font-mono text-xs uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full w-fit mx-auto mb-2 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+            <div className="text-emerald-400 font-mono text-xs uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full w-fit mx-auto mb-2 shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)]">
               Tuition Console
             </div>
           </Link>
@@ -108,11 +108,11 @@ export default function Login() {
 
           <div>
             <motion.button
-              whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(16,185,129,0.3)" }}
+              whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(var(--theme-rgb),0.3)" }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-slate-950 bg-emerald-500 hover:bg-emerald-600 focus:outline-none transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-slate-950 bg-emerald-500 hover:bg-emerald-600 focus:outline-none transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Verifying Credentials..." : "Authenticate Session"}
             </motion.button>

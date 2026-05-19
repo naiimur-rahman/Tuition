@@ -15,7 +15,6 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
   const pathname = usePathname();
   const router = useRouter();
   const [theme, setTheme] = useState<"dark" | "light">("dark");
-  const [activeRole, setActiveRole] = useState<"parent" | "tutor" | undefined>(selectedRole);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSectorDropdownOpen, setIsSectorDropdownOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -51,20 +50,6 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
-
-  // Update activeRole if prop changes, otherwise check sessionStorage
-  useEffect(() => {
-    if (selectedRole) {
-      setActiveRole(selectedRole);
-    } else {
-      const savedRole = sessionStorage.getItem("userRole");
-      if (savedRole === "parent" || savedRole === "tutor") {
-        setActiveRole(savedRole);
-      } else {
-        setActiveRole(undefined);
-      }
-    }
-  }, [selectedRole]);
 
   const toggleTheme = () => {
     if (theme === "dark") {
@@ -112,7 +97,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 className="flex items-center cursor-pointer"
               >
                 {/* Map & Tuition Combined Brand Logo */}
-                <div className="relative flex items-center justify-center w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/30 mr-2 sm:mr-2.5 shadow-[0_0_15px_rgba(16,185,129,0.2)] text-emerald-400 group overflow-hidden shrink-0">
+                <div className="relative flex items-center justify-center w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 mr-2 sm:mr-2.5 shadow-[0_0_15px_rgba(var(--theme-rgb),0.2)] text-emerald-400 group overflow-hidden shrink-0">
                   {/* Subtle inner pulse glowing ring */}
                   <span className="absolute inset-0 bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
                   
@@ -144,7 +129,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                   </svg>
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-heading font-extrabold text-base sm:text-lg tracking-tight bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent select-none whitespace-nowrap">
+                  <span className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-emerald-400 select-none whitespace-nowrap">
                     Tuition Console
                   </span>
                 </div>
@@ -170,7 +155,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 {isLinkActive("/map?type=tuition") && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -191,7 +176,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 {isLinkActive("/map?type=tutor") && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -209,7 +194,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 {isLinkActive("/about") && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -227,7 +212,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 {isLinkActive("/contact") && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -245,7 +230,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 {isLinkActive("/guidelines") && (
                   <motion.div
                     layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -256,12 +241,12 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
           {/* Right Controls */}
           <div className="flex items-center space-x-4">
 
-            {/* Theme Toggle Button (Desktop Only) */}
+            {/* Theme Toggle Button (Always Visible) */}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={toggleTheme}
-              className="p-2 rounded-xl border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors duration-200 cursor-pointer shadow-inner hidden sm:flex items-center justify-center"
+              className="p-2 rounded-xl border border-slate-800 bg-slate-900/40 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors duration-200 cursor-pointer shadow-inner flex items-center justify-center"
               aria-label="Toggle theme color mode"
             >
               {!mounted ? (
@@ -284,7 +269,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                   href="/dashboard"
                   className={`text-xs font-mono uppercase tracking-wider font-extrabold px-4 py-2 rounded-xl border transition-all duration-200 ${
                     isLinkActive("/dashboard")
-                      ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                      ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(var(--theme-rgb),0.15)]"
                       : "text-slate-400 hover:text-slate-200 bg-slate-900/30 border-slate-800/80 hover:border-slate-700"
                   }`}
                 >
@@ -310,7 +295,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-sans font-black tracking-wider uppercase px-4 py-2 rounded-xl text-xs hover:brightness-110 shadow-[0_4px_12px_rgba(16,185,129,0.15)] transition-all cursor-pointer border-none"
+                  className="bg-emerald-500 text-white font-sans font-black tracking-wider uppercase px-4 py-2 rounded-xl text-xs hover:brightness-110 shadow-[0_4px_12px_rgba(99,102,241,0.15)] transition-all cursor-pointer border-none"
                 >
                   Sign Up
                 </Link>
@@ -348,101 +333,34 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
             className="sm:hidden border-t bg-slate-950/95 border-slate-900 backdrop-blur-xl overflow-hidden shadow-2xl relative z-40 rounded-b-2xl"
           >
             <div className="px-3.5 py-4.5 space-y-3.5 flex flex-col">
-              {/* Mobile Role Switcher & Theme Row */}
-              {activeRole && (
-                <div className="flex items-center justify-between gap-2.5 pb-1">
-                  {/* Symmetrical Role Switches */}
-                  <div className="flex items-center bg-slate-950 border border-slate-900 rounded-xl p-0.5 w-full">
-                    <button
-                      onClick={() => {
-                        sessionStorage.setItem("userRole", "parent");
-                        setActiveRole("parent");
-                        window.location.reload();
-                      }}
-                      className={`flex-1 py-1.5 rounded-lg text-[10px] font-mono font-extrabold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                        activeRole === "parent"
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                          : "text-slate-500 hover:text-slate-300 border border-transparent"
-                      }`}
-                    >
-                      <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                      </svg>
-                      Tutors
-                    </button>
-                    <button
-                      onClick={() => {
-                        sessionStorage.setItem("userRole", "tutor");
-                        setActiveRole("tutor");
-                        window.location.reload();
-                      }}
-                      className={`flex-1 py-1.5 rounded-lg text-[10px] font-mono font-extrabold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                        activeRole === "tutor"
-                          ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20"
-                          : "text-slate-500 hover:text-slate-300 border border-transparent"
-                      }`}
-                    >
-                      <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                      Jobs
-                    </button>
-                  </div>
- 
-                  {/* Compact Mobile Theme Toggle */}
-                  <button
-                    onClick={toggleTheme}
-                    className="p-2 rounded-xl border border-slate-900 bg-slate-950 text-slate-400 hover:text-emerald-400 transition-colors flex items-center justify-center cursor-pointer shrink-0"
-                    aria-label="Toggle theme color mode"
-                  >
-                    {!mounted ? (
-                      <div className="w-3.5 h-3.5 animate-pulse rounded-full bg-slate-900" />
-                    ) : theme === "light" ? (
-                      <svg className="w-3.5 h-3.5 text-pink-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-              )}
- 
               {/* Navigation Links Grid (Exactly 2 Lines) */}
               <div className="grid grid-cols-2 gap-2.5">
-                {(!activeRole || activeRole === "tutor") && (
-                  <Link
-                    href="/map?type=tuition"
-                    className={`px-3 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-extrabold transition-all duration-200 flex items-center ${
-                      isLinkActive("/map?type=tuition")
-                        ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 border border-slate-900/60"
-                    }`}
-                  >
-                    <svg className="w-4 h-4 mr-2 text-emerald-500/80 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                    </svg>
-                    Find Jobs
-                  </Link>
-                )}
-                {(!activeRole || activeRole === "parent") && (
-                  <Link
-                    href="/map?type=tutor"
-                    className={`px-3 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-extrabold transition-all duration-200 flex items-center ${
-                      isLinkActive("/map?type=tutor")
-                        ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 border border-slate-900/60"
-                    }`}
-                  >
-                    <svg className="w-4 h-4 mr-2 text-emerald-500/80 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    Find Tutors
-                  </Link>
-                )}
+                <Link
+                  href="/map?type=tuition"
+                  className={`px-3 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-extrabold transition-all duration-200 flex items-center ${
+                    isLinkActive("/map?type=tuition")
+                      ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 border border-slate-900/60"
+                  }`}
+                >
+                  <svg className="w-4 h-4 mr-2 text-emerald-500/80 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                  </svg>
+                  Find Jobs
+                </Link>
+                <Link
+                  href="/map?type=tutor"
+                  className={`px-3 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider font-extrabold transition-all duration-200 flex items-center ${
+                    isLinkActive("/map?type=tutor")
+                      ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
+                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40 border border-slate-900/60"
+                  }`}
+                >
+                  <svg className="w-4 h-4 mr-2 text-emerald-500/80 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                  Find Tutors
+                </Link>
                 <Link
                   href="/about"
                   className={`px-3 py-2.5 rounded-xl text-[11px] font-mono uppercase tracking-wider font-bold transition-all duration-200 flex items-center ${
@@ -520,7 +438,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                     </button>
                   </Link>
                   <Link href="/register" className="w-full">
-                    <button className="w-full bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-mono uppercase tracking-wider font-extrabold py-3 rounded-xl text-xs transition-all duration-200 flex items-center justify-center cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] border-none">
+                    <button className="w-full bg-emerald-500 text-white font-mono uppercase tracking-wider font-extrabold py-3 rounded-xl text-xs transition-all duration-200 flex items-center justify-center cursor-pointer shadow-[0_4px_12px_rgba(99,102,241,0.15)] border-none">
                       Sign up
                     </button>
                   </Link>

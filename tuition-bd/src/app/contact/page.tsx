@@ -11,7 +11,7 @@ export default function ContactPage() {
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
           backgroundImage: `
-            radial-gradient(circle, rgba(16,185,129,0.15) 1px, transparent 1px),
+            radial-gradient(circle, rgba(var(--theme-rgb),0.15) 1px, transparent 1px),
             linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
             linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
           `,
@@ -30,7 +30,7 @@ export default function ContactPage() {
             Get in touch
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--foreground)] mt-4">
-            Contact <span className="bg-gradient-to-r from-[#10b981] via-[#06b6d4] to-[#6366f1] bg-clip-text text-transparent">Tuition Console</span>
+            Contact <span className="text-emerald-400">Tuition Console</span>
           </h1>
           <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
             Have questions, feedback, or need premium enterprise support? We are always here to assist you.
@@ -62,7 +62,7 @@ export default function ContactPage() {
             <h3 className="text-lg font-bold text-[var(--foreground)] mb-1">Office Location</h3>
             <p className="text-xs sm:text-sm text-slate-400 mb-4">Paikpara, Mirpur-1</p>
             <span className="text-xs sm:text-sm font-mono font-bold text-indigo-400">
-              Dhaka, Bangladesh
+              Bangladesh
             </span>
           </div>
 

@@ -279,11 +279,11 @@ export default function ForgotPassword() {
                   </div>
                 </div>
                 <motion.button
-                  whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(16,185,129,0.3)" }}
+                  whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(var(--theme-rgb),0.3)" }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 px-4 font-bold rounded-xl text-slate-950 bg-emerald-500 hover:bg-emerald-600 transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] disabled:opacity-50"
+                  className="w-full py-3.5 px-4 font-bold rounded-xl text-slate-950 bg-emerald-500 hover:bg-emerald-600 transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)] disabled:opacity-50"
                 >
                   {loading ? "Updating..." : "Finalize & Update"}
                 </motion.button>

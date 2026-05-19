@@ -52,11 +52,7 @@ export default function Register() {
     actualLatitude: undefined as number | undefined,
     actualLongitude: undefined as number | undefined,
     gender: "",
-    studentClass: "",
-    hoursRequired: "",
-    tutorGenderPreference: "",
-    salary: "",
-    numberOfChildren: "",
+    preferable_time: "",
   });
   const [nidImageUrl, setNidImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -286,6 +282,16 @@ export default function Register() {
         setLoading(false);
         return;
       }
+      if (!data.gender || (data.gender !== "Male" && data.gender !== "Female")) {
+        setError("Tutors must specify gender (Male or Female).");
+        setLoading(false);
+        return;
+      }
+      if (!data.preferable_time) {
+        setError("Tutors must specify preferable tuition time.");
+        setLoading(false);
+        return;
+      }
       if (!nidImageUrl || !universityIdImageUrl || !selfieImageUrl) {
         setError("Please upload your National ID, Student ID, and Tutor Picture to verify your tutor account.");
         setLoading(false);
@@ -331,7 +337,7 @@ export default function Register() {
         <div className="text-center space-y-2">
           {/* Logo Badge */}
           <Link href="/" className="inline-block">
-            <div className="text-emerald-400 font-mono text-xs uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full w-fit mx-auto mb-2 shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+            <div className="text-emerald-400 font-mono text-xs uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full w-fit mx-auto mb-2 shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)]">
               Tuition Console
             </div>
           </Link>
@@ -425,7 +431,7 @@ export default function Register() {
               <input
                 type="text"
                 required
-                placeholder="e.g. Block D, Lalmatia, Dhaka"
+                placeholder="e.g. Block D, Lalmatia, Bangladesh"
                 className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
                 value={data.address}
                 onChange={(e) => setData({ ...data, address: e.target.value })}
@@ -516,7 +522,23 @@ export default function Register() {
                       <option value="" disabled className="bg-slate-950 text-slate-500">-- Select Gender --</option>
                       <option value="Male" className="bg-slate-950 text-slate-100">Male</option>
                       <option value="Female" className="bg-slate-950 text-slate-100">Female</option>
-                      <option value="Other" className="bg-slate-950 text-slate-100">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Preferable Time</label>
+                    <select
+                      value={data.preferable_time}
+                      required={data.role === "TUTOR"}
+                      onChange={(e) => setData({ ...data, preferable_time: e.target.value })}
+                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
+                    >
+                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select Preferable Time --</option>
+                      <option value="Available All Day" className="bg-slate-950 text-slate-100">Available All Day</option>
+                      <option value="Morning (8:00 AM - 12:00 PM)" className="bg-slate-950 text-slate-100">Morning (8:00 AM - 12:00 PM)</option>
+                      <option value="Afternoon (12:00 PM - 4:00 PM)" className="bg-slate-950 text-slate-100">Afternoon (12:00 PM - 4:00 PM)</option>
+                      <option value="Evening (4:00 PM - 8:00 PM)" className="bg-slate-950 text-slate-100">Evening (4:00 PM - 8:00 PM)</option>
+                      <option value="Night (8:00 PM - 11:00 PM)" className="bg-slate-950 text-slate-100">Night (8:00 PM - 11:00 PM)</option>
                     </select>
                   </div>
 
@@ -749,105 +771,7 @@ export default function Register() {
             )}
           </AnimatePresence>
 
-          <AnimatePresence mode="wait">
-            {data.role === "PARENT" && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="space-y-4 overflow-hidden pt-2"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Student Class / Grade</label>
-                    <select
-                      value={data.studentClass}
-                      onChange={(e) => setData({ ...data, studentClass: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
-                    >
-                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select Class --</option>
-                      <option value="Play" className="bg-slate-950 text-slate-100">Play</option>
-                      <option value="Nursery" className="bg-slate-950 text-slate-100">Nursery</option>
-                      <option value="KG" className="bg-slate-950 text-slate-100">Kindergarten (KG)</option>
-                      <option value="Class 1" className="bg-slate-950 text-slate-100">Class 1</option>
-                      <option value="Class 2" className="bg-slate-950 text-slate-100">Class 2</option>
-                      <option value="Class 3" className="bg-slate-950 text-slate-100">Class 3</option>
-                      <option value="Class 4" className="bg-slate-950 text-slate-100">Class 4</option>
-                      <option value="Class 5" className="bg-slate-950 text-slate-100">Class 5</option>
-                      <option value="Class 6" className="bg-slate-950 text-slate-100">Class 6</option>
-                      <option value="Class 7" className="bg-slate-950 text-slate-100">Class 7</option>
-                      <option value="Class 8" className="bg-slate-950 text-slate-100">Class 8</option>
-                      <option value="Class 9" className="bg-slate-950 text-slate-100">Class 9</option>
-                      <option value="Class 10 (SSC)" className="bg-slate-950 text-slate-100">Class 10 (SSC)</option>
-                      <option value="Class 11 (HSC 1st Year)" className="bg-slate-950 text-slate-100">Class 11 (HSC 1st Year)</option>
-                      <option value="Class 12 (HSC 2nd Year)" className="bg-slate-950 text-slate-100">Class 12 (HSC 2nd Year)</option>
-                      <option value="O-Level" className="bg-slate-950 text-slate-100">O-Level</option>
-                      <option value="A-Level" className="bg-slate-950 text-slate-100">A-Level</option>
-                      <option value="Admission Test" className="bg-slate-950 text-slate-100">Admission Test</option>
-                      <option value="University" className="bg-slate-950 text-slate-100">University</option>
-                      <option value="Other" className="bg-slate-950 text-slate-100">Other</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Hours Required (Per Day)</label>
-                    <select
-                      value={data.hoursRequired}
-                      onChange={(e) => setData({ ...data, hoursRequired: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
-                    >
-                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select Hours --</option>
-                      <option value="1 Hour" className="bg-slate-950 text-slate-100">1 Hour</option>
-                      <option value="1.5 Hours" className="bg-slate-950 text-slate-100">1.5 Hours</option>
-                      <option value="2 Hours" className="bg-slate-950 text-slate-100">2 Hours</option>
-                      <option value="3+ Hours" className="bg-slate-950 text-slate-100">3+ Hours</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Tutor Gender Preference</label>
-                    <select
-                      value={data.tutorGenderPreference}
-                      onChange={(e) => setData({ ...data, tutorGenderPreference: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
-                    >
-                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select Preference --</option>
-                      <option value="Male" className="bg-slate-950 text-slate-100">Male Tutor</option>
-                      <option value="Female" className="bg-slate-950 text-slate-100">Female Tutor</option>
-                      <option value="Any" className="bg-slate-950 text-slate-100">Any (No Preference)</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Expected Salary</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 5000 BDT/month"
-                      value={data.salary}
-                      onChange={(e) => setData({ ...data, salary: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Number of Children</label>
-                    <select
-                      value={data.numberOfChildren}
-                      onChange={(e) => setData({ ...data, numberOfChildren: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
-                    >
-                      <option value="" disabled className="bg-slate-950 text-slate-500">-- Select --</option>
-                      <option value="1" className="bg-slate-950 text-slate-100">1 Child</option>
-                      <option value="2" className="bg-slate-950 text-slate-100">2 Children</option>
-                      <option value="3" className="bg-slate-950 text-slate-100">3 Children</option>
-                      <option value="4+" className="bg-slate-950 text-slate-100">4+ Children</option>
-                    </select>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Removed Parent requirements to keep Guardian onboarding clean */}
 
           {error && (
             <motion.p
@@ -861,11 +785,11 @@ export default function Register() {
 
           <div className="pt-2">
             <motion.button
-              whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(16,185,129,0.3)" }}
+              whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(var(--theme-rgb),0.3)" }}
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading || uploading || uploadingStudentId || uploadingSelfie}
-              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-slate-950 bg-emerald-500 hover:bg-emerald-600 focus:outline-none transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-slate-950 bg-emerald-500 hover:bg-emerald-600 focus:outline-none transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Creating Account..." : (uploading || uploadingStudentId || uploadingSelfie) ? "Waiting for file upload..." : "Create Account"}
             </motion.button>

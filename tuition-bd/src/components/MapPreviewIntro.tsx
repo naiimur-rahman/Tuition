@@ -15,7 +15,7 @@ interface MapPreviewIntroProps {
 
 type OnboardingStep = "scanning" | "posting" | "matching" | "connecting" | "success";
 
-// Converts Dhaka coordinates to exact flat SVG canvas dimensions (480x420)
+// Converts Bangladesh coordinates to exact flat SVG canvas dimensions (480x420)
 const mapToSvgCoords = (lat: number, lng: number) => {
   const latMin = 23.68;
   const latMax = 23.86;
@@ -113,7 +113,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
 
   // Metadata describing our 5-stage side timeline steps in easy English
   const stepsList = [
-    { key: "scanning", title: "1. Finding Locations", desc: "Loading Dhaka map sectors and live database." },
+    { key: "scanning", title: "1. Finding Locations", desc: "Loading Bangladesh map sectors and live database." },
     { key: "posting", title: "2. Guardian Posts Job", desc: "A parent posts a new tuition request on the map." },
     { key: "matching", title: "3. Finding Tutors", desc: "Our platform searches for nearby verified tutors." },
     { key: "connecting", title: "4. Secure Escrow Lock", desc: "Securing payment and trust channels between both sides." },
@@ -129,7 +129,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
         className="absolute inset-0 opacity-10 pointer-events-none"
         style={{
           backgroundImage: `
-            radial-gradient(circle, rgba(16,185,129,0.15) 1px, transparent 1px),
+            radial-gradient(circle, rgba(var(--theme-rgb),0.15) 1px, transparent 1px),
             linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
             linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
           `,
@@ -141,7 +141,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
       <div className="relative z-20 text-center max-w-xl w-full px-2 space-y-1 md:space-y-2 mb-4 md:mb-6 flex-shrink-0">
         <h2 className="text-lg md:text-xl lg:text-2xl font-black text-white tracking-tight pt-1">
           How{" "}
-          <span className="bg-gradient-to-r from-[#10b981] via-[#06b6d4] to-[#6366f1] bg-clip-text text-transparent">
+          <span className="text-emerald-400">
             Tuition Console
           </span>{" "}
           Works
@@ -186,7 +186,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
                     ) : isActive ? (
                       <div className="relative flex h-5 w-5 items-center justify-center">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/35 opacity-75" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(var(--theme-rgb),0.8)]" />
                       </div>
                     ) : (
                       <div className="w-5 h-5 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center">
@@ -228,7 +228,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
             >
               <div className="relative flex h-5 w-5 mt-0.5 flex-shrink-0 items-center justify-center">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400/35 opacity-75" />
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(var(--theme-rgb),0.8)]" />
               </div>
               <div>
                 <h4 className="text-[10px] font-mono tracking-widest font-black text-emerald-400 uppercase leading-none">
@@ -263,7 +263,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
               <motion.div
                 animate={{ y: ["-100%", "100%"] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent shadow-[0_0_10px_rgba(52,211,153,0.3)] pointer-events-none"
+                className="absolute inset-x-0 h-0.5 bg-emerald-500/20 pointer-events-none"
               />
             </>
           )}
@@ -326,7 +326,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
               </span>
 
               {/* Tutor Profile Avatar Card */}
-              <div className="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-900 border-2 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]">
+              <div className="relative flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-900 border-2 border-emerald-400 shadow-[0_0_15px_rgba(var(--theme-rgb),0.4)]">
                 {step === "success" ? (
                   // Happy Smiley tutor
                   <span className="text-lg sm:text-xl">🤗</span>
@@ -365,13 +365,13 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
               className="absolute -translate-x-1/2 -translate-y-1/2 z-40 flex flex-col items-center pointer-events-none"
             >
               <span className="absolute flex h-14 w-14 items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10b981]/20 opacity-75" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#14b8a6]/20 opacity-75" />
                 <span className="animate-pulse absolute inline-flex h-10 w-10 rounded-full bg-emerald-500/10" />
               </span>
 
               {/* Brand Logo Pin Badge */}
-              <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border border-[#10b981]/80 shadow-[0_0_20px_rgba(16,185,129,0.35)]">
-                <svg className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 text-[#10b981] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+              <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border border-[#14b8a6]/80 shadow-[0_0_20px_rgba(var(--theme-rgb),0.35)]">
+                <svg className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 text-[#14b8a6] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                   {/* Teardrop Pin Outline */}
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
                   {/* Mortarboard Diamond */}
@@ -382,7 +382,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
               </div>
               
               <div className="mt-1.5 text-[8.5px] sm:text-[10px] font-black font-sans tracking-tight bg-slate-950/90 border border-slate-800/80 px-2 py-0.5 rounded-md whitespace-nowrap shadow-lg">
-                <span className="bg-gradient-to-r from-[#10b981] via-[#06b6d4] to-[#6366f1] bg-clip-text text-transparent">
+                <span className="text-emerald-400">
                   Tuition Console
                 </span>
               </div>
@@ -471,10 +471,10 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
                 initial={{ opacity: 0, y: 30, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                className="absolute bottom-3 sm:bottom-6 inset-x-3 sm:inset-x-4 z-40 glass-panel p-3 sm:p-4 rounded-2xl border border-[#10b981]/30 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
+                className="absolute bottom-3 sm:bottom-6 inset-x-3 sm:inset-x-4 z-40 glass-panel p-3 sm:p-4 rounded-2xl border border-[#14b8a6]/30 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
               >
                 <div className="flex items-center space-x-2 sm:space-x-3 text-left">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#10b981]/10 flex items-center justify-center text-[#10b981] border border-[#10b981]/30 flex-shrink-0 animate-pulse">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#14b8a6]/10 flex items-center justify-center text-[#14b8a6] border border-[#14b8a6]/30 flex-shrink-0 animate-pulse">
                     <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       {/* Teardrop Pin Outline */}
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />

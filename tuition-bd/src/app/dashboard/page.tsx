@@ -80,6 +80,10 @@ export default function Dashboard() {
   const [educationType, setEducationType] = useState("select"); // "select" or "custom"
   const [customEducation, setCustomEducation] = useState("");
   const [bio, setBio] = useState("");
+  const [gender, setGender] = useState("");
+  const [preferableTime, setPreferableTime] = useState("");
+  const [isActive, setIsActive] = useState(true);
+  const [reactivationRequested, setReactivationRequested] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState("UNVERIFIED");
   const [rejectionReason, setRejectionReason] = useState("");
   const [rejectedAt, setRejectedAt] = useState("");
@@ -99,6 +103,10 @@ export default function Dashboard() {
   const [popupOpen, setPopupOpen] = useState(false);
   const [popupType, setPopupType] = useState<"success" | "error" | "info">("info");
   const [popupMessage, setPopupMessage] = useState("");
+
+  const [requestModalJob, setRequestModalJob] = useState<any>(null);
+  const [helplineModalJob, setHelplineModalJob] = useState<any>(null);
+  const [isAccepting, setIsAccepting] = useState(false);
 
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
@@ -224,7 +232,7 @@ export default function Dashboard() {
     }
   }, [status, router]);
 
-  useEffect(() => {
+  const loadDashboardData = () => {
     if (session) {
       if ((session.user as any)?.role === "ADMIN") {
         router.push("/dashboard/admin");
@@ -246,6 +254,10 @@ export default function Dashboard() {
             }
           }
           if (data.bio) setBio(data.bio);
+          if (data.gender) setGender(data.gender);
+          if (data.preferable_time) setPreferableTime(data.preferable_time);
+          if (data.is_active !== undefined) setIsActive(data.is_active);
+          if (data.reactivationRequested !== undefined) setReactivationRequested(data.reactivationRequested);
           if (data.verificationStatus) setVerificationStatus(data.verificationStatus);
           if (data.rejectionReason) setRejectionReason(data.rejectionReason);
           if (data.rejectedAt) setRejectedAt(data.rejectedAt);
@@ -271,6 +283,49 @@ export default function Dashboard() {
         })
         .catch((err) => console.error("Error loading profile:", err));
     }
+  };
+
+  const handleAcceptRequest = async (jobId: string, paymentType: "instant" | "later") => {
+    setIsAccepting(true);
+    try {
+      const res = await fetch("/api/jobs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId,
+          action: "accept",
+          paymentType
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setRequestModalJob(null);
+        if (paymentType === "instant") {
+          setPopupType("success");
+          setPopupMessage("✓ Request accepted and parent contact details unlocked successfully!");
+          setPopupOpen(true);
+          loadDashboardData();
+        } else {
+          setHelplineModalJob(updated);
+          loadDashboardData();
+        }
+      } else {
+        const txt = await res.text();
+        setPopupType("error");
+        setPopupMessage(txt || "Failed to accept direct request.");
+        setPopupOpen(true);
+      }
+    } catch (e) {
+      setPopupType("error");
+      setPopupMessage("Network error accepting request.");
+      setPopupOpen(true);
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDashboardData();
   }, [session]);
 
   if (status === "loading") {
@@ -289,6 +344,35 @@ export default function Dashboard() {
   const role = (session.user as any)?.role || "PARENT";
   const email = session.user?.email || "";
 
+  const handleRequestReactivation = async () => {
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reactivationRequested: true,
+        }),
+      });
+      if (res.ok) {
+        setReactivationRequested(true);
+        setPopupType("success");
+        setPopupMessage("Your reactivation request has been sent successfully. Please allow up to 24 hours for review, or call our helpline at 096-96-847-847 for immediate assistance.");
+        setPopupOpen(true);
+      } else {
+        setPopupType("error");
+        setPopupMessage("Failed to send reactivation request.");
+        setPopupOpen(true);
+      }
+    } catch (err) {
+      console.error(err);
+      setPopupType("error");
+      setPopupMessage("An error occurred while sending reactivation request.");
+      setPopupOpen(true);
+    }
+  };
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingProfile(true);
@@ -304,6 +388,9 @@ export default function Dashboard() {
           address, 
           bio, 
           education,
+          gender: role === "TUTOR" ? gender : undefined,
+          preferable_time: role === "TUTOR" ? preferableTime : undefined,
+          is_active: role === "TUTOR" ? isActive : undefined,
           latitude,
           longitude,
           actualLatitude,
@@ -339,7 +426,7 @@ export default function Dashboard() {
                 Welcome, {session.user?.name || "Operator"}
               </h1>
               <p className="text-slate-400 text-sm font-mono flex items-center">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
+                <span className="h-2 w-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(var(--theme-rgb),0.8)] animate-pulse" />
                 Logged in as: <span className="text-emerald-400 ml-1 font-bold uppercase tracking-wider">{role}</span>
                 <span className="ml-3 px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs rounded font-bold font-mono">
                   {role === "TUTOR"
@@ -351,7 +438,7 @@ export default function Dashboard() {
 
             {role === "TUTOR" ? (
               verificationStatus === "VERIFIED" ? (
-                <div className="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2.5 rounded-xl font-mono text-xs uppercase tracking-wider shadow-[0_0_10px_rgba(16,185,129,0.05)] w-fit font-bold">
+                <div className="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2.5 rounded-xl font-mono text-xs uppercase tracking-wider shadow-[0_0_10px_rgba(var(--theme-rgb),0.05)] w-fit font-bold">
                   <svg className="w-4 h-4 mr-1 text-emerald-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
@@ -398,7 +485,7 @@ export default function Dashboard() {
                 </div>
               )
             ) : (
-              <div className="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2.5 rounded-xl font-mono text-xs uppercase tracking-wider shadow-[0_0_10px_rgba(16,185,129,0.05)] w-fit">
+              <div className="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2.5 rounded-xl font-mono text-xs uppercase tracking-wider shadow-[0_0_10px_rgba(var(--theme-rgb),0.05)] w-fit">
                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -407,6 +494,42 @@ export default function Dashboard() {
             )}
           </div>
         </div>
+
+        {role === "TUTOR" && !isActive && (
+          <div className="glass-card rounded-2xl p-6 md:p-8 border border-red-500/20 bg-slate-950 mb-8 relative overflow-hidden animate-fadeIn">
+            <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-red-500/5 rounded-full filter blur-[50px] pointer-events-none" />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <h2 className="text-xl font-bold font-heading text-red-400 flex items-center gap-2">
+                  <span className="animate-pulse h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                  Account Deactivated
+                </h2>
+                <p className="text-xs text-slate-400 leading-relaxed font-sans max-w-2xl">
+                  Your tutor profile is currently marked as inactive. To reactivate your account and start receiving tuition requests, please call our call center or click "Request Reactivation" below to notify the administrator.
+                </p>
+                <div className="flex items-center gap-2 bg-red-500/5 border border-red-500/10 rounded-xl px-4 py-2 text-xs font-mono text-slate-300 w-fit">
+                  <span>Helpline:</span>
+                  <span className="font-bold text-red-400">096-96-847-847</span>
+                </div>
+              </div>
+              <div className="shrink-0">
+                {reactivationRequested ? (
+                  <div className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 px-5 py-3 rounded-xl text-xs font-mono font-bold uppercase tracking-wider text-center animate-pulse">
+                    ✓ Reactivation Request Pending
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleRequestReactivation}
+                    className="bg-red-600 hover:bg-red-500 text-white font-extrabold px-6 py-3 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider shadow-[0_4px_12px_rgba(239,68,68,0.15)] border-none"
+                  >
+                    Request Reactivation
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -438,7 +561,7 @@ export default function Dashboard() {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
-                    placeholder="Banani, Dhaka"
+                    placeholder="Banani, Bangladesh"
                   />
                 </div>
 
@@ -512,6 +635,50 @@ export default function Dashboard() {
                         className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
                         placeholder="e.g. O-Level Math and Physics Specialist"
                       />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Gender</label>
+                        <select
+                          value={gender}
+                          onChange={(e) => setGender(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
+                        >
+                          <option value="" disabled className="bg-slate-950 text-slate-500">-- Select --</option>
+                          <option value="Male" className="bg-slate-950 text-slate-100">Male</option>
+                          <option value="Female" className="bg-slate-950 text-slate-100">Female</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Preferable Time</label>
+                        <select
+                          value={preferableTime}
+                          onChange={(e) => setPreferableTime(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
+                        >
+                          <option value="" disabled className="bg-slate-950 text-slate-500">-- Select --</option>
+                          <option value="Available All Day" className="bg-slate-950 text-slate-100">Available All Day</option>
+                           <option value="Morning (8:00 AM - 12:00 PM)" className="bg-slate-950 text-slate-100">Morning (8:00 AM - 12:00 PM)</option>
+                           <option value="Afternoon (12:00 PM - 4:00 PM)" className="bg-slate-950 text-slate-100">Afternoon (12:00 PM - 4:00 PM)</option>
+                           <option value="Evening (4:00 PM - 8:00 PM)" className="bg-slate-950 text-slate-100">Evening (4:00 PM - 8:00 PM)</option>
+                           <option value="Night (8:00 PM - 11:00 PM)" className="bg-slate-950 text-slate-100">Night (8:00 PM - 11:00 PM)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3 pt-2">
+                      <input
+                        type="checkbox"
+                        id="isActive"
+                        checked={isActive}
+                        onChange={(e) => setIsActive(e.target.checked)}
+                        className="w-4 h-4 text-emerald-500 bg-slate-950 border-slate-800 rounded focus:ring-emerald-500 focus:ring-offset-slate-950 cursor-pointer"
+                      />
+                      <label htmlFor="isActive" className="text-xs font-mono uppercase text-slate-300 font-semibold cursor-pointer select-none">
+                        Active & Available for Assignments
+                      </label>
                     </div>
                   </>
                 )}
@@ -865,7 +1032,7 @@ export default function Dashboard() {
                     <button
                       type="submit"
                       disabled={verificationStatus === "PENDING" || isSubmittingVerify}
-                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.1)] flex items-center justify-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed border-none"
+                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(var(--theme-rgb),0.1)] flex items-center justify-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed border-none"
                     >
                       {isSubmittingVerify ? (
                         <>
@@ -878,22 +1045,97 @@ export default function Dashboard() {
                     </button>
                   </form>
 
-                  {/* ASSIGNED TUITION JOBS & SECURE MATCH PAYMENTS FOR TUTORS */}
-                  <div className="mt-8 border-t border-slate-800/80 pt-8 space-y-6">
-                    <div>
-                      <h2 className="text-xl font-bold font-heading text-white">Assigned Tuition Jobs</h2>
-                      <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">Tuition assignments requiring match payments or active details</p>
-                    </div>
-                    <div className="h-px bg-slate-800/80" />
+                  {/* DIRECT TUITION REQUESTS SECTION */}
+                  {(() => {
+                    const directRequests = (tutorJobs || []).filter((job: any) => job.status === "REQUESTED");
+                    const activeAssignments = (tutorJobs || []).filter((job: any) => job.status !== "REQUESTED");
 
-                    {(!tutorJobs || tutorJobs.length === 0) ? (
-                      <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 text-center space-y-2">
-                        <p className="text-xs text-slate-500 font-mono italic">No active tuition job assignments found.</p>
-                        <p className="text-[11px] text-slate-400 font-sans">Apply to open tuition job markers directly on the map to get assigned!</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {tutorJobs.map((job: any) => (
+                    return (
+                      <>
+                        <div className="mt-8 border-t border-slate-800/80 pt-8 space-y-6">
+                          <div>
+                            <h2 className="text-xl font-bold font-heading text-white">Direct Tuition Requests</h2>
+                            <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">Proposals sent to you directly by parents</p>
+                          </div>
+                          <div className="h-px bg-slate-800/80" />
+
+                          {(!directRequests || directRequests.length === 0) ? (
+                            <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 text-center">
+                              <p className="text-xs text-slate-500 font-mono italic">No direct tuition requests found.</p>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {directRequests.map((job: any) => (
+                                <div key={job.id} className="bg-slate-950/60 border border-slate-850 p-4.5 rounded-2xl space-y-3 relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-extrabold">
+                                      Direct Request
+                                    </span>
+                                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-md uppercase font-extrabold tracking-wider border bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+                                      Pending Action
+                                    </span>
+                                  </div>
+
+                                  <div className="space-y-1">
+                                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Tuition Code</span>
+                                    <span className="text-xs text-slate-200 font-bold block">TCT-{String(job.jobSeq && job.jobSeq > 0 ? job.jobSeq : 1).padStart(3, '0')}</span>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-2 text-[10px] font-mono py-1">
+                                    <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-850 text-left">
+                                      <span className="text-slate-500 block text-[8px] uppercase font-bold">Class</span>
+                                      <span className="text-white font-bold">{job.classLevel}</span>
+                                    </div>
+                                    <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-850 text-left">
+                                      <span className="text-slate-500 block text-[8px] uppercase font-bold">Student Gender</span>
+                                      <span className="text-white font-bold">{job.studentGender}</span>
+                                    </div>
+                                    <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-850 text-left">
+                                      <span className="text-slate-500 block text-[8px] uppercase font-bold">Subject</span>
+                                      <span className="text-white font-bold truncate block">{job.subject}</span>
+                                    </div>
+                                    <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-850 text-left">
+                                      <span className="text-slate-500 block text-[8px] uppercase font-bold">Duration</span>
+                                      <span className="text-white font-bold truncate block">{job.duration}</span>
+                                    </div>
+                                    <div className="bg-slate-900/60 p-2 rounded-lg border border-slate-850 text-left col-span-2">
+                                      <span className="text-slate-500 block text-[8px] uppercase font-bold">Time Preference</span>
+                                      <span className="text-white font-bold truncate block">{job.preferableTime}</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850 text-[10px] text-amber-400 font-mono text-center">
+                                    ⚠️ To know full details, please contact Tuition Console.
+                                  </div>
+
+                                  <button
+                                    onClick={() => setRequestModalJob(job)}
+                                    className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs font-sans transition duration-200 cursor-pointer border-none flex items-center justify-center"
+                                  >
+                                    Accept Request
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* ASSIGNED TUITION JOBS & SECURE MATCH PAYMENTS FOR TUTORS */}
+                        <div className="mt-8 border-t border-slate-800/80 pt-8 space-y-6">
+                          <div>
+                            <h2 className="text-xl font-bold font-heading text-white">Assigned Tuition Jobs</h2>
+                            <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">Tuition assignments requiring match payments or active details</p>
+                          </div>
+                          <div className="h-px bg-slate-800/80" />
+
+                          {(!activeAssignments || activeAssignments.length === 0) ? (
+                            <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 text-center space-y-2">
+                              <p className="text-xs text-slate-500 font-mono italic">No active tuition job assignments found.</p>
+                              <p className="text-[11px] text-slate-400 font-sans">Apply to open tuition job markers directly on the map to get assigned!</p>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {activeAssignments.map((job: any) => (
                           <div key={job.id} className="bg-slate-950/60 border border-slate-850 p-4.5 rounded-2xl space-y-3 relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-300">
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-purple-500/10 text-purple-400 border-purple-500/20 font-extrabold">
@@ -1019,6 +1261,9 @@ export default function Dashboard() {
                       </div>
                     )}
                   </div>
+                  </>
+                  );
+                  })()}
 
                   {/* DYNAMIC MATCH PAYMENT HISTORY LOG FOR TUTORS */}
                   <div className="mt-8 border-t border-slate-800/80 pt-8 space-y-6">
@@ -1147,6 +1392,7 @@ export default function Dashboard() {
                         subject: formData.get("subject"),
                         classLevel: formData.get("classLevel"),
                         salary: formData.get("salary"),
+                        tutorRequirement: formData.get("tutorRequirement"),
                         description: formData.get("description"),
                         latitude: 23.8103,
                         longitude: 90.4125,
@@ -1238,6 +1484,17 @@ export default function Dashboard() {
                     </div>
 
                     <div className="space-y-1">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Tutor Varsity/Dept Requirement</label>
+                      <input
+                        type="text"
+                        name="tutorRequirement"
+                        required
+                        placeholder="e.g. Public Varsity Only, CSE Department, BUET/DU Students Only"
+                        className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition duration-200"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
                       <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Detailed Description</label>
                       <textarea
                         name="description"
@@ -1251,13 +1508,13 @@ export default function Dashboard() {
                       <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
-                      GPS location coordinates will mock to central Dhaka area for mapping simulation.
+                      GPS location coordinates will mock to central Bangladesh area for mapping simulation.
                     </div>
 
                     <button
                       type="submit"
                       disabled={isSubmittingJob}
-                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2 disabled:opacity-50"
+                      className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)] flex items-center justify-center space-x-2 disabled:opacity-50"
                     >
                       {isSubmittingJob ? (
                         <>
@@ -1294,8 +1551,9 @@ export default function Dashboard() {
                               <span className={`shrink-0 text-[9px] font-mono px-2 py-0.5 rounded border font-extrabold uppercase ${
                                 job.status === "OPEN" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
                                 job.status === "ASSIGNED" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+                                job.status === "PENDING" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
                                 "bg-slate-500/10 text-slate-400 border-slate-500/20"
-                              }`}>{job.status}</span>
+                              }`}>{job.status === "PENDING" ? "PENDING REVIEW" : job.status}</span>
                             </div>
 
                             <div className="flex items-center justify-between pt-2 border-t border-slate-800/60">
@@ -1349,41 +1607,25 @@ export default function Dashboard() {
                             </div>
 
                             <div className="space-y-1 pt-1.5 border-t border-slate-900">
-                              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Education & Qualification</span>
+                              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">University / Education</span>
                               <p className="text-xs text-emerald-300 leading-relaxed font-sans font-semibold">
                                 {t.education}
                               </p>
                             </div>
 
-                            <div className="bg-slate-900/40 p-3.5 rounded-xl text-xs space-y-1 text-slate-300 font-sans text-left mt-2 border border-slate-800/80">
-                              <p><span className="text-slate-500 font-mono text-[10px] uppercase font-bold">Tutor Name:</span> <span className="text-white font-bold">{t.name}</span></p>
-                              <p><span className="text-slate-500 font-mono text-[10px] uppercase font-bold">Contact Phone:</span> <span className="text-emerald-400 font-mono font-bold select-all">{t.phone}</span></p>
-                              <p><span className="text-slate-500 font-mono text-[10px] uppercase font-bold">Email Address:</span> <span className="text-slate-300 font-mono select-all">{t.email}</span></p>
+                            <div className="space-y-1 pt-1.5 border-t border-slate-900">
+                              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Subjects</span>
+                              <p className="text-xs text-emerald-400 leading-relaxed font-sans font-semibold">
+                                {t.subject}
+                              </p>
                             </div>
 
-                            {/* Tutor Identity Visual Previews */}
-                            {(t.selfieImageUrl || t.universityIdImageUrl) && (
-                              <div className="mt-3 grid grid-cols-2 gap-3 pt-3 border-t border-slate-800/60">
-                                {t.selfieImageUrl && (
-                                  <div className="space-y-1.5 flex flex-col">
-                                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Tutor Photo</span>
-                                    <div className="relative h-28 w-full rounded-xl overflow-hidden border border-slate-800 group-hover:border-emerald-500/40 transition-colors shadow-lg">
-                                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                                      <img src={t.selfieImageUrl} alt="Tutor Selfie" className="absolute inset-0 w-full h-full object-cover" />
-                                    </div>
-                                  </div>
-                                )}
-                                {t.universityIdImageUrl && (
-                                  <div className="space-y-1.5 flex flex-col">
-                                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">University ID</span>
-                                    <div className="relative h-28 w-full rounded-xl overflow-hidden border border-slate-800 group-hover:border-emerald-500/40 transition-colors shadow-lg">
-                                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                                      <img src={t.universityIdImageUrl} alt="University ID" className="absolute inset-0 w-full h-full object-cover" />
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                            <div className="space-y-1 pt-1.5 border-t border-slate-900">
+                              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block font-bold">Tutor Bio</span>
+                              <p className="text-xs text-slate-300 leading-relaxed font-sans italic">
+                                "{t.bio}"
+                              </p>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1469,7 +1711,7 @@ export default function Dashboard() {
                         <button
                           type="submit"
                           disabled={isSubmittingReview}
-                          className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2 disabled:opacity-50"
+                          className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 px-4 rounded-xl text-sm transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)] flex items-center justify-center space-x-2 disabled:opacity-50"
                         >
                           {isSubmittingReview ? (
                             <>
@@ -1508,7 +1750,7 @@ export default function Dashboard() {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-[0_10px_40px_rgba(0,0,0,0.8)] text-center space-y-6 transform scale-100 transition-all duration-300">
             {/* Decorative hotline icon header */}
-            <div className="mx-auto w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+            <div className="mx-auto w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(var(--theme-rgb),0.15)]">
               <svg className="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
@@ -1589,7 +1831,7 @@ export default function Dashboard() {
 
               <button
                 onClick={() => setPopupOpen(false)}
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold py-3 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider border-none shadow-[0_4px_12px_rgba(16,185,129,0.15)]"
+                className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold py-3 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider border-none shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)]"
               >
                 Acknowledge & Close
               </button>
@@ -1597,6 +1839,77 @@ export default function Dashboard() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Accept Direct Request double-branching Modal */}
+      {requestModalJob && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-lg font-extrabold font-heading text-white">Accept Tuition Request</h3>
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-sans px-2">
+                Select payment type to accept assignment for Tuition Code <strong className="text-emerald-400 font-mono">TCT-{String(requestModalJob.jobSeq).padStart(3, '0')}</strong>.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3.5 pt-2">
+              <button
+                disabled={isAccepting}
+                onClick={() => handleAcceptRequest(requestModalJob.id, "instant")}
+                className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-800 text-slate-950 font-bold py-3 px-4 rounded-xl text-xs transition duration-200 cursor-pointer border-none shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)] flex items-center justify-center"
+              >
+                {isAccepting ? "Accepting..." : "Instant Pay"}
+              </button>
+              <button
+                disabled={isAccepting}
+                onClick={() => handleAcceptRequest(requestModalJob.id, "later")}
+                className="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-800 text-slate-200 font-bold py-3 px-4 rounded-xl text-xs transition duration-200 cursor-pointer border-none flex items-center justify-center"
+              >
+                Pay Later
+              </button>
+            </div>
+
+            <button
+              onClick={() => setRequestModalJob(null)}
+              className="w-full bg-slate-950/60 hover:bg-slate-950 border border-slate-850 text-slate-400 py-2.5 rounded-xl transition duration-200 cursor-pointer text-[10px] font-mono uppercase tracking-wider block"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Pay Later Helpline Info Popup Modal */}
+      {helplineModalJob && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl max-w-md w-full shadow-2xl space-y-6 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+              <svg className="h-7 w-7 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-lg font-extrabold font-heading text-white">Call Helpline</h3>
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-sans px-2">
+                To take this tuition, note your Tuition ID: <strong className="text-indigo-400 font-mono">TCT-{String(helplineModalJob.jobSeq).padStart(3, '0')}</strong> and call our helpline.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setHelplineModalJob(null)}
+              className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-extrabold py-3 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider border-none shadow-[0_4px_12px_rgba(99,102,241,0.15)]"
+            >
+              Acknowledge & Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

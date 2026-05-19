@@ -45,6 +45,9 @@ model Profile {
   universityIdImageUrl String?
   selfieImageUrl       String?
   gender              String?  // Male, Female, Other
+  preferable_time     String?
+  is_active           Boolean  @default(true)
+  reactivationRequested Boolean  @default(false)
   studentClass        String?  // The class/grade the parent needs a tutor for
   hoursRequired       String?  // Expected time commitment
   tutorGenderPreference String? // Parent's preference for tutor gender
@@ -80,6 +83,8 @@ model TuitionJob {
   approxLatitude  Float?   // Blurred location for public
   approxLongitude Float?   // Blurred location for public
   locationUnlocked Boolean  @default(false)
+  tutorDetailsReleased Boolean @default(false)
+  tutorRequirement String?  // Specific dept students/public/private varsity requirements
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

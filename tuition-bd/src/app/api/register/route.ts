@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       universityIdImageUrl,
       selfieImageUrl,
       gender,
+      preferable_time,
       studentClass,
       hoursRequired,
       tutorGenderPreference,
@@ -36,6 +37,12 @@ export async function POST(request: Request) {
     if (role === "TUTOR") {
       if (!nidImageUrl || !universityIdImageUrl || !selfieImageUrl) {
         return new NextResponse("Tutors must upload National ID, Student ID, and Tutor Picture.", { status: 400 });
+      }
+      if (!gender || (gender !== "Male" && gender !== "Female")) {
+        return new NextResponse("Tutors must specify gender (Male or Female).", { status: 400 });
+      }
+      if (!preferable_time) {
+        return new NextResponse("Tutors must specify preferable tuition time.", { status: 400 });
       }
     }
 
@@ -56,7 +63,7 @@ export async function POST(request: Request) {
     let actualLongitude = reqActualLng !== undefined && reqActualLng !== null ? parseFloat(reqActualLng) : null;
 
     if (!latitude && address) {
-      // Centered on Dhaka with mild scattering to populate on map
+      // Centered on Bangladesh with mild scattering to populate on map
       latitude = 23.8103 + (Math.random() - 0.5) * 0.08;
       longitude = 90.4125 + (Math.random() - 0.5) * 0.08;
     }
@@ -82,12 +89,14 @@ export async function POST(request: Request) {
             nidImageUrl: nidImageUrl || null,
             universityIdImageUrl: universityIdImageUrl || null,
             selfieImageUrl: selfieImageUrl || null,
-            gender: gender || null,
-            studentClass: studentClass || null,
-            hoursRequired: hoursRequired || null,
-            tutorGenderPreference: tutorGenderPreference || null,
-            salary: salary || null,
-            numberOfChildren: numberOfChildren || null,
+            gender: role === "TUTOR" ? gender : null,
+            preferable_time: role === "TUTOR" ? preferable_time : null,
+            is_active: role === "TUTOR" ? true : undefined,
+            studentClass: role === "PARENT" ? (studentClass || null) : null,
+            hoursRequired: role === "PARENT" ? (hoursRequired || null) : null,
+            tutorGenderPreference: role === "PARENT" ? (tutorGenderPreference || null) : null,
+            salary: role === "PARENT" ? (salary || null) : null,
+            numberOfChildren: role === "PARENT" ? (numberOfChildren || null) : null,
             verificationStatus,
             latitude,
             longitude,

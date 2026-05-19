@@ -11,7 +11,7 @@ export default function GuidelinesPage() {
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
           backgroundImage: `
-            radial-gradient(circle, rgba(16,185,129,0.15) 1px, transparent 1px),
+            radial-gradient(circle, rgba(var(--theme-rgb),0.15) 1px, transparent 1px),
             linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
             linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px)
           `,
@@ -30,7 +30,7 @@ export default function GuidelinesPage() {
             Platform Policies
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--foreground)] mt-4">
-            Policy <span className="bg-gradient-to-r from-[#10b981] via-[#06b6d4] to-[#6366f1] bg-clip-text text-transparent">Guidelines</span>
+            Policy <span className="text-emerald-400">Guidelines</span>
           </h1>
           <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
             Please read our guidelines to understand safety operations, escrow procedures, and community rules.

@@ -22,6 +22,14 @@ export async function GET(request: Request) {
       },
       include: {
         profile: true,
+        tuitionJobs: {
+          where: {
+            status: "OPEN"
+          },
+          orderBy: {
+            createdAt: "desc"
+          }
+        }
       },
       orderBy: {
         createdAt: "desc",
@@ -51,10 +59,13 @@ export async function GET(request: Request) {
         tutorSeq: profile?.tutorSeq ?? null,
         rejectionReason: profile?.rejectionReason || null,
         rejectedAt: profile?.rejectedAt || null,
+        is_active: profile?.is_active ?? true,
+        reactivationRequested: profile?.reactivationRequested ?? false,
         user: {
           name: user.name,
           email: user.email,
           role: user.role,
+          jobs: user.tuitionJobs || [],
         },
       };
     });
@@ -87,6 +98,8 @@ export async function PATCH(request: Request) {
       longitude,
       verificationStatus,
       rejectionReason,
+      is_active,
+      reactivationRequested,
     } = body;
 
     if (!profileId) {
@@ -137,6 +150,8 @@ export async function PATCH(request: Request) {
         verificationStatus: verificationStatus !== undefined ? verificationStatus : undefined,
         rejectionReason: verificationStatus === "REJECTED" ? (rejectionReason || "Documents could not be verified by administrator.") : null,
         rejectedAt: verificationStatus === "REJECTED" ? new Date() : null,
+        is_active: is_active !== undefined ? is_active : undefined,
+        reactivationRequested: reactivationRequested !== undefined ? reactivationRequested : undefined,
       };
 
       // Filter out undefined fields

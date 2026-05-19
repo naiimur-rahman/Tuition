@@ -56,6 +56,7 @@ export default function AdminDashboard() {
   // Tab switcher and basic loaders
   const [activeTab, setActiveTab] = useState<"documents" | "tutors" | "parents" | "blacklist" | "payments" | "jobs">("documents");
   const [pendingProfiles, setPendingProfiles] = useState<any[]>([]);
+  const [editingRequirements, setEditingRequirements] = useState<Record<string, string>>({});
   const [loadingProfiles, setLoadingProfiles] = useState(true);
   const [allProfiles, setAllProfiles] = useState<any[]>([]);
   const [loadingAllProfiles, setLoadingAllProfiles] = useState(false);
@@ -95,6 +96,83 @@ export default function AdminDashboard() {
   });
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [editError, setEditError] = useState("");
+
+  // Search parameters
+  const [searchType, setSearchType] = useState<"user" | "tuition">("user");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
+  const [userSearchResult, setUserSearchResult] = useState<any>(null);
+  const [tuitionSearchResult, setTuitionSearchResult] = useState<any>(null);
+
+  const handleAdminSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+
+    setSearchLoading(true);
+    setSearchError("");
+    setUserSearchResult(null);
+    setTuitionSearchResult(null);
+
+    try {
+      if (searchType === "user") {
+        const res = await fetch(`/api/admin/search/user?registration_number=${encodeURIComponent(searchQuery.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          setUserSearchResult(data);
+        } else if (res.status === 404) {
+          setSearchError("No user was found matching that registration number / details.");
+        } else {
+          setSearchError("An error occurred while performing user search.");
+        }
+      } else {
+        const res = await fetch(`/api/admin/search/tuition?tuition_id=${encodeURIComponent(searchQuery.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          setTuitionSearchResult(data);
+        } else if (res.status === 404) {
+          setSearchError("No tuition post was found matching that ID.");
+        } else {
+          setSearchError("An error occurred while performing tuition search.");
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setSearchError("Network failure or connection error during search.");
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setSearchError("");
+    setUserSearchResult(null);
+    setTuitionSearchResult(null);
+  };
+
+  const handleReFetchSearch = async () => {
+    if (!searchQuery.trim()) return;
+    try {
+      if (searchType === "user") {
+        const res = await fetch(`/api/admin/search/user?registration_number=${encodeURIComponent(searchQuery.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          setUserSearchResult(data);
+        }
+      } else {
+        const res = await fetch(`/api/admin/search/tuition?tuition_id=${encodeURIComponent(searchQuery.trim())}`);
+        if (res.ok) {
+          const data = await res.json();
+          setTuitionSearchResult(data);
+        }
+      }
+    } catch (err) {
+      console.error("Refetch search failed:", err);
+    }
+  };
+
+
 
   // Rejection predefined options templates
   const REJECTION_TEMPLATES = [
@@ -209,7 +287,7 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (session && (session.user as any).role === "ADMIN" && activeTab === "jobs") {
+    if (session && (session.user as any).role === "ADMIN" && (activeTab === "jobs" || activeTab === "documents")) {
       fetchJobsList();
     }
   }, [session, activeTab]);
@@ -227,6 +305,7 @@ export default function AdminDashboard() {
       if (res.ok) {
         alert("✓ Tutor assigned manually successfully (Pay Later active).");
         fetchJobsList();
+        handleReFetchSearch();
       } else {
         alert("Failed to assign tutor.");
       }
@@ -314,6 +393,95 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteJob = async (jobId: string) => {
+    if (!confirm("Are you sure you want to delete this tuition post? This cannot be undone.")) return;
+    try {
+      const res = await fetch(`/api/admin/jobs?jobId=${jobId}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        alert("✓ Job post deleted successfully!");
+        fetchAllProfilesList();
+        fetchJobsList();
+        handleReFetchSearch();
+      } else {
+        alert("Failed to delete job post.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error deleting job post.");
+    }
+  };
+
+  const handleApproveJob = async (jobId: string, requirement: string) => {
+    try {
+      const res = await fetch("/api/admin/jobs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId, action: "approve", tutorRequirement: requirement }),
+      });
+      if (res.ok) {
+        alert("✓ Tuition job approved and published live!");
+        fetchAllProfilesList();
+        fetchJobsList();
+        handleReFetchSearch();
+      } else {
+        alert("Failed to approve job post.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error approving job post.");
+    }
+  };
+
+  const handleToggleTutorActive = async (profileId: string, isActive: boolean) => {
+    try {
+      const res = await fetch("/api/admin/profiles", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          profileId,
+          is_active: isActive,
+          ...(isActive ? { reactivationRequested: false } : {})
+        }),
+      });
+      if (res.ok) {
+        alert(`✓ Tutor status updated to ${isActive ? "Active" : "Inactive"}.`);
+        fetchAllProfilesList();
+        handleReFetchSearch();
+      } else {
+        alert("Failed to update active status.");
+      }
+    } catch (err) {
+      console.error("Toggle active error:", err);
+      alert("An error occurred while updating status.");
+    }
+  };
+
+  const handleReleaseTutorDetails = async (jobId: string) => {
+    if (!confirm("Are you sure you want to release this tutor's contact details to the parent?")) return;
+    try {
+      const res = await fetch("/api/admin/jobs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId,
+          action: "release"
+        }),
+      });
+      if (res.ok) {
+        alert("✓ Tutor contact details released successfully!");
+        fetchJobsList();
+        handleReFetchSearch();
+      } else {
+        alert("Failed to release details.");
+      }
+    } catch (err) {
+      console.error("Release details error:", err);
+      alert("An error occurred while releasing details.");
+    }
+  };
+
   // Verification Approvals and Rejections controller
   const handleVerify = async (profileId: string, verifyStatus: "VERIFIED" | "REJECTED", reason?: string) => {
     try {
@@ -337,6 +505,7 @@ export default function AdminDashboard() {
         if (activeTab === "tutors" || activeTab === "parents") {
           fetchAllProfilesList();
         }
+        handleReFetchSearch();
       } else {
         alert("Failed to update verification status.");
       }
@@ -487,7 +656,7 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="space-y-1">
-                        <h3 className="text-base font-bold text-white flex items-center gap-2">
+                        <h3 className="text-base font-bold text-white flex flex-wrap items-center gap-2">
                           {profile.user?.name || "Unknown Operator"}
                           {profile.verificationStatus === "VERIFIED" && (
                             <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded border border-emerald-500/20 font-mono uppercase tracking-wider font-bold">
@@ -502,6 +671,20 @@ export default function AdminDashboard() {
                           {profile.verificationStatus === "REJECTED" && (
                             <span className="text-[9px] bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded border border-red-500/20 font-mono uppercase tracking-wider font-bold">
                               Rejected
+                            </span>
+                          )}
+                          {role === "TUTOR" && (
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono uppercase tracking-wider font-bold ${
+                              profile.is_active
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                : "bg-red-500/10 text-red-400 border-red-500/20"
+                            }`}>
+                              {profile.is_active ? "Active" : "Inactive"}
+                            </span>
+                          )}
+                          {role === "TUTOR" && profile.reactivationRequested && (
+                            <span className="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30 font-mono uppercase tracking-wider font-bold animate-pulse">
+                              ⚠️ Reactivation Requested
                             </span>
                           )}
                         </h3>
@@ -550,31 +733,112 @@ export default function AdminDashboard() {
                       <button
                         type="button"
                         onClick={() => handleOpenEditModal(profile)}
-                        className="bg-slate-900 hover:bg-slate-850 text-slate-400 border border-slate-800 px-3 py-2 rounded-xl transition duration-200 cursor-pointer"
+                        className="bg-slate-900 hover:bg-slate-850 text-slate-400 border border-slate-800 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold"
                         title="Edit Profile Details"
                       >
                         ✏️ Edit
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteUser(profile.user?.id)}
-                        className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold font-mono uppercase"
-                        title="Remove User completely (Can register again)"
-                      >
-                        🗑️ Remove
-                      </button>
+                      {role === "TUTOR" && (
+                        <>
+                          {profile.is_active ? (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleTutorActive(profile.id, false)}
+                              className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold font-mono uppercase"
+                              title="Mark Tutor Inactive"
+                            >
+                              Mark Inactive
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleToggleTutorActive(profile.id, true)}
+                              className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold font-mono uppercase animate-pulse"
+                              title="Reactivate Tutor"
+                            >
+                              {profile.reactivationRequested ? "Approve Reactivation" : "Mark Active"}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteUser(profile.userId)}
+                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold font-mono uppercase"
+                            title="Completely remove tutor account"
+                          >
+                            Completely Remove
+                          </button>
+                        </>
+                      )}
 
-                      <button
-                        type="button"
-                        onClick={() => handleBanUser(profile.user?.id)}
-                        className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold font-mono uppercase"
-                        title="Ban and Blacklist User"
-                      >
-                        🚫 Ban
-                      </button>
+                      {role === "PARENT" && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteUser(profile.userId)}
+                            className="bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold font-mono uppercase"
+                            title="Delete Parent Account"
+                          >
+                            Delete Account
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleBanUser(profile.userId)}
+                            className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-2 rounded-xl transition duration-200 cursor-pointer text-xs font-bold font-mono uppercase"
+                            title="Ban and Blacklist Parent Account"
+                          >
+                            Ban Account
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
+
+                  {role === "PARENT" && profile.user?.jobs && profile.user.jobs.length > 0 && (
+                    <div className="p-4 bg-slate-900/30 border border-slate-900 rounded-2xl space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-wider font-bold">
+                          Active Tuition Posts ({profile.user.jobs.length})
+                        </span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs border-collapse">
+                          <thead>
+                            <tr className="border-b border-slate-800 text-slate-500 font-mono uppercase tracking-wider text-[9px]">
+                              <th className="py-2 px-3">ID</th>
+                              <th className="py-2 px-3">Class/Subject</th>
+                              <th className="py-2 px-3">Salary</th>
+                              <th className="py-2 px-3 text-right">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {profile.user.jobs.map((job: any) => (
+                              <tr key={job.id} className="border-b border-slate-900/60 hover:bg-slate-900/10">
+                                <td className="py-2 px-3 font-mono text-slate-400">
+                                  TCT-{String(job.jobSeq).padStart(3, '0')}
+                                </td>
+                                <td className="py-2 px-3 text-slate-200">
+                                  {job.classLevel} - {job.subject}
+                                </td>
+                                <td className="py-2 px-3 text-pink-400 font-mono font-bold">
+                                  ৳ {job.salary} BDT
+                                </td>
+                                <td className="py-2 px-3 text-right">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteJob(job.id)}
+                                    className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-2 py-1 rounded-lg transition duration-200 cursor-pointer text-[10px] font-bold font-sans uppercase"
+                                  >
+                                    Delete Post
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Expandable Location Auditing Leaflet widgets */}
                   <AnimatePresence>
@@ -656,7 +920,7 @@ export default function AdminDashboard() {
                 Admin Control Console
               </h1>
               <p className="text-slate-400 text-sm font-mono flex items-center">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
+                <span className="h-2 w-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(var(--theme-rgb),0.8)] animate-pulse" />
                 Operational Credentials Authorized: <span className="text-emerald-400 ml-1 font-bold">SYSTEM ADMINISTRATOR</span>
               </p>
             </div>
@@ -689,25 +953,97 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Dynamic Glassmorphism Navigation Tabs */}
-        <div className="flex border-b border-slate-800/80 pb-px overflow-x-auto whitespace-nowrap scrollbar-none">
+        {/* SECURE ADMINISTRATIVE SEARCH PANEL */}
+        <div className="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
+          <div>
+            <h2 className="text-lg font-bold font-heading text-white flex items-center gap-2">
+              🔍 Secure Administrative Search Console
+            </h2>
+            <p className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">
+              Query unmasked records directly from the database core
+            </p>
+          </div>
+
+          <form onSubmit={handleAdminSearch} className="flex flex-col md:flex-row gap-3">
+            <div className="w-full md:w-64">
+              <select
+                value={searchType}
+                onChange={(e) => setSearchType(e.target.value as "user" | "tuition")}
+                className="w-full bg-slate-950 border border-slate-800 text-slate-200 rounded-xl px-3.5 py-3 text-xs focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono"
+              >
+                <option value="user">Search User by Reg No.</option>
+                <option value="tuition">Search Tuition by ID</option>
+              </select>
+            </div>
+
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={searchType === "user" ? "Enter Reg No (e.g. TC-001) or CUID, Email, Phone..." : "Enter Tuition ID (e.g. TCT-001) or job CUID..."}
+                className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-mono"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={searchLoading || !searchQuery.trim()}
+                className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-slate-950 font-extrabold px-6 py-3 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider shrink-0 flex items-center justify-center gap-2"
+              >
+                {searchLoading ? (
+                  <>
+                    <div className="animate-spin h-3.5 w-3.5 border-2 border-slate-950 border-t-transparent rounded-full" />
+                    Searching...
+                  </>
+                ) : (
+                  "Execute Search"
+                )}
+              </button>
+
+              {(userSearchResult || tuitionSearchResult || searchError) && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 px-4 py-3 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider font-bold"
+                >
+                  Clear Results
+                </button>
+              )}
+            </div>
+          </form>
+
+          {/* Error Message */}
+          {searchError && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl text-xs font-mono flex items-center gap-2 animate-fadeIn">
+              <span>⚠️</span>
+              <span>{searchError}</span>
+            </div>
+          )}
+        </div>
+
+        {!(userSearchResult || tuitionSearchResult) ? (
+          <>
+            {/* Dynamic Glassmorphism Navigation Tabs */}
+            <div className="flex border-b border-slate-800/80 pb-px overflow-x-auto whitespace-nowrap scrollbar-none">
           <button
             type="button"
             onClick={() => setActiveTab("documents")}
             className={`px-6 py-3.5 font-bold font-mono text-xs uppercase tracking-wider transition-all duration-300 border-b-2 cursor-pointer ${
               activeTab === "documents"
-                ? "text-emerald-400 border-emerald-500 bg-emerald-500/5 shadow-[inset_0_-2px_0_rgba(16,185,129,1)]"
+                ? "text-emerald-400 border-emerald-500 bg-emerald-500/5 shadow-[inset_0_-2px_0_rgba(var(--theme-rgb),1)]"
                 : "text-slate-400 border-transparent hover:text-slate-200"
             }`}
           >
-            📋 ID Verification Queue ({pendingProfiles.length})
+            📋 Task Inbox ({pendingProfiles.length + jobs.filter((j) => j.status === "PENDING").length})
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("tutors")}
             className={`px-6 py-3.5 font-bold font-mono text-xs uppercase tracking-wider transition-all duration-300 border-b-2 cursor-pointer ${
               activeTab === "tutors"
-                ? "text-emerald-400 border-emerald-500 bg-emerald-500/5 shadow-[inset_0_-2px_0_rgba(16,185,129,1)]"
+                ? "text-emerald-400 border-emerald-500 bg-emerald-500/5 shadow-[inset_0_-2px_0_rgba(var(--theme-rgb),1)]"
                 : "text-slate-400 border-transparent hover:text-slate-200"
             }`}
           >
@@ -718,7 +1054,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab("parents")}
             className={`px-6 py-3.5 font-bold font-mono text-xs uppercase tracking-wider transition-all duration-300 border-b-2 cursor-pointer ${
               activeTab === "parents"
-                ? "text-emerald-400 border-emerald-500 bg-emerald-500/5 shadow-[inset_0_-2px_0_rgba(16,185,129,1)]"
+                ? "text-emerald-400 border-emerald-500 bg-emerald-500/5 shadow-[inset_0_-2px_0_rgba(var(--theme-rgb),1)]"
                 : "text-slate-400 border-transparent hover:text-slate-200"
             }`}
           >
@@ -751,7 +1087,7 @@ export default function AdminDashboard() {
             onClick={() => setActiveTab("jobs")}
             className={`px-6 py-3.5 font-bold font-mono text-xs uppercase tracking-wider transition-all duration-300 border-b-2 cursor-pointer ${
               activeTab === "jobs"
-                ? "text-emerald-400 border-emerald-500 bg-emerald-500/5 shadow-[inset_0_-2px_0_rgba(16,185,129,1)]"
+                ? "text-emerald-400 border-emerald-500 bg-emerald-500/5 shadow-[inset_0_-2px_0_rgba(var(--theme-rgb),1)]"
                 : "text-slate-400 border-transparent hover:text-slate-200"
             }`}
           >
@@ -770,6 +1106,101 @@ export default function AdminDashboard() {
               transition={{ duration: 0.2 }}
               className="space-y-6"
             >
+              {/* Pending Tuition Approvals Card */}
+              <div className="glass-card rounded-2xl p-6 md:p-8 border border-slate-800 space-y-6">
+                <div>
+                  <h2 className="text-xl font-bold font-heading text-amber-400">Tuition Approval Directory</h2>
+                  <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">
+                    Review tutor requirements, edit if necessary, and approve parent posts to render on map
+                  </p>
+                </div>
+                <div className="h-px bg-slate-800/80" />
+
+                {jobs.filter((j) => j.status === "PENDING").length === 0 ? (
+                  <div className="py-8 text-center bg-slate-900/10 border border-slate-900 rounded-xl space-y-2">
+                    <span className="text-2xl">✨</span>
+                    <h3 className="text-xs font-bold text-slate-300">No Pending Tuition Posts</h3>
+                    <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                      All parent tuition posts are approved and live on the map!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {jobs
+                      .filter((j) => j.status === "PENDING")
+                      .map((job) => {
+                        const currentReq = editingRequirements[job.id] !== undefined 
+                          ? editingRequirements[job.id] 
+                          : (job.tutorRequirement || "");
+                        return (
+                          <div
+                            key={job.id}
+                            className="bg-slate-950 border border-slate-850 p-5 rounded-2xl flex flex-col justify-between space-y-4 hover:border-slate-800 transition-all duration-300"
+                          >
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs text-amber-400 font-bold font-mono px-2 py-0.5 bg-amber-400/10 border border-amber-400/20 rounded">
+                                  TCT-{String(job.jobSeq).padStart(3, '0')}
+                                </span>
+                                <span className="text-[10px] text-yellow-500 bg-yellow-500/5 border border-yellow-500/20 px-2 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+                                  Pending Approval
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                  <span className="text-[9px] text-slate-500 font-mono block">Class & Subject</span>
+                                  <span className="text-slate-200 font-semibold">{job.classLevel} - {job.subject}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[9px] text-slate-500 font-mono block">Salary</span>
+                                  <span className="text-pink-400 font-bold font-mono">৳ {job.salary} BDT</span>
+                                </div>
+                                <div className="col-span-2">
+                                  <span className="text-[9px] text-slate-500 font-mono block">Guardian</span>
+                                  <span className="text-slate-300">{job.parent?.name || "N/A"} ({job.parent?.profile?.phone || "N/A"})</span>
+                                </div>
+                                <div className="col-span-2">
+                                  <span className="text-[9px] text-slate-500 font-mono block">Details Description</span>
+                                  <p className="text-[11px] text-slate-400 leading-normal line-clamp-2">{job.description || "No description provided."}</p>
+                                </div>
+                              </div>
+
+                              <div className="pt-2 border-t border-slate-900/60">
+                                <label className="block text-[9px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Tutor Requirement (Admin Editable)</label>
+                                <input
+                                  type="text"
+                                  value={currentReq}
+                                  onChange={(e) => setEditingRequirements(prev => ({ ...prev, [job.id]: e.target.value }))}
+                                  className="w-full bg-slate-900/50 border border-slate-800 text-slate-100 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition duration-200 mt-1"
+                                  placeholder="e.g. Public Varsity Only, BUET/DU Students Only"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2 pt-2 border-t border-slate-900/60">
+                              <button
+                                type="button"
+                                onClick={() => handleApproveJob(job.id, currentReq)}
+                                className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold py-2 rounded-xl text-[10px] font-mono uppercase tracking-wider cursor-pointer border-none transition duration-200 text-center"
+                              >
+                                Approve & Post Live
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteJob(job.id)}
+                                className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 px-3 py-2 rounded-xl text-[10px] font-mono uppercase tracking-wider cursor-pointer transition duration-200"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                )}
+              </div>
+
               <div className="glass-card rounded-2xl p-6 md:p-8 border border-slate-800 space-y-6">
                 <div>
                   <h2 className="text-xl font-bold font-heading text-white">Educator Credentials Audit</h2>
@@ -863,7 +1294,7 @@ export default function AdminDashboard() {
                           <button
                             type="button"
                             onClick={() => handleVerify(profile.id, "VERIFIED")}
-                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 py-2.5 rounded-xl text-xs font-bold transition duration-200 cursor-pointer shadow-[0_4px_10px_rgba(16,185,129,0.15)] text-center"
+                            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 py-2.5 rounded-xl text-xs font-bold transition duration-200 cursor-pointer shadow-[0_4px_10px_rgba(var(--theme-rgb),0.15)] text-center"
                           >
                             Approve Profile
                           </button>
@@ -1083,7 +1514,7 @@ export default function AdminDashboard() {
                             <div className="flex lg:flex-col sm:flex-row items-stretch lg:items-end gap-2 shrink-0">
                               <button
                                 onClick={() => handleVerifyPayment(payment.id, "SUCCESS")}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(16,185,129,0.1)] border-none"
+                                className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(var(--theme-rgb),0.1)] border-none"
                               >
                                 Approve & Unlock
                               </button>
@@ -1145,7 +1576,7 @@ export default function AdminDashboard() {
                         <div
                           key={job.id}
                           className={`bg-slate-950/60 border p-5 rounded-2xl flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between transition-all duration-300 ${
-                            isPendingManual ? "border-emerald-500/30 hover:border-emerald-500/50 shadow-[0_4px_16px_rgba(16,185,129,0.03)]" : "border-slate-850 hover:border-slate-800"
+                            isPendingManual ? "border-emerald-500/30 hover:border-emerald-500/50 shadow-[0_4px_16px_rgba(var(--theme-rgb),0.03)]" : "border-slate-850 hover:border-slate-800"
                           }`}
                         >
                           <div className="space-y-3 flex-1">
@@ -1191,6 +1622,22 @@ export default function AdminDashboard() {
                                       TC-{String(job.tutor.profile?.tutorSeq || 1).padStart(3, '0')} - {job.tutor.name}
                                     </span>
                                     <span className="text-slate-400 text-[10px] font-mono block">Phone: {job.tutor.profile?.phone || "N/A"}</span>
+                                    <div className="mt-1.5">
+                                      {job.tutorDetailsReleased ? (
+                                        <span className="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded font-mono font-bold uppercase tracking-wider">
+                                          ✓ Details Released
+                                        </span>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleReleaseTutorDetails(job.id)}
+                                          className="bg-indigo-600/25 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase cursor-pointer transition duration-150"
+                                          title="Release tutor details to parent dashboard"
+                                        >
+                                          Release Details
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                 ) : (
                                   <span className="text-slate-500 italic">No tutor applied yet</span>
@@ -1203,7 +1650,7 @@ export default function AdminDashboard() {
                             <div className="flex gap-2 shrink-0 items-center justify-end">
                               <button
                                 onClick={() => handleAssignTutor(job.id, job.tutorId)}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(16,185,129,0.1)] border-none"
+                                className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(var(--theme-rgb),0.1)] border-none"
                               >
                                 Assign Tutor Manually
                               </button>
@@ -1218,6 +1665,522 @@ export default function AdminDashboard() {
             </motion.div>
           )}
         </AnimatePresence>
+          </>
+        ) : (
+          <div className="space-y-8 animate-fadeIn">
+            {userSearchResult && (
+              <div className="bg-slate-900/50 border border-slate-800/80 p-6 md:p-8 rounded-3xl space-y-6">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold font-heading text-emerald-400">
+                      User Inspection Profile: {userSearchResult.name || "Operator"}
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">
+                      Full unmasked administrative record view
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="bg-slate-950 hover:bg-slate-900 text-slate-400 border border-slate-850 px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase transition cursor-pointer"
+                  >
+                    Close Inspection
+                  </button>
+                </div>
+
+                <div className="h-px bg-slate-800/80" />
+
+                {/* Structured user info */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Personal Information */}
+                  <div className="bg-slate-950/60 border border-slate-850 p-5 rounded-2xl space-y-4">
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono border-b border-slate-850 pb-2">
+                      Personal Details
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Full Name</span>
+                        <span className="text-slate-200 font-semibold">{userSearchResult.name || "N/A"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Email Address</span>
+                        <span className="text-slate-200 font-semibold select-all">{userSearchResult.email || "N/A"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Contact Phone</span>
+                        <span className="text-slate-200 font-semibold select-all">{userSearchResult.profile?.phone || "N/A"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">System Role</span>
+                        <span className="text-emerald-400 font-bold uppercase font-mono">{userSearchResult.role}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Joined Date</span>
+                        <span className="text-slate-400">{new Date(userSearchResult.createdAt).toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Last Updated</span>
+                        <span className="text-slate-400">{new Date(userSearchResult.updatedAt).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Account Security & Status */}
+                  <div className="bg-slate-950/60 border border-slate-850 p-5 rounded-2xl space-y-4">
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono border-b border-slate-850 pb-2">
+                      Account Security & Status
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Account Status</span>
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
+                          userSearchResult.profile?.is_active !== false
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : "bg-red-500/10 text-red-400 border border-red-500/20"
+                        }`}>
+                          {userSearchResult.profile?.is_active !== false ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Verification Status</span>
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
+                          userSearchResult.profile?.verificationStatus === "VERIFIED"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : userSearchResult.profile?.verificationStatus === "PENDING"
+                            ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
+                            : "bg-slate-800 text-slate-400 border border-slate-700"
+                        }`}>
+                          {userSearchResult.profile?.verificationStatus || "UNVERIFIED"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Reactivation Requested</span>
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
+                          userSearchResult.profile?.reactivationRequested
+                            ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 animate-pulse"
+                            : "bg-slate-800 text-slate-400 border border-slate-700"
+                        }`}>
+                          {userSearchResult.profile?.reactivationRequested ? "Yes (⚠️ Pending)" : "No"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">User Reference ID</span>
+                        <span className="text-slate-300 font-mono">
+                          {userSearchResult.role === "TUTOR"
+                            ? `TC-${String(userSearchResult.profile?.tutorSeq || 1).padStart(3, '0')}`
+                            : `TP-${String(userSearchResult.profile?.tutorSeq || 1).padStart(3, '0')}`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Manage user status in searched view */}
+                    {userSearchResult.role === "TUTOR" && userSearchResult.profile && (
+                      <div className="pt-2 flex gap-2 border-t border-slate-850">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleTutorActive(userSearchResult.profile.id, !userSearchResult.profile.is_active)}
+                          className={`w-full py-2 px-4 rounded-xl text-xs font-mono font-bold uppercase cursor-pointer text-center border transition-all ${
+                            userSearchResult.profile.is_active !== false
+                              ? "bg-red-950/20 hover:bg-red-950/40 text-red-400 border-red-500/20"
+                              : "bg-emerald-600 hover:bg-emerald-500 text-slate-950 border-emerald-600"
+                          }`}
+                        >
+                          {userSearchResult.profile.reactivationRequested && !userSearchResult.profile.is_active
+                            ? "Approve Reactivation"
+                            : userSearchResult.profile.is_active !== false
+                            ? "Deactivate Tutor"
+                            : "Activate Tutor"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Profile Extra Data / Location */}
+                {userSearchResult.profile && (
+                  <div className="bg-slate-950/60 border border-slate-850 p-5 rounded-2xl space-y-4">
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono border-b border-slate-850 pb-2">
+                      Profile Configurations & Location Coordinates
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                      <div className="space-y-2">
+                        <div>
+                          <span className="text-[10px] text-slate-500 font-mono block">Configured Address</span>
+                          <span className="text-slate-200 font-semibold">{userSearchResult.profile.address || "No address configured"}</span>
+                        </div>
+                        {userSearchResult.role === "TUTOR" && (
+                          <>
+                            <div>
+                              <span className="text-[10px] text-slate-500 font-mono block">Education Details</span>
+                              <span className="text-slate-200 font-semibold">{userSearchResult.profile.education || "No education history"}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-slate-500 font-mono block">Biography</span>
+                              <span className="text-slate-300 italic">"{userSearchResult.profile.bio || "No biography configured"}"</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-slate-500 font-mono block">Preferred Time / Gender</span>
+                              <span className="text-slate-200 font-mono text-[10px]">
+                                {userSearchResult.profile.preferable_time || "Any time"} | {userSearchResult.profile.gender || "Any"}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="bg-slate-900/40 p-4 border border-slate-850 rounded-xl space-y-2 font-mono">
+                        <div className="text-[10px] text-slate-500 uppercase font-bold">GPS Coordinates</div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span className="text-[9px] text-slate-500 block">Claimed Lat/Lng</span>
+                            <span className="text-slate-300">
+                              {userSearchResult.profile.latitude?.toFixed(6) || "N/A"}, {userSearchResult.profile.longitude?.toFixed(6) || "N/A"}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-slate-500 block">Device GPS Lat/Lng</span>
+                            <span className="text-slate-300">
+                              {userSearchResult.profile.actualLatitude?.toFixed(6) || "N/A"}, {userSearchResult.profile.actualLongitude?.toFixed(6) || "N/A"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* History Lists */}
+                <div className="bg-slate-950/60 border border-slate-850 p-5 rounded-2xl space-y-4">
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono border-b border-slate-850 pb-2">
+                    Linked Logs / Activity History
+                  </h3>
+                  
+                  {userSearchResult.role === "PARENT" ? (
+                    <div className="space-y-2 text-xs">
+                      <div className="text-[10px] text-slate-500 font-mono uppercase font-bold">Tuition Post Listings ({userSearchResult.tuitionJobs?.length || 0})</div>
+                      {!userSearchResult.tuitionJobs || userSearchResult.tuitionJobs.length === 0 ? (
+                        <div className="text-slate-500 italic py-2">No tuition posts logs registered.</div>
+                      ) : (
+                        <div className="border border-slate-850 rounded-xl overflow-hidden">
+                          <table className="w-full text-left font-mono">
+                            <thead className="bg-slate-900 text-slate-400 text-[10px] uppercase">
+                              <tr>
+                                <th className="p-3">Job ID</th>
+                                <th className="p-3">Title</th>
+                                <th className="p-3">Subject/Class</th>
+                                <th className="p-3">Salary</th>
+                                <th className="p-3">Status</th>
+                                <th className="p-3 text-right">Actions</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-850 text-slate-300">
+                              {userSearchResult.tuitionJobs.map((j: any) => (
+                                <tr key={j.id} className="hover:bg-slate-900/30">
+                                  <td className="p-3">TCT-{String(j.jobSeq).padStart(3, '0')}</td>
+                                  <td className="p-3 font-sans font-semibold text-white">{j.title}</td>
+                                  <td className="p-3">{j.subject} ({j.classLevel})</td>
+                                  <td className="p-3">৳{j.salary} BDT</td>
+                                  <td className="p-3">
+                                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                                      j.status === "ASSIGNED" ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"
+                                    }`}>
+                                      {j.status}
+                                    </span>
+                                  </td>
+                                  <td className="p-3 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteJob(j.id)}
+                                      className="bg-red-950/20 hover:bg-red-950/40 text-red-400 border border-red-500/20 px-2.5 py-1 rounded text-[10px] cursor-pointer"
+                                    >
+                                      Delete Post
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2 text-xs">
+                      <div className="text-[10px] text-slate-500 font-mono uppercase font-bold">Applied & Assigned Jobs ({userSearchResult.appliedJobs?.length || 0})</div>
+                      {!userSearchResult.appliedJobs || userSearchResult.appliedJobs.length === 0 ? (
+                        <div className="text-slate-500 italic py-2">No tuition jobs logs registered.</div>
+                      ) : (
+                        <div className="border border-slate-850 rounded-xl overflow-hidden">
+                          <table className="w-full text-left font-mono">
+                            <thead className="bg-slate-900 text-slate-400 text-[10px] uppercase">
+                              <tr>
+                                <th className="p-3">Job ID</th>
+                                <th className="p-3">Title</th>
+                                <th className="p-3">Guardian</th>
+                                <th className="p-3">Class/Subject</th>
+                                <th className="p-3">Salary</th>
+                                <th className="p-3">Assign Status</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-850 text-slate-300">
+                              {userSearchResult.appliedJobs.map((j: any) => (
+                                <tr key={j.id} className="hover:bg-slate-900/30">
+                                  <td className="p-3">TCT-{String(j.jobSeq).padStart(3, '0')}</td>
+                                  <td className="p-3 font-sans font-semibold text-white">{j.title}</td>
+                                  <td className="p-3 font-sans">{j.parent?.name || "Guardian"}</td>
+                                  <td className="p-3">{j.subject} ({j.classLevel})</td>
+                                  <td className="p-3">৳{j.salary} BDT</td>
+                                  <td className="p-3">
+                                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                                      j.tutorId === userSearchResult.id ? "bg-emerald-500/10 text-emerald-400" : "bg-slate-800 text-slate-400"
+                                    }`}>
+                                      {j.tutorId === userSearchResult.id ? "Assigned" : "Applied"}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Raw Database Payload */}
+                <div className="space-y-2">
+                  <div className="text-[10px] text-slate-500 font-mono uppercase font-bold">Raw Database Record (JSON Inspector)</div>
+                  <pre className="bg-slate-950 border border-slate-850 p-5 rounded-2xl text-[10px] font-mono text-emerald-400 overflow-auto max-h-[300px] leading-relaxed select-all">
+                    {JSON.stringify(userSearchResult, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {tuitionSearchResult && (
+              <div className="bg-slate-900/50 border border-slate-800/80 p-6 md:p-8 rounded-3xl space-y-6">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold font-heading text-emerald-400">
+                      Tuition Post Inspection: TCT-{String(tuitionSearchResult.jobSeq).padStart(3, '0')}
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">
+                      Complete unmasked tuition details and status
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="bg-slate-950 hover:bg-slate-900 text-slate-400 border border-slate-850 px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase transition cursor-pointer"
+                  >
+                    Close Inspection
+                  </button>
+                </div>
+
+                <div className="h-px bg-slate-800/80" />
+
+                {/* Details layout */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Job Specs */}
+                  <div className="bg-slate-950/60 border border-slate-850 p-5 rounded-2xl space-y-4">
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono border-b border-slate-850 pb-2">
+                      Tuition Job Specifications
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Title</span>
+                        <span className="text-slate-200 font-semibold">{tuitionSearchResult.title}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Class & Subject</span>
+                        <span className="text-slate-200 font-semibold">{tuitionSearchResult.classLevel} - {tuitionSearchResult.subject}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Salary Offered</span>
+                        <span className="text-pink-400 font-bold font-mono">৳{tuitionSearchResult.salary} BDT</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Active Status</span>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                          tuitionSearchResult.status === "ASSIGNED"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : tuitionSearchResult.status === "COMPLETED"
+                            ? "bg-slate-800 text-slate-400"
+                            : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                        }`}>
+                          {tuitionSearchResult.status}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Location Unlocked</span>
+                        <span className="text-slate-200 font-semibold">{tuitionSearchResult.locationUnlocked ? "Yes (✓)" : "No (Locked)"}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-500 font-mono block">Tutor Details Released</span>
+                        <span className="text-slate-200 font-semibold">{tuitionSearchResult.tutorDetailsReleased ? "Yes (✓)" : "No (Released Locked)"}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-850 space-y-2">
+                      <div className="text-[10px] text-slate-500 font-mono uppercase block">Description</div>
+                      <p className="text-xs text-slate-300 leading-relaxed font-sans">{tuitionSearchResult.description}</p>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-850 space-y-2">
+                      <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Tutor Requirement (Admin Editable)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          id="searchRequirementInput"
+                          defaultValue={tuitionSearchResult.tutorRequirement || ""}
+                          className="flex-1 bg-slate-900/50 border border-slate-800 text-slate-100 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition duration-200"
+                          placeholder="e.g. Public Varsity Only, CSE Department, BUET/DU Students Only"
+                        />
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const reqVal = (document.getElementById("searchRequirementInput") as HTMLInputElement)?.value;
+                            const res = await fetch("/api/admin/jobs", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ jobId: tuitionSearchResult.id, action: "updateRequirement", tutorRequirement: reqVal }),
+                            });
+                            if (res.ok) {
+                              alert("✓ Tutor requirement updated successfully.");
+                              handleReFetchSearch();
+                              fetchJobsList();
+                            } else {
+                              alert("Failed to update requirement.");
+                            }
+                          }}
+                          className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-xl text-xs font-bold font-sans uppercase transition duration-200"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Interactive management buttons */}
+                    <div className="pt-4 border-t border-slate-850 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteJob(tuitionSearchResult.id)}
+                        className="bg-red-950/20 hover:bg-red-950/40 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase cursor-pointer"
+                      >
+                        Delete Post
+                      </button>
+
+                      {tuitionSearchResult.status === "PENDING" && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const reqVal = (document.getElementById("searchRequirementInput") as HTMLInputElement)?.value;
+                            await handleApproveJob(tuitionSearchResult.id, reqVal);
+                          }}
+                          className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider cursor-pointer border-none"
+                        >
+                          Approve & Post Live
+                        </button>
+                      )}
+
+                      {tuitionSearchResult.status === "OPEN" && tuitionSearchResult.tutorId && (
+                        <button
+                          type="button"
+                          onClick={() => handleAssignTutor(tuitionSearchResult.id, tuitionSearchResult.tutorId)}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider cursor-pointer border-none"
+                        >
+                          Assign Tutor Manually
+                        </button>
+                      )}
+
+                      {tuitionSearchResult.tutorId && !tuitionSearchResult.tutorDetailsReleased && (
+                        <button
+                          type="button"
+                          onClick={() => handleReleaseTutorDetails(tuitionSearchResult.id)}
+                          className="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 border border-indigo-500/20 px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider cursor-pointer"
+                        >
+                          Release Details
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Associated Users */}
+                  <div className="space-y-6">
+                    {/* Guardian Info */}
+                    <div className="bg-slate-950/60 border border-slate-850 p-5 rounded-2xl space-y-4">
+                      <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider font-mono border-b border-slate-850 pb-2">
+                        Guardian Profile Details
+                      </h3>
+                      {tuitionSearchResult.parent ? (
+                        <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Name</span>
+                            <span className="text-slate-200 font-semibold font-sans">{tuitionSearchResult.parent.name || "N/A"}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Email</span>
+                            <span className="text-slate-300 select-all">{tuitionSearchResult.parent.email || "N/A"}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Contact Phone</span>
+                            <span className="text-slate-300 select-all">{tuitionSearchResult.parent.profile?.phone || "N/A"}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Coordinates</span>
+                            <span className="text-slate-400">
+                              {tuitionSearchResult.latitude?.toFixed(5) || "N/A"}, {tuitionSearchResult.longitude?.toFixed(5) || "N/A"}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-slate-500 italic text-xs">No linked Guardian details found.</div>
+                      )}
+                    </div>
+
+                    {/* Tutor Info */}
+                    <div className="bg-slate-950/60 border border-slate-850 p-5 rounded-2xl space-y-4">
+                      <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider font-mono border-b border-slate-850 pb-2">
+                        Assigned/Applied Tutor Details
+                      </h3>
+                      {tuitionSearchResult.tutor ? (
+                        <div className="grid grid-cols-2 gap-4 text-xs font-mono">
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Tutor Reg No.</span>
+                            <span className="text-slate-200">TC-{String(tuitionSearchResult.tutor.profile?.tutorSeq || 1).padStart(3, '0')}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Name</span>
+                            <span className="text-slate-200 font-semibold font-sans">{tuitionSearchResult.tutor.name || "N/A"}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Email</span>
+                            <span className="text-slate-300 select-all">{tuitionSearchResult.tutor.email || "N/A"}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-500 block">Contact Phone</span>
+                            <span className="text-slate-300 select-all">{tuitionSearchResult.tutor.profile?.phone || "N/A"}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-slate-500 italic text-xs">No tutor currently assigned to this post.</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Raw Database Payload */}
+                <div className="space-y-2">
+                  <div className="text-[10px] text-slate-500 font-mono uppercase font-bold">Raw Database Record (JSON Inspector)</div>
+                  <pre className="bg-slate-950 border border-slate-850 p-5 rounded-2xl text-[10px] font-mono text-emerald-400 overflow-auto max-h-[300px] leading-relaxed select-all">
+                    {JSON.stringify(tuitionSearchResult, null, 2)}
+                  </pre>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* PREMIUM IN-APP REJECTION PROMPT DIALOG MODAL */}
@@ -1471,7 +2434,7 @@ export default function AdminDashboard() {
                   <button
                     type="submit"
                     disabled={isSavingProfile}
-                    className="flex-grow bg-emerald-500 hover:bg-emerald-600 text-slate-950 py-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2 disabled:opacity-50"
+                    className="flex-grow bg-emerald-500 hover:bg-emerald-600 text-slate-950 py-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)] flex items-center justify-center space-x-2 disabled:opacity-50"
                   >
                     {isSavingProfile ? (
                       <>
@@ -1640,7 +2603,7 @@ export default function AdminDashboard() {
                         handleVerify(previewDocuments.profileId, "VERIFIED");
                         setPreviewDocuments(null);
                       }}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-6 py-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(16,185,129,0.15)] flex items-center justify-center space-x-2"
+                      className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-6 py-3 rounded-xl text-xs font-bold transition duration-200 cursor-pointer shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)] flex items-center justify-center space-x-2"
                     >
                       ✓ Approve Tutor
                     </button>

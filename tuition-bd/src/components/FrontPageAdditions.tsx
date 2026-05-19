@@ -14,7 +14,7 @@ export default function FrontPageAdditions({ selectedRole }: FrontPageAdditionsP
   const stats = selectedRole === "parent" ? [
     { value: "12,400+", label: "Verified Tutors", description: "Top universities & background checked" },
     { value: "4.92/5.0", label: "Parent Rating", description: "Voted by thousands of satisfied families" },
-    { value: "Dhaka-Wide", label: "Dense Coverage", description: "Mirpur, Dhanmondi, Gulshan & more" },
+    { value: "Nationwide", label: "Dense Coverage", description: "Connecting users across Bangladesh" },
     { value: "15 Mins", label: "Avg. Match Time", description: "Get connected to expert teachers instantly" },
   ] : [
     { value: "BDT 22k+", label: "Top Monthly Salary", description: "Premium rates for elite academic coaches" },
@@ -27,45 +27,45 @@ export default function FrontPageAdditions({ selectedRole }: FrontPageAdditionsP
     {
       num: "01",
       title: "Browse Local Map",
-      desc: "Use our interactive Leaflet OSM map to locate certified teachers in your immediate sector, filtering by standard subjects and class boards.",
-      color: "from-emerald-500 to-teal-400",
-      glow: "rgba(16,185,129,0.15)"
+      desc: "Use our interactive Leaflet OSM map to locate certified teachers in your immediate sector, filtering by subjects and class boards.",
+      textColor: "text-emerald-400",
+      glow: "rgba(239,68,68,0.15)"
     },
     {
       num: "02",
       title: "Verify Credentials",
       desc: "Review selected tutor portfolios, official NID/University validation statuses, student feedback ratings, and past tuition experience histories.",
-      color: "from-teal-500 to-indigo-400",
-      glow: "rgba(20,184,166,0.15)"
+      textColor: "text-indigo-400",
+      glow: "rgba(244,63,94,0.15)"
     },
     {
       num: "03",
       title: "Start Learning Classes",
       desc: "Schedule demo lessons, conduct screening interviews, and launch your student's optimized academic learning journey with absolute peace of mind.",
-      color: "from-indigo-500 to-emerald-400",
-      glow: "rgba(99,102,241,0.15)"
+      textColor: "text-emerald-400",
+      glow: "rgba(239,68,68,0.15)"
     }
   ] : [
     {
       num: "01",
       title: "Upload Verification",
       desc: "Upload university IDs or academic certificates to receive the green verification badge and build instant trust with parents.",
-      color: "from-indigo-500 to-purple-400",
-      glow: "rgba(99,102,241,0.15)"
+      textColor: "text-indigo-400",
+      glow: "rgba(244,63,94,0.15)"
     },
     {
       num: "02",
       title: "Locate Hotspots",
-      desc: "Browse our active tuition job map for pin-drop requests within your walking radius, complete with target budgets and scheduling notes.",
-      color: "from-purple-500 to-emerald-400",
-      glow: "rgba(168,85,247,0.15)"
+      desc: "Browse our active tuition job map for pin-drop requests within your radius, complete with target budgets and scheduling notes.",
+      textColor: "text-emerald-400",
+      glow: "rgba(239,68,68,0.15)"
     },
     {
       num: "03",
       title: "Secure bKash Match",
       desc: "Lock in the job, instantly unlock parent verified telephone contact numbers via secure bKash Checkout, and begin professional classes.",
-      color: "from-emerald-500 to-teal-400",
-      glow: "rgba(16,185,129,0.15)"
+      textColor: "text-indigo-400",
+      glow: "rgba(244,63,94,0.15)"
     }
   ];
 
@@ -122,7 +122,7 @@ export default function FrontPageAdditions({ selectedRole }: FrontPageAdditionsP
               {selectedRole === "parent" ? "Find the Perfect Tutor in 3 Steps" : "Start Earning as a Premium Tutor"}
             </p>
             <p className="text-sm sm:text-base text-[var(--muted)] max-w-2xl mx-auto leading-relaxed">
-              Designed specifically for the Dhaka student community, here is how our secure connection portal works.
+              Designed specifically for the Bangladesh student community, here is how our secure connection portal works.
             </p>
           </div>
 
@@ -140,7 +140,7 @@ export default function FrontPageAdditions({ selectedRole }: FrontPageAdditionsP
                 />
 
                 <div className="flex items-start justify-between mb-6">
-                  <span className={`text-4xl font-extrabold bg-gradient-to-r ${step.color} bg-clip-text text-transparent font-mono tracking-tighter`}>
+                  <span className={`text-4xl font-extrabold ${step.textColor} font-mono tracking-tighter`}>
                     {step.num}
                   </span>
                   <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800/50 flex items-center justify-center text-slate-500 group-hover:text-emerald-400 group-hover:border-emerald-500/20 transition-colors">
@@ -170,7 +170,7 @@ export default function FrontPageAdditions({ selectedRole }: FrontPageAdditionsP
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, idx) => (
               <div key={idx} className="text-center space-y-2">
-                <span className="block text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-transparent bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text">
+                <span className="block text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-emerald-400">
                   {stat.value}
                 </span>
                 <span className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-[var(--foreground)] font-mono">

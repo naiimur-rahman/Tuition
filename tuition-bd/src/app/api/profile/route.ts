@@ -39,6 +39,9 @@ export async function GET(request: Request) {
               profile: {
                 select: {
                   phone: true,
+                  gender: true,
+                  hoursRequired: true,
+                  preferable_time: true,
                 }
               }
             }
@@ -66,6 +69,9 @@ export async function GET(request: Request) {
         salary: job.salary,
         status: job.status,
         locationUnlocked: job.locationUnlocked,
+        studentGender: job.parent.profile?.gender || "Not Specified",
+        duration: job.parent.profile?.hoursRequired || "Not Specified",
+        preferableTime: job.parent.profile?.preferable_time || "Flexible",
         parent: job.locationUnlocked ? {
           name: job.parent.name,
           email: job.parent.email,
@@ -140,7 +146,7 @@ export async function GET(request: Request) {
           parentId: userId,
           tutorId: { not: null },
           status: {
-            in: ["ASSIGNED", "COMPLETED"],
+            in: ["OPEN", "ASSIGNED", "COMPLETED"],
           },
         },
         include: {
@@ -154,6 +160,7 @@ export async function GET(request: Request) {
                   tutorSeq: true,
                   education: true,
                   phone: true,
+                  bio: true,
                   selfieImageUrl: true,
                   universityIdImageUrl: true,
                 },
@@ -166,16 +173,19 @@ export async function GET(request: Request) {
       const assignedTutorsMap = new Map();
       assignedJobs.forEach((job) => {
         if (job.tutor) {
+          const released = job.tutorDetailsReleased === true;
           assignedTutorsMap.set(job.tutor.id, {
             id: job.tutor.id,
-            name: job.tutor.name || "Tutor",
-            email: job.tutor.email || "N/A",
-            phone: job.tutor.profile?.phone || "Not specified",
+            name: released ? job.tutor.name : "Tutor [Masked]",
+            email: released ? job.tutor.email : "Email [Masked]",
+            phone: released ? (job.tutor.profile?.phone || "Not specified") : "Phone [Masked]",
             tutorSeq: job.tutor.profile?.tutorSeq || 1,
             education: job.tutor.profile?.education || "Not specified",
+            bio: job.tutor.profile?.bio || "No bio available",
+            subject: job.subject || "Various Subjects",
             jobTitle: job.title,
-            selfieImageUrl: job.tutor.profile?.selfieImageUrl || null,
-            universityIdImageUrl: job.tutor.profile?.universityIdImageUrl || null,
+            selfieImageUrl: released ? job.tutor.profile?.selfieImageUrl : null,
+            universityIdImageUrl: released ? job.tutor.profile?.universityIdImageUrl : null,
           });
         }
       });
@@ -215,6 +225,9 @@ export async function POST(request: Request) {
       bio, 
       education,
       gender,
+      preferable_time,
+      is_active,
+      reactivationRequested,
       studentClass,
       hoursRequired,
       tutorGenderPreference,
@@ -261,6 +274,9 @@ export async function POST(request: Request) {
       bio: bio || null,
       education: education || null,
       gender: gender || null,
+      preferable_time: preferable_time || null,
+      is_active: is_active !== undefined ? is_active : true,
+      reactivationRequested: reactivationRequested !== undefined ? reactivationRequested : false,
       studentClass: studentClass || null,
       hoursRequired: hoursRequired || null,
       tutorGenderPreference: tutorGenderPreference || null,
@@ -278,6 +294,9 @@ export async function POST(request: Request) {
       phone: phone !== undefined ? phone : undefined,
       address: address !== undefined ? address : undefined,
       gender: gender !== undefined ? gender : undefined,
+      preferable_time: preferable_time !== undefined ? preferable_time : undefined,
+      is_active: is_active !== undefined ? is_active : undefined,
+      reactivationRequested: reactivationRequested !== undefined ? reactivationRequested : undefined,
       studentClass: studentClass !== undefined ? studentClass : undefined,
       hoursRequired: hoursRequired !== undefined ? hoursRequired : undefined,
       tutorGenderPreference: tutorGenderPreference !== undefined ? tutorGenderPreference : undefined,

@@ -87,7 +87,7 @@ function PaymentContent() {
   return (
     <div className="bg-slate-900 border border-slate-800 shadow-2xl rounded-2xl p-6 sm:p-8 max-w-md w-full space-y-6 relative overflow-hidden text-left">
       {/* BKash Branding Top accent */}
-      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-pink-500 via-pink-600 to-pink-500" />
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-pink-500" />
       
       {/* Header */}
       <div className="text-center space-y-2">

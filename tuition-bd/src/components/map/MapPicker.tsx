@@ -43,7 +43,36 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
         shadowUrl: "/marker-shadow.png",
       });
     }
-  }, []);
+
+    // Auto fetch location on load if default coordinates are used (i.e. registration page init)
+    const isDefaultCoords = (!initialLat || initialLat === 23.8103) && (!initialLng || initialLng === 90.4125);
+    if (isDefaultCoords && "geolocation" in navigator) {
+      setIsFetchingLocation(true);
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const fetchedLat = position.coords.latitude;
+          const fetchedLng = position.coords.longitude;
+          const newPos: [number, number] = [fetchedLat, fetchedLng];
+          
+          setMarkerPosition(newPos);
+          setActualPos(newPos);
+          setIsFetchingLocation(false);
+          
+          onChange({
+            lat: fetchedLat,
+            lng: fetchedLng,
+            actualLat: fetchedLat,
+            actualLng: fetchedLng,
+          });
+        },
+        (error) => {
+          console.error("Error auto-fetching geolocation on map mount:", error);
+          setIsFetchingLocation(false);
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
+  }, [initialLat, initialLng, onChange]);
 
   const markerRef = useRef<any>(null);
 

@@ -61,7 +61,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { jobId, action, tutorId } = body;
+    const { jobId, action, tutorId, tutorRequirement } = body;
 
     if (!jobId) {
       return new NextResponse("Missing jobId", { status: 400 });
@@ -85,9 +85,68 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ updatedJob, message: "Tutor assigned manually (Pay Later)." });
     }
 
+    if (action === "release") {
+      const updatedJob = await prisma.tuitionJob.update({
+        where: { id: jobId },
+        data: {
+          tutorDetailsReleased: true
+        }
+      });
+
+      return NextResponse.json({ updatedJob, message: "Tutor details released successfully." });
+    }
+
+    if (action === "approve") {
+      const updatedJob = await prisma.tuitionJob.update({
+        where: { id: jobId },
+        data: {
+          status: "OPEN",
+          tutorRequirement: tutorRequirement !== undefined ? tutorRequirement : undefined
+        }
+      });
+
+      return NextResponse.json({ updatedJob, message: "Tuition post approved successfully." });
+    }
+
+    if (action === "updateRequirement") {
+      const updatedJob = await prisma.tuitionJob.update({
+        where: { id: jobId },
+        data: {
+          tutorRequirement: tutorRequirement !== undefined ? tutorRequirement : undefined
+        }
+      });
+
+      return NextResponse.json({ updatedJob, message: "Tutor requirement updated successfully." });
+    }
+
     return new NextResponse("Invalid action", { status: 400 });
   } catch (error) {
     console.error("ADMIN_PATCH_JOBS_ERROR", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any).role !== "ADMIN") {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const jobId = searchParams.get("jobId");
+
+    if (!jobId) {
+      return new NextResponse("Missing jobId", { status: 400 });
+    }
+
+    await prisma.tuitionJob.delete({
+      where: { id: jobId }
+    });
+
+    return NextResponse.json({ success: true, message: "Job post deleted successfully." });
+  } catch (error) {
+    console.error("ADMIN_DELETE_JOB_ERROR", error);
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
