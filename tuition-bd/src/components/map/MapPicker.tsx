@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from "react";
+import type * as LeafletType from "leaflet";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 // Fix Leaflet marker icons in Next.js
-let L: any = null;
-if (typeof window !== "undefined") {
-  L = require("leaflet");
-}
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const L = typeof window !== "undefined" ? require("leaflet") : null;
 
 function MapUpdater({ center }: { center: [number, number] }) {
   const map = useMap();
@@ -33,7 +32,15 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
   const [actualPos, setActualPos] = useState<[number, number] | null>(null);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
+  const onChangeRef = useRef(onChange);
   useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  const autoFetchedRef = useRef(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
     if (L) {
       delete L.Icon.Default.prototype._getIconUrl;
@@ -43,10 +50,24 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
         shadowUrl: "/marker-shadow.png",
       });
     }
+  }, []);
 
-    // Auto fetch location on load if default coordinates are used (i.e. registration page init)
+  // Sync initialLat/initialLng changes
+  useEffect(() => {
+    if (initialLat && initialLng) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMarkerPosition([initialLat, initialLng]);
+    }
+  }, [initialLat, initialLng]);
+
+  // Auto fetch location on load if default coordinates are used (i.e. registration page init)
+  useEffect(() => {
+    if (autoFetchedRef.current) return;
+
     const isDefaultCoords = (!initialLat || initialLat === 23.8103) && (!initialLng || initialLng === 90.4125);
     if (isDefaultCoords && "geolocation" in navigator) {
+      autoFetchedRef.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsFetchingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -58,7 +79,7 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
           setActualPos(newPos);
           setIsFetchingLocation(false);
           
-          onChange({
+          onChangeRef.current({
             lat: fetchedLat,
             lng: fetchedLng,
             actualLat: fetchedLat,
@@ -72,9 +93,9 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
         { enableHighAccuracy: true, timeout: 8000 }
       );
     }
-  }, [initialLat, initialLng, onChange]);
+  }, [initialLat, initialLng]);
 
-  const markerRef = useRef<any>(null);
+  const markerRef = useRef<LeafletType.Marker | null>(null);
 
   const eventHandlers = useMemo(
     () => ({
@@ -84,7 +105,7 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
           const latLng = marker.getLatLng();
           const newPos: [number, number] = [latLng.lat, latLng.lng];
           setMarkerPosition(newPos);
-          onChange({
+          onChangeRef.current({
             lat: latLng.lat,
             lng: latLng.lng,
             actualLat: actualPos ? actualPos[0] : undefined,
@@ -93,7 +114,7 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
         }
       },
     }),
-    [onChange, actualPos]
+    [actualPos]
   );
 
   const handleAutoFetchLocation = () => {
@@ -109,7 +130,7 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
           setActualPos(newPos);
           setIsFetchingLocation(false);
           
-          onChange({
+          onChangeRef.current({
             lat: fetchedLat,
             lng: fetchedLng,
             actualLat: fetchedLat,

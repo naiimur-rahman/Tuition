@@ -114,8 +114,8 @@ export async function GET(request: Request) {
           verified: parentVerificationStatus === "VERIFIED",
           address: fullAddress,
           parent: {
-            name: "undefined",
-            email: "undefined@tuition-console.net",
+            name: job.parent?.name || "Parent",
+            email: job.parent?.email || "",
             verificationStatus: parentVerificationStatus,
             gender: job.parent?.profile?.gender || null,
             preferable_time: job.parent?.profile?.preferable_time || null,
@@ -135,8 +135,8 @@ export async function GET(request: Request) {
         verified: parentVerificationStatus === "VERIFIED",
         address: shortAddress,
         parent: {
-          name: "undefined",
-          email: "undefined@tuition-console.net",
+          name: "Parent [Masked]",
+          email: "masked@tuition-console.net",
           verificationStatus: parentVerificationStatus,
           gender: job.parent?.profile?.gender || null,
           preferable_time: job.parent?.profile?.preferable_time || null,

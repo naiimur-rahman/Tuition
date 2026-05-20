@@ -44,9 +44,8 @@ export async function detectFaceInImage(file: File): Promise<boolean> {
         // B. PRIMARY DEFENSE: Native FaceDetector (Shape Detection API)
         if ("FaceDetector" in window) {
           try {
-            // @ts-ignore
+            // @ts-expect-error - FaceDetector Shape Detection API is only supported in some browsers and missing standard typings
             const detector = new FaceDetector({ maxDetectedFaces: 3, fastMode: false });
-            // @ts-ignore
             const faces = await detector.detect(img);
             console.log("Native Vision FaceDetector detected faces:", faces.length);
             if (faces.length > 0) {
@@ -65,12 +64,12 @@ export async function detectFaceInImage(file: File): Promise<boolean> {
         // C. SECONDARY DEFENSE: tracking.js Viola-Jones Cascade Classifier
         try {
           // Dynamically import tracking.js client-side chunks to prevent SSR build issues
-          // @ts-ignore
+          // @ts-expect-error - tracking.js does not have official TypeScript definitions
           await import("tracking/build/tracking-min.js");
-          // @ts-ignore
+          // @ts-expect-error - tracking.js face model does not have official TypeScript definitions
           await import("tracking/build/data/face-min.js");
 
-          // @ts-ignore
+          // @ts-expect-error - window.tracking is set dynamically via browser script load
           const tracking = window.tracking;
           if (tracking) {
             const tracker = new tracking.ObjectTracker("face");
@@ -87,7 +86,7 @@ export async function detectFaceInImage(file: File): Promise<boolean> {
               ctx.drawImage(img, 0, 0);
 
               let detected = false;
-              tracker.once("track", (event: any) => {
+              tracker.once("track", (event: { data?: Array<unknown> }) => {
                 if (event.data && event.data.length > 0) {
                   detected = true;
                 }
