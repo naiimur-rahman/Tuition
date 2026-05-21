@@ -44,7 +44,7 @@ function MapSearchContent() {
   return (
     <div className="max-w-[96%] mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
       {/* Page Header */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-slate-200/60 dark:border-slate-800/80 pb-6 transition-colors duration-300">
+      <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-slate-800/80 light:border-slate-200/60 pb-6 transition-colors duration-300">
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl font-extrabold font-heading text-[var(--foreground)] tracking-tight">
             {type === "tutor" ? (
@@ -67,7 +67,7 @@ function MapSearchContent() {
         </div>
 
         {/* Segmented Switcher for Map Mode */}
-        <div className="flex bg-slate-900/80 dark:bg-slate-900/60 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 max-w-md w-full md:w-auto shrink-0 shadow-lg select-none">
+        <div className="flex bg-slate-900/80 light:bg-slate-100 p-1 rounded-2xl border border-slate-800/80 light:border-slate-200/60 max-w-md w-full md:w-auto shrink-0 shadow-lg select-none">
           <button 
             onClick={() => router.push('/map?type=tutor')}
             className={`flex-1 md:flex-none py-2.5 px-5 rounded-xl text-xs font-mono font-bold uppercase transition-all duration-200 cursor-pointer text-center ${
@@ -96,16 +96,16 @@ function MapSearchContent() {
         <div className="lg:col-span-1 space-y-6 order-2 lg:order-1">
           
           {/* Card 1: Map Navigation Guide */}
-          <div className="glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 space-y-4 transition-all duration-300">
+          <div className="glass-card p-5 rounded-2xl border border-slate-800/80 light:border-slate-200/60 space-y-4 transition-all duration-300">
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-[10px] font-mono text-white uppercase tracking-wider font-extrabold">
+              <span className="text-[10px] font-mono text-slate-200 light:text-slate-800 uppercase tracking-wider font-extrabold">
                 Navigation Guide
               </span>
             </div>
-            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
+            <div className="h-px bg-slate-800/80 light:bg-slate-200/60" />
             <div className="space-y-3 text-[11px] text-slate-400 leading-relaxed font-sans">
               <div className="flex gap-2">
                 <span className="bg-slate-900 border border-slate-800 text-slate-400 w-5 h-5 rounded-full flex items-center justify-center font-bold font-mono text-[9px] shrink-0">1</span>
@@ -129,7 +129,7 @@ function MapSearchContent() {
           </div>
 
           {/* Card 2: Proximity Radius & Live Metrics */}
-          <div className="glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 space-y-4 transition-all duration-300">
+          <div className="glass-card p-5 rounded-2xl border border-slate-800/80 light:border-slate-200/60 space-y-4 transition-all duration-300">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider font-extrabold">
                 Search Proximity Range
@@ -138,7 +138,7 @@ function MapSearchContent() {
                 Spatial Radius
               </span>
             </div>
-            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
+            <div className="h-px bg-slate-800/80 light:bg-slate-200/60" />
 
             {/* Radius Selection Buttons */}
             <div className="flex items-center gap-2">
@@ -158,7 +158,7 @@ function MapSearchContent() {
               ))}
             </div>
 
-            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
+            <div className="h-px bg-slate-800/80 light:bg-slate-200/60" />
 
             {/* Merged Live Metrics / Map Numbers */}
             <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-800/60 space-y-2 font-mono text-[10px]">
@@ -176,7 +176,7 @@ function MapSearchContent() {
               </div>
             </div>
 
-            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80" />
+            <div className="h-px bg-slate-800/80 light:bg-slate-200/60" />
 
             {/* Legend Indicators */}
             <div className="space-y-2 text-[10px] font-mono text-slate-400">
@@ -199,7 +199,7 @@ function MapSearchContent() {
           </div>
 
           {/* Card 3: Search Filters */}
-          <div className="glass-card p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 space-y-6 transition-all duration-300">
+          <div className="glass-card p-5 rounded-2xl border border-slate-800/80 light:border-slate-200/60 space-y-6 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold font-heading text-[var(--foreground)] flex items-center">
@@ -221,7 +221,7 @@ function MapSearchContent() {
               )}
             </div>
 
-            <div className="h-px bg-slate-200/60 dark:bg-slate-800/80 transition-colors duration-300" />
+            <div className="h-px bg-slate-800/80 light:bg-slate-200/60 transition-colors duration-300" />
 
             <div className="space-y-5">
               {/* Subjects Checkboxes */}

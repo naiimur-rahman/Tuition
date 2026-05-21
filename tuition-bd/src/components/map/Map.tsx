@@ -5,8 +5,7 @@ import { MapContainer, TileLayer, Circle, Marker, Popup, useMap } from "react-le
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-
-const L = typeof window !== "undefined" ? require("leaflet") : null;
+import L from "leaflet";
 
 function RecenterControl({ userLocation }: { userLocation: [number, number] | null }) {
   const map = useMap();
@@ -240,8 +239,7 @@ export default function MapComponent({
   // Fix Leaflet marker icons in Next.js
   useEffect(() => {
     setIsMounted(true);
-    const L = require("leaflet");
-    delete L.Icon.Default.prototype._getIconUrl;
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: "/marker-icon-2x.png",
       iconUrl: "/marker-icon.png",
@@ -524,7 +522,7 @@ export default function MapComponent({
             iconSize: [32, 32],
             iconAnchor: [16, 16],
             popupAnchor: [0, -16],
-          }) : null;
+          }) : undefined;
 
           if (zoomLevel <= 13) {
             return (

@@ -52,12 +52,15 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
   }, [pathname]);
 
   const toggleTheme = () => {
+    const root = document.documentElement;
     if (theme === "dark") {
-      document.documentElement.classList.add("light");
+      root.classList.add("light");
+      root.classList.remove("dark");
       localStorage.setItem("theme", "light");
       setTheme("light");
     } else {
-      document.documentElement.classList.remove("light");
+      root.classList.remove("light");
+      root.classList.add("dark");
       localStorage.setItem("theme", "dark");
       setTheme("dark");
     }

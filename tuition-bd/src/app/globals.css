@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* App theme: .light on <html> = light; no .light = dark (not OS media) */
+@custom-variant dark (&:where(html:not(.light), html:not(.light) *));
+@custom-variant light (&:where(html.light, html.light *));
+
 :root {
   --background: #000000; /* Absolute fully dark black background */
   --foreground: #f8fafc;
@@ -310,6 +314,96 @@ h1, h2, h3, h4, h5, h6 {
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+}
+
+/* ==========================================
+   DARK MODE POLISH (default: html without .light)
+   ========================================== */
+html:not(.light) {
+  color-scheme: dark;
+}
+
+html:not(.light) body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Muted / secondary text readable on black */
+html:not(.light) .text-slate-600:not(.keep-dark *) {
+  color: #94a3b8 !important;
+}
+
+html:not(.light) .text-slate-700:not(.keep-dark *) {
+  color: #cbd5e1 !important;
+}
+
+/* Accent text: bright on dark surfaces */
+html:not(.light) .text-emerald-400:not(.keep-dark *),
+html:not(.light) .text-emerald-300:not(.keep-dark *) {
+  color: #2dd4bf !important;
+}
+
+html:not(.light) .text-indigo-400:not(.keep-dark *),
+html:not(.light) .text-indigo-500:not(.keep-dark *) {
+  color: #2dd4bf !important;
+}
+
+html:not(.light) .text-cyan-400:not(.keep-dark *),
+html:not(.light) .text-cyan-300:not(.keep-dark *) {
+  color: #22d3ee !important;
+}
+
+html:not(.light) .text-slate-300:not(.keep-dark *),
+html:not(.light) .text-slate-400:not(.keep-dark *) {
+  color: #94a3b8 !important;
+}
+
+html:not(.light) .text-slate-500:not(.keep-dark *) {
+  color: #64748b !important;
+}
+
+html:not(.light) .hover\:text-white:not(.keep-dark *):hover,
+html:not(.light) .hover\:text-slate-200:not(.keep-dark *):hover,
+html:not(.light) .hover\:text-slate-300:not(.keep-dark *):hover {
+  color: #f8fafc !important;
+}
+
+/* Forms in dark mode */
+html:not(.light) select:not(.keep-dark *),
+html:not(.light) textarea:not(.keep-dark *),
+html:not(.light) input:not([type="checkbox"]):not([type="radio"]):not(.keep-dark *) {
+  color: #f8fafc !important;
+}
+
+html:not(.light) select option,
+html:not(.light) optgroup {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+html:not(.light) ::placeholder {
+  color: #64748b !important;
+  opacity: 1;
+}
+
+/* White labels stay white in dark (map sidebar, CTAs) */
+html:not(.light) .text-white:not(.keep-dark *) {
+  color: #f8fafc !important;
+}
+
+html:not(.light) .bg-emerald-500.text-white,
+html:not(.light) .bg-emerald-600.text-white,
+html:not(.light) [class*="bg-emerald-5"].text-white,
+html:not(.light) .bg-emerald-500 .text-white {
+  color: #ffffff !important;
+}
+
+/* Dividers on dark pages */
+html:not(.light) hr,
+html:not(.light) .h-px.bg-slate-800,
+html:not(.light) .h-px.bg-slate-900,
+html:not(.light) .h-px[class*="bg-slate-8"] {
+  background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* ==========================================

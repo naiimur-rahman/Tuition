@@ -30,6 +30,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${headingFont.variable} ${bodyFont.variable} h-full antialiased`}
     >
       <head>
@@ -37,16 +38,13 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
+                const root = document.documentElement;
                 const stored = localStorage.getItem('theme');
-                if (stored === 'light') {
-                  document.documentElement.classList.add('light');
-                } else if (stored === 'dark') {
-                  document.documentElement.classList.remove('light');
-                } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-                  document.documentElement.classList.add('light');
-                } else {
-                  document.documentElement.classList.remove('light');
-                }
+                const useLight =
+                  stored === 'light' ||
+                  (stored !== 'dark' && window.matchMedia('(prefers-color-scheme: light)').matches);
+                root.classList.toggle('light', useLight);
+                root.classList.toggle('dark', !useLight);
               } catch (_) {}
             `,
           }}
