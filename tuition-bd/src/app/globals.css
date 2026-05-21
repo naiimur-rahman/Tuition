@@ -17,14 +17,14 @@
 
 /* Light Theme Variable Overrides */
 .light {
-  --background: #f1f5f9;
+  --background: #f8fafc;
   --foreground: #0f172a;
-  --muted: #475569;
+  --muted: #64748b;
   
-  --slate-800: #1e293b;
-  --slate-850: #0f172a;
-  --slate-900: #0f172a;
-  --slate-950: #020617;
+  --slate-800: #e2e8f0;
+  --slate-850: #cbd5e1;
+  --slate-900: #f1f5f9;
+  --slate-950: #ffffff;
 }
 
 @theme {
@@ -380,23 +380,40 @@ h1, h2, h3, h4, h5, h6 {
 .light .bg-slate-900\/40:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-900\/30:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-900\/10:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/20:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/50:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/80:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-900\/90:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-955:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-950:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-955\/40:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-955\/20:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-950\/40:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/50:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/60:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/70:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-950\/80:not(.keep-dark):not(.keep-dark *),
-.light .bg-slate-950\/95:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-950\/90:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/95:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-955\/95:not(.keep-dark):not(.keep-dark *),
 .light .bg-slate-955\/90:not(.keep-dark):not(.keep-dark *),
-.light .bg-slate-950\/20:not(.keep-dark):not(.keep-dark *),
-.light .bg-slate-900\/90:not(.keep-dark):not(.keep-dark *),
-.light .bg-slate-900\/50:not(.keep-dark):not(.keep-dark *),
-.light .bg-slate-900\/80:not(.keep-dark):not(.keep-dark *) {
+.light .bg-slate-850:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-800:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-800\/40:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-800\/60:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-800\/80:not(.keep-dark):not(.keep-dark *) {
   background-color: #ffffff !important;
   background-image: none !important;
   border-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+/* Subtle gray bands for section strips (stats, estimator) */
+.light .bg-slate-950\/20:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/30:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/40:not(.keep-dark):not(.keep-dark *),
+.light .bg-slate-950\/50:not(.keep-dark):not(.keep-dark *) {
+  background-color: #f1f5f9 !important;
+  border-color: rgba(15, 23, 42, 0.06) !important;
 }
 
 .light .glass-card:not(.keep-dark) {
@@ -433,8 +450,19 @@ h1, h2, h3, h4, h5, h6 {
 .light .text-slate-50:not(.keep-dark *),
 .light .text-slate-100:not(.keep-dark *),
 .light .text-slate-200:not(.keep-dark *),
-.light .text-white:not(.keep-dark *) {
+.light .text-white:not(.keep-dark *):not(.bg-emerald-500):not(.bg-emerald-600):not([class*="bg-emerald-5"]):not([class*="bg-red-5"]) {
   color: #020617 !important; /* Rich Dark Slate 950 */
+}
+
+/* Keep white label text on filled accent buttons */
+.light .bg-emerald-500.text-white,
+.light .bg-emerald-600.text-white,
+.light [class*="bg-emerald-5"].text-white,
+.light [class*="bg-red-5"].text-white,
+.light .bg-emerald-500 .text-white,
+.light .bg-emerald-600 .text-white,
+.light [class*="bg-emerald-5"] .text-white {
+  color: #ffffff !important;
 }
 
 .light .text-slate-300:not(.keep-dark *),
@@ -447,17 +475,69 @@ h1, h2, h3, h4, h5, h6 {
   color: #475569 !important; /* Medium Slate 600 */
 }
 
+.light .text-slate-600:not(.keep-dark *) {
+  color: #475569 !important;
+}
+
+.light .text-slate-700:not(.keep-dark *) {
+  color: #334155 !important;
+}
+
+/* Accent colors: darker shades for readable contrast on light surfaces */
+.light .text-emerald-400:not(.keep-dark *),
+.light .text-emerald-300:not(.keep-dark *),
+.light [class*="text-emerald-400/"]:not(.keep-dark *) {
+  color: #0d9488 !important;
+}
+
+.light .text-emerald-500:not(.keep-dark *) {
+  color: #0f766e !important;
+}
+
+.light .text-indigo-400:not(.keep-dark *),
+.light .text-indigo-500:not(.keep-dark *),
+.light [class*="text-indigo-400/"]:not(.keep-dark *) {
+  color: #0d9488 !important;
+}
+
+.light .text-cyan-400:not(.keep-dark *),
+.light .text-cyan-300:not(.keep-dark *),
+.light [class*="text-cyan-400/"]:not(.keep-dark *) {
+  color: #0891b2 !important;
+}
+
+.light .text-red-400:not(.keep-dark *) {
+  color: #dc2626 !important;
+}
+
+.light .text-pink-500:not(.keep-dark *) {
+  color: #db2777 !important;
+}
+
+.light .text-sky-400:not(.keep-dark *) {
+  color: #0284c7 !important;
+}
+
 /* Stabilize active hover states to prevent invisible/white text on hover */
 .light .hover\:text-white:not(.keep-dark *):hover {
   color: #020617 !important;
 }
-.light .hover\:text-slate-200:not(.keep-dark *):hover {
+.light .hover\:text-slate-200:not(.keep-dark *):hover,
+.light .hover\:text-slate-300:not(.keep-dark *):hover {
   color: #0f172a !important;
 }
 .light .hover\:text-emerald-400:not(.keep-dark *):hover {
   color: #0d9488 !important;
 }
 .light .hover\:text-indigo-400:not(.keep-dark *):hover {
+  color: #0d9488 !important;
+}
+.light .hover\:text-cyan-300:not(.keep-dark *):hover,
+.light .hover\:text-cyan-400:not(.keep-dark *):hover {
+  color: #0e7490 !important;
+}
+
+.light .group:hover .group-hover\:text-emerald-400:not(.keep-dark *) {
   color: #0d9488 !important;
 }
 
@@ -506,6 +586,49 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255, 255, 255, 0.8) !important;
   border-color: rgba(15, 23, 42, 0.05) !important;
   box-shadow: 0 10px 40px rgba(15, 23, 42, 0.04) !important;
+}
+
+.light nav.glass-panel,
+.light nav[class*="shadow-["] {
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.06) !important;
+}
+
+/* Form controls: readable text on light surfaces */
+.light select:not(.keep-dark *),
+.light textarea:not(.keep-dark *),
+.light input:not([type="checkbox"]):not([type="radio"]):not(.keep-dark *) {
+  color: #0f172a !important;
+}
+
+.light select[class*="bg-slate"]:not(.keep-dark *),
+.light textarea[class*="bg-slate"]:not(.keep-dark *),
+.light input[class*="bg-slate"]:not(.keep-dark *) {
+  background-color: #ffffff !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+.light select option,
+.light optgroup {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.light ::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1;
+}
+
+/* Page shells that use bg-slate-950 as root wrapper */
+.light .bg-slate-950.text-\[var\(--foreground\)\]:not(.keep-dark) {
+  background-color: var(--background) !important;
+}
+
+/* Horizontal dividers only */
+.light hr,
+.light .h-px.bg-slate-900,
+.light .h-px.bg-slate-800,
+.light .h-px[class*="bg-slate-"] {
+  background-color: #e2e8f0 !important;
 }
 
 /* Strip Leaflet default divIcon square box styling for our beautiful custom maps pins */

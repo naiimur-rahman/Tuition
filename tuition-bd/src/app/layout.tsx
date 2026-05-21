@@ -37,10 +37,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                if (prefersDark) {
+                const stored = localStorage.getItem('theme');
+                if (stored === 'light') {
+                  document.documentElement.classList.add('light');
+                } else if (stored === 'dark') {
                   document.documentElement.classList.remove('light');
-                } else if (localStorage.theme === 'light' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+                } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
                   document.documentElement.classList.add('light');
                 } else {
                   document.documentElement.classList.remove('light');
