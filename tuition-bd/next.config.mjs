@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['bcrypt', '@prisma/client'],
+  serverExternalPackages: ['bcryptjs', '@prisma/client'],
 };
 
 export default nextConfig;

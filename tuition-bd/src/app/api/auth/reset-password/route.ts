@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "crypto";
 // Wait, using bcrypt package for hashing, not crypto
-import bcryptjs from "bcrypt";
+import bcryptjs from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
