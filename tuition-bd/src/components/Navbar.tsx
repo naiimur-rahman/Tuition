@@ -99,42 +99,9 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 whileTap={{ scale: 0.98 }}
                 className="flex items-center cursor-pointer"
               >
-                {/* Map & Tuition Combined Brand Logo */}
-                <div className="relative flex items-center justify-center w-8.5 h-8.5 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 mr-2 sm:mr-2.5 shadow-[0_0_15px_rgba(var(--theme-rgb),0.2)] text-emerald-400 group overflow-hidden shrink-0">
-                  {/* Subtle inner pulse glowing ring */}
-                  <span className="absolute inset-0 bg-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-pulse" />
-                  
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6 relative z-10 text-emerald-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" 
-                          stroke="currentColor" 
-                          strokeWidth="2" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                    />
-                    <path d="M12 6.5L8.5 8.5L12 10.5L15.5 8.5L12 6.5Z" 
-                          fill="currentColor" 
-                          stroke="currentColor" 
-                          strokeWidth="1" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round"
-                    />
-                    <path d="M9.5 9.1V11.5C9.5 12.5 10.6 13.5 12 13.5C13.4 13.5 14.5 12.5 14.5 11.5V9.1" 
-                          stroke="currentColor" 
-                          strokeWidth="1.2" 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round"
-                    />
-                    <path d="M13.8 8.5V10.5" 
-                          stroke="currentColor" 
-                          strokeWidth="0.8" 
-                          strokeLinecap="round"
-                    />
-                  </svg>
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-heading font-extrabold text-base sm:text-lg tracking-tight text-emerald-400 select-none whitespace-nowrap">
-                    Tuition Console
-                  </span>
+                {/* TutorHire Brand Logo */}
+                <div className="flex items-center ml-1 -ml-2 sm:-ml-4">
+                  <img src="/logo.png" alt="TutorHire Logo" className="h-16 sm:h-20 w-auto dark:invert mt-1 sm:mt-2" />
                 </div>
               </motion.div>
             </Link>

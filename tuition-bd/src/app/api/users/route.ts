@@ -52,7 +52,7 @@ export async function GET(request: Request) {
     const sanitizedTutors = tutors.map((tutor) => ({
       ...tutor,
       name: "undefined",
-      email: "undefined@tuition-console.net",
+      email: "undefined@tutorhire.com",
       profile: tutor.profile ? {
         ...tutor.profile,
         phone: "•••••••••••",

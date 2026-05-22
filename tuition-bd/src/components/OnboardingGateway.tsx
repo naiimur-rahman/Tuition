@@ -52,38 +52,10 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.3 }}
-                whileHover={{ scale: 1.05 }}
-                className="flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(var(--theme-rgb),0.15)] cursor-pointer"
               >
-                <svg className="w-9 h-9" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* A premium map marker shape */}
-                  <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2Z" 
-                        stroke="currentColor" 
-                        strokeWidth="2" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                  />
-                  {/* A graduation cap inside the center of the marker */}
-                  <path d="M12 6.5L8.5 8.5L12 10.5L15.5 8.5L12 6.5Z" 
-                        fill="currentColor" 
-                        stroke="currentColor" 
-                        strokeWidth="1" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                  />
-                  <path d="M9.5 9.1V11.5C9.5 12.5 10.6 13.5 12 13.5C13.4 13.5 14.5 12.5 14.5 11.5V9.1" 
-                        stroke="currentColor" 
-                        strokeWidth="1.2" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                  />
-                  {/* Tassel */}
-                  <path d="M13.8 8.5V10.5" 
-                        stroke="currentColor" 
-                        strokeWidth="0.8" 
-                        strokeLinecap="round"
-                  />
-                </svg>
+                <div className="relative z-10 flex items-center justify-center transform hover:scale-105 transition-transform duration-500">
+                  <img src="/logo.png" alt="TutorHire Logo" className="h-16 sm:h-20 w-auto invert" />
+                </div>
               </motion.div>
  
               <motion.h1
@@ -94,7 +66,7 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
               >
                 <span className="text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Welcome to</span>
                 <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-emerald-400 drop-shadow-sm mt-1 whitespace-nowrap">
-                  Tuition Console
+                  TutorHire
                 </span>
               </motion.h1>
  
@@ -104,7 +76,7 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                 transition={{ duration: 0.3, delay: 0.05 }}
                 className="text-slate-400 max-w-lg mx-auto text-xs sm:text-sm md:text-base font-sans leading-relaxed px-4"
               >
-                Select your console mode to initialize queries, scan location maps, and launch the matching engine.
+                Select your mode to initialize queries, scan location maps, and launch the matching engine.
               </motion.p>
             </div>
  
@@ -142,7 +114,7 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                 </div>
   
                 <div className="flex items-center text-[10px] sm:text-xs font-mono text-emerald-400 mt-4 sm:mt-6 tracking-wider font-bold uppercase group-hover:translate-x-1.5 transition-transform duration-300">
-                  Enter Parent Console
+                  Enter Parent Portal
                   <svg className="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
@@ -180,7 +152,7 @@ export default function OnboardingGateway({ onSelectRole }: OnboardingGatewayPro
                 </div>
   
                 <div className="flex items-center text-[10px] sm:text-xs font-mono text-indigo-400 mt-4 sm:mt-6 tracking-wider font-bold uppercase group-hover:translate-x-1.5 transition-transform duration-300">
-                  Enter Tutor Console
+                  Tutor Platform Dashboard
                   <svg className="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>

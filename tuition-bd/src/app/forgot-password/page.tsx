@@ -141,7 +141,7 @@ export default function ForgotPassword() {
         <div className="text-center space-y-2 mb-8">
           <Link href="/" className="inline-block">
             <div className="text-sky-400 font-mono text-xs uppercase tracking-widest bg-sky-500/10 border border-sky-500/20 px-3 py-1 rounded-full w-fit mx-auto mb-2 shadow-[0_0_10px_rgba(14,165,233,0.1)]">
-              Tuition Console
+              TutorHire
             </div>
           </Link>
           <h2 className="text-3xl font-bold font-heading text-white">

@@ -18,8 +18,8 @@ const bodyFont = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Tuition Console | Premium Tutor & Tuition Discovery",
-  description: "Connect with verified tutors and find tuition jobs in Bangladesh using our interactive, premium map-based console.",
+  title: "TutorHire | Premium Tutor & Tuition Discovery",
+  description: "Connect with verified tutors and find tuition jobs in Bangladesh using our interactive, premium map-based platform.",
 };
 
 export default function RootLayout({

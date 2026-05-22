@@ -39,7 +39,7 @@ export default function RoleDashboardSectors({}: RoleDashboardSectorsProps = {})
         {/* Header */}
         <div className="text-center lg:text-left space-y-4">
           <h2 className="text-xs font-mono tracking-widest text-emerald-400 uppercase font-bold bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full w-fit mx-auto lg:mx-0 shadow-[0_0_15px_rgba(var(--theme-rgb),0.05)]">
-            Parent Operator Console
+            Parent Operator Dashboard
           </h2>
           <h3 className="text-3xl font-heading font-extrabold text-white tracking-tight">
             Tutor Verification & Matching Engine
@@ -248,7 +248,7 @@ export default function RoleDashboardSectors({}: RoleDashboardSectorsProps = {})
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 16v3m4-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2m12 0a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2h14z" />
                 </svg>
               </div>
-              <h4 className="text-xl font-bold font-heading text-white">How to Earn with Tuition Console</h4>
+              <h4 className="text-xl font-bold font-heading text-white">How to Earn with TutorHire</h4>
               <p className="text-slate-400 text-sm leading-relaxed">
                 Start matching with premium tuition jobs in three simple steps:
               </p>

@@ -165,7 +165,7 @@ function PaymentContent() {
                 Merchant
               </span>
             </div>
-            <span className="text-[10px] text-slate-500 block mt-1 font-mono">(Tuition Console - Merchant Account)</span>
+            <span className="text-[10px] text-slate-500 block mt-1 font-mono">(TutorHire - Merchant Account)</span>
           </div>
           <div className="flex gap-2.5">
             <span className="font-mono text-pink-400 font-bold select-none">3.</span>

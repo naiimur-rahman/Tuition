@@ -338,7 +338,7 @@ export default function Register() {
           {/* Logo Badge */}
           <Link href="/" className="inline-block">
             <div className="text-emerald-400 font-mono text-xs uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full w-fit mx-auto mb-2 shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)]">
-              Tuition Console
+              TutorHire
             </div>
           </Link>
           <h2 className="text-3xl font-extrabold font-heading text-white tracking-tight">
@@ -373,7 +373,7 @@ export default function Register() {
                 autoComplete="email"
                 required
                 className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200"
-                placeholder="operator@console.com"
+                placeholder="hello@tutorhire.com"
                 value={data.email}
                 onChange={(e) => setData({ ...data, email: e.target.value })}
               />

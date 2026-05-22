@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -241,8 +241,8 @@ export async function POST(request: Request) {
 
     let latitude = reqLat !== undefined && reqLat !== null ? parseFloat(reqLat) : undefined;
     let longitude = reqLng !== undefined && reqLng !== null ? parseFloat(reqLng) : undefined;
-    let actualLatitude = reqActualLat !== undefined && reqActualLat !== null ? parseFloat(reqActualLat) : undefined;
-    let actualLongitude = reqActualLng !== undefined && reqActualLng !== null ? parseFloat(reqActualLng) : undefined;
+    const actualLatitude = reqActualLat !== undefined && reqActualLat !== null ? parseFloat(reqActualLat) : undefined;
+    const actualLongitude = reqActualLng !== undefined && reqActualLng !== null ? parseFloat(reqActualLng) : undefined;
 
     let approxLatitude = undefined;
     let approxLongitude = undefined;
@@ -267,7 +267,7 @@ export async function POST(request: Request) {
 
     const isCurrentlyVerified = existingProfile?.verificationStatus === "VERIFIED";
 
-    let createData: any = {
+    const createData: any = {
       userId,
       phone: phone || null,
       address: address || null,
@@ -290,7 +290,7 @@ export async function POST(request: Request) {
       actualLongitude,
     };
 
-    let updateData: any = {
+    const updateData: any = {
       phone: phone !== undefined ? phone : undefined,
       address: address !== undefined ? address : undefined,
       gender: gender !== undefined ? gender : undefined,

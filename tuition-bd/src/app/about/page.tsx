@@ -34,11 +34,11 @@ export default function AboutPage() {
           <span className="text-[10px] tracking-[0.3em] font-mono font-extrabold uppercase bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-full">
             Our Mission
           </span>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--foreground)] mt-4">
-            About <span className="text-emerald-400">Tuition Console</span>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--foreground)] mt-4 flex flex-wrap items-center justify-center gap-1 sm:gap-2">
+            About <img src="/logo.png" alt="TutorHire" className="h-24 sm:h-28 lg:h-32 w-auto dark:invert -mb-2 sm:-mb-3 -ml-1 sm:-ml-2" />
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed font-sans">
-            Tuition Console is the first platform in Bangladesh designed to match parents and tutors securely using state-of-the-art real-time live location.
+            TutorHire is the first platform in Bangladesh designed to match parents and tutors securely using state-of-the-art real-time live location.
           </p>
         </div>
 
@@ -87,7 +87,7 @@ export default function AboutPage() {
             <p className="text-xs sm:text-sm text-[var(--muted)] max-w-xl mx-auto leading-relaxed">
               {activeRole === "tutor"
                 ? "Unlock premium teaching vacancies, coordinate class schedules instantly, and protect your tutoring career with verified credentials and secure payouts."
-                : "Tuition Console introduces features tailored specifically for the Bangladesh tutoring ecosystem, maximizing transparency and trust."}
+                : "TutorHire introduces features tailored specifically for the Bangladesh tutoring ecosystem, maximizing transparency and trust."}
             </p>
           </div>
 
@@ -188,7 +188,7 @@ export default function AboutPage() {
                 </span>
               </h2>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-sans">
-                Tuition Console was designed with user security as our top priority. We implement privacy-first features tailored specifically for the tutoring ecosystem in Bangladesh, ensuring peace of mind for both parents and educators.
+                TutorHire was designed with user security as our top priority. We implement privacy-first features tailored specifically for the tutoring ecosystem in Bangladesh, ensuring peace of mind for both parents and educators.
               </p>
               <div className="space-y-4 text-xs">
                 <div className="flex items-start space-x-3">

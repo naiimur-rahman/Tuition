@@ -6,7 +6,7 @@ import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 // Fix Leaflet marker icons in Next.js
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+ 
 const L = typeof window !== "undefined" ? require("leaflet") : null;
 
 function MapUpdater({ center }: { center: [number, number] }) {
@@ -40,7 +40,7 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
   const autoFetchedRef = useRef(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setIsMounted(true);
     if (L) {
       delete L.Icon.Default.prototype._getIconUrl;
@@ -55,7 +55,7 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
   // Sync initialLat/initialLng changes
   useEffect(() => {
     if (initialLat && initialLng) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setMarkerPosition([initialLat, initialLng]);
     }
   }, [initialLat, initialLng]);
@@ -67,7 +67,7 @@ export default function MapPicker({ initialLat, initialLng, onChange }: MapPicke
     const isDefaultCoords = (!initialLat || initialLat === 23.8103) && (!initialLng || initialLng === 90.4125);
     if (isDefaultCoords && "geolocation" in navigator) {
       autoFetchedRef.current = true;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setIsFetchingLocation(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {

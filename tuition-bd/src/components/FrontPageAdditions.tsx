@@ -71,7 +71,7 @@ export default function FrontPageAdditions({ selectedRole }: FrontPageAdditionsP
 
   const faqs = selectedRole === "parent" ? [
     {
-      q: "How does Tuition Console verify registered tutors?",
+      q: "How does TutorHire verify registered tutors?",
       a: "Safety and academic excellence are our foundations. Tutors must upload valid university identification cards (e.g. BUET, DU, NSU, BRAC) and national identity cards (NID). Our administrators manually inspect each document before awarding the official green verification badge."
     },
     {

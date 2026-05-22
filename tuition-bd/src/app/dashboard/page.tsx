@@ -852,7 +852,7 @@ export default function Dashboard() {
                           setRejectionReason("");
                           setRejectedAt("");
                           setPopupType("success");
-                          setPopupMessage("✓ Credentials uploaded and verification request logged! Your files are now under verification by the Tuition Console Admin.");
+                          setPopupMessage("✓ Credentials uploaded and verification request logged! Your files are now under verification by the TutorHire Admin.");
                           setPopupOpen(true);
                           formEl.reset();
                         } else {
@@ -1105,7 +1105,7 @@ export default function Dashboard() {
                                   </div>
 
                                   <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-850 text-[10px] text-amber-400 font-mono text-center">
-                                    ⚠️ To know full details, please contact Tuition Console.
+                                    ⚠️ To know full details, please contact TutorHire.
                                   </div>
 
                                   <button
@@ -1222,7 +1222,7 @@ export default function Dashboard() {
                                       </div>
                                       <div className="bg-slate-900/60 border border-slate-850 p-2 rounded-lg text-center mt-1">
                                         <p className="text-[9px] font-mono text-slate-400">
-                                          📞 Need Help? Call Tuition Console: <span className="text-emerald-400 font-bold">096-96-847-847</span>
+                                          📞 Need Help? Call TutorHire: <span className="text-emerald-400 font-bold">096-96-847-847</span>
                                         </p>
                                       </div>
                                     </>
@@ -1759,7 +1759,7 @@ export default function Dashboard() {
             <div className="space-y-2">
               <h3 className="text-xl font-heading font-extrabold text-white">Pay Later Coordination</h3>
               <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                To activate the match coordinates for **{payLaterJob.title}** and settle the commission after matching, please contact the Tuition Console Hotline.
+                To activate the match coordinates for **{payLaterJob.title}** and settle the commission after matching, please contact the TutorHire Hotline.
               </p>
             </div>
 

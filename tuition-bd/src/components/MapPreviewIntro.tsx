@@ -142,7 +142,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
         <h2 className="text-lg md:text-xl lg:text-2xl font-black text-white tracking-tight pt-1">
           How{" "}
           <span className="text-emerald-400">
-            Tuition Console
+            TutorHire
           </span>{" "}
           Works
         </h2>
@@ -369,21 +369,19 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
                 <span className="animate-pulse absolute inline-flex h-10 w-10 rounded-full bg-emerald-500/10" />
               </span>
 
-              {/* Brand Logo Pin Badge */}
-              <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border border-[#14b8a6]/80 shadow-[0_0_20px_rgba(var(--theme-rgb),0.35)]">
-                <svg className="w-5.5 h-5.5 sm:w-6.5 sm:h-6.5 text-[#14b8a6] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  {/* Teardrop Pin Outline */}
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                  {/* Mortarboard Diamond */}
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.5l3.5 2-3.5 2-3.5-2z" />
-                  {/* Cap Base */}
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 9.5v2c0 .6 1.1 1 2.5 1s2.5-.4 2.5-1v-2" />
+              {/* Custom 'T' Logo Badge */}
+              <div className="relative flex items-center justify-center rounded-full h-8 w-8 sm:h-10 sm:w-10 bg-white dark:bg-slate-900 border-2 border-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)] z-10">
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" viewBox="0 0 24 24" fill="none">
+                  {/* Top Bar */}
+                  <rect x="2" y="3" width="20" height="5" className="fill-black dark:fill-white" />
+                  {/* Vertical Stem with Angled Cut */}
+                  <polygon points="9,13 15,8.5 15,22 9,22" className="fill-[#334155] dark:fill-[#cbd5e1]" />
                 </svg>
               </div>
               
               <div className="mt-1.5 text-[8.5px] sm:text-[10px] font-black font-sans tracking-tight bg-slate-950/90 border border-slate-800/80 px-2 py-0.5 rounded-md whitespace-nowrap shadow-lg">
                 <span className="text-emerald-400">
-                  Tuition Console
+                  TutorHire
                 </span>
               </div>
             </motion.div>
@@ -474,15 +472,8 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
                 className="absolute bottom-3 sm:bottom-6 inset-x-3 sm:inset-x-4 z-40 glass-panel p-3 sm:p-4 rounded-2xl border border-[#14b8a6]/30 flex items-center justify-between shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
               >
                 <div className="flex items-center space-x-2 sm:space-x-3 text-left">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#14b8a6]/10 flex items-center justify-center text-[#14b8a6] border border-[#14b8a6]/30 flex-shrink-0 animate-pulse">
-                    <svg className="w-4.5 h-4.5 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      {/* Teardrop Pin Outline */}
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                      {/* Mortarboard Diamond */}
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.5l3.5 2-3.5 2-3.5-2z" />
-                      {/* Cap Base */}
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 9.5v2c0 .6 1.1 1 2.5 1s2.5-.4 2.5-1v-2" />
-                    </svg>
+                  <div className="flex items-center justify-center flex-shrink-0 mr-3 sm:mr-4">
+                    <img src="/logo.png" alt="TutorHire" className="h-10 sm:h-12 w-auto object-contain dark:invert" />
                   </div>
                   <div className="max-w-[170px] xs:max-w-[220px] sm:max-w-[280px]">
                     <h4 className="text-[8.5px] sm:text-[9.5px] font-mono font-black text-amber-400 uppercase tracking-widest leading-none">
@@ -492,7 +483,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
                       Real-Time Location Matched!
                     </p>
                     <p className="text-[8.5px] sm:text-[9.5px] text-slate-300 mt-1 leading-snug font-semibold">
-                      Tuition Console is the first platform in Bangladesh to match tutors using live location.
+                      TutorHire is the first platform in Bangladesh to match tutors using live location.
                     </p>
                   </div>
                 </div>

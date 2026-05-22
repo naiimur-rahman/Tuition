@@ -29,8 +29,8 @@ export default function ContactPage() {
           <span className="text-[10px] tracking-[0.3em] font-mono font-extrabold uppercase bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-full">
             Get in touch
           </span>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--foreground)] mt-4">
-            Contact <span className="text-emerald-400">Tuition Console</span>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--foreground)] mt-4 flex flex-wrap items-center justify-center gap-1 sm:gap-2">
+            Contact <img src="/logo.png" alt="TutorHire" className="h-24 sm:h-28 lg:h-32 w-auto dark:invert -mb-2 sm:-mb-3 -ml-1 sm:-ml-2" />
           </h1>
           <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto leading-relaxed">
             Have questions, feedback, or need premium enterprise support? We are always here to assist you.
@@ -47,8 +47,8 @@ export default function ContactPage() {
             </div>
             <h3 className="text-lg font-bold text-[var(--foreground)] mb-1">Email Us</h3>
             <p className="text-xs sm:text-sm text-slate-400 mb-4">Drop us a line and we will reply as soon as possible.</p>
-            <a href="mailto:support@tuitionconsole.com" className="text-xs sm:text-sm font-mono font-bold text-emerald-400 hover:text-emerald-300">
-              support@tuitionconsole.com
+            <a href="mailto:support@tutorhire.com" className="text-xs sm:text-sm font-mono font-bold text-emerald-400 hover:text-emerald-300">
+              support@tutorhire.com
             </a>
           </div>
 

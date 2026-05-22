@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -308,13 +308,13 @@ export async function PATCH(request: Request) {
           });
 
           const mailOptions = {
-            from: `"Tuition Console" <${process.env.SMTP_EMAIL}>`,
+            from: `"TutorHire" <${process.env.SMTP_EMAIL}>`,
             to: tutor.email,
-            subject: "New Tuition Direct Request - Tuition Console",
+            subject: "New Tuition Direct Request - TutorHire",
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0f172a; color: #f1f5f9; border-radius: 10px; border: 1px solid #1e293b;">
                 <div style="text-align: center; margin-bottom: 20px;">
-                  <h2 style="color: #10b981; margin: 0;">Tuition Console</h2>
+                  <h2 style="color: #10b981; margin: 0;">TutorHire</h2>
                   <p style="color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Direct Request Notification</p>
                 </div>
                 

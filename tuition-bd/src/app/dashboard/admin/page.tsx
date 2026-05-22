@@ -917,7 +917,7 @@ export default function AdminDashboard() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="space-y-1 flex-shrink-0">
               <h1 className="text-3xl font-extrabold font-heading text-white tracking-tight">
-                Admin Control Console
+                Admin Control Panel
               </h1>
               <p className="text-slate-400 text-sm font-mono flex items-center">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(var(--theme-rgb),0.8)] animate-pulse" />
@@ -957,7 +957,7 @@ export default function AdminDashboard() {
         <div className="glass-card rounded-2xl p-6 border border-slate-800 space-y-4">
           <div>
             <h2 className="text-lg font-bold font-heading text-white flex items-center gap-2">
-              🔍 Secure Administrative Search Console
+              🔍 Secure Administrative Search Panel
             </h2>
             <p className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">
               Query unmasked records directly from the database core

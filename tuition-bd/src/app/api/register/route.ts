@@ -59,8 +59,8 @@ export async function POST(request: Request) {
 
     let latitude = reqLat !== undefined && reqLat !== null ? parseFloat(reqLat) : null;
     let longitude = reqLng !== undefined && reqLng !== null ? parseFloat(reqLng) : null;
-    let actualLatitude = reqActualLat !== undefined && reqActualLat !== null ? parseFloat(reqActualLat) : null;
-    let actualLongitude = reqActualLng !== undefined && reqActualLng !== null ? parseFloat(reqActualLng) : null;
+    const actualLatitude = reqActualLat !== undefined && reqActualLat !== null ? parseFloat(reqActualLat) : null;
+    const actualLongitude = reqActualLng !== undefined && reqActualLng !== null ? parseFloat(reqActualLng) : null;
 
     if (!latitude && address) {
       // Centered on Bangladesh with mild scattering to populate on map
@@ -68,8 +68,8 @@ export async function POST(request: Request) {
       longitude = 90.4125 + (Math.random() - 0.5) * 0.08;
     }
 
-    let approxLatitude = latitude ? latitude + (Math.random() - 0.5) * 0.008 : null;
-    let approxLongitude = longitude ? longitude + (Math.random() - 0.5) * 0.008 : null;
+    const approxLatitude = latitude ? latitude + (Math.random() - 0.5) * 0.008 : null;
+    const approxLongitude = longitude ? longitude + (Math.random() - 0.5) * 0.008 : null;
 
     // Set verification based on NID uploaded during tutor sign up
     const verificationStatus = role === "TUTOR" && nidImageUrl ? "PENDING" : "UNVERIFIED";

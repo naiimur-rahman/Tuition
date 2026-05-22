@@ -177,33 +177,17 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
 
   return (
     <div className="relative min-h-[70vh] flex items-center justify-center overflow-hidden pt-6 pb-16 lg:pt-8 lg:pb-24">
-      {/* Background Decorative Glowing Blobs */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <motion.div
-          animate={isMobile ? undefined : {
-            x: [0, 40, -20, 0],
-            y: [0, -50, 30, 0],
-            scale: [1, 1.15, 0.9, 1],
+      {/* Background Decorative Element (Subtle Monochrome Grid) */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]">
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(var(--foreground) 1px, transparent 1px),
+              linear-gradient(90deg, var(--foreground) 1px, transparent 1px)
+            `,
+            backgroundSize: "40px 40px"
           }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="hidden md:block absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full filter blur-[100px]"
-        />
-        <motion.div
-          animate={isMobile ? undefined : {
-            x: [0, -30, 40, 0],
-            y: [0, 60, -40, 0],
-            scale: [1, 0.9, 1.1, 1],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="hidden md:block absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-indigo-500/10 rounded-full filter blur-[120px]"
         />
       </div>
 
@@ -223,10 +207,10 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
               className="text-4xl tracking-tight font-extrabold text-[var(--foreground)] sm:text-5xl md:text-6xl font-heading leading-tight"
             >
               Find the perfect <br />
-              <span className="text-emerald-400 drop-shadow-sm">
+              <span className="text-slate-500 drop-shadow-sm">
                 {currentText}
               </span>
-              <span className="inline-block w-[3px] h-[0.85em] bg-emerald-400 ml-1.5 align-middle animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.9)]" />
+              <span className="inline-block w-[3px] h-[0.85em] bg-slate-400 ml-1.5 align-middle animate-pulse" />
             </motion.h1>
 
             {/* Sub-text */}
@@ -248,7 +232,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="group relative w-full sm:w-auto bg-emerald-500 text-white font-black px-7 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(16,185,129,0.3)] border-none overflow-hidden flex items-center justify-center tracking-wide font-sans"
+                    className="group relative w-full sm:w-auto bg-foreground text-background font-black px-7 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer shadow-[0_8px_30px_rgba(15,23,42,0.2)] border border-foreground/10 overflow-hidden flex items-center justify-center tracking-wide font-sans hover:opacity-90"
                   >
                     {/* Shimmer light effect */}
                     <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" style={{ animationDuration: '1.5s' }} />
@@ -265,7 +249,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="group relative w-full sm:w-auto px-7 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer overflow-hidden flex items-center justify-center tracking-wide font-sans font-black bg-slate-950/60 hover:bg-slate-900 border border-cyan-500/30 text-cyan-400 hover:text-cyan-300 hover:border-cyan-400 shadow-[0_4px_15px_rgba(34,211,238,0.15)]"
+                    className="group relative w-full sm:w-auto px-7 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer overflow-hidden flex items-center justify-center tracking-wide font-sans font-black bg-background text-foreground hover:bg-slate-50 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md"
                   >
                     <span>Find Tuition Jobs</span>
                     <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -280,9 +264,9 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={onTriggerDemo}
-                    className="w-full sm:w-auto bg-slate-900/60 hover:bg-slate-800/80 text-emerald-400 border border-emerald-500/20 px-6 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer flex items-center justify-center tracking-wide font-sans font-bold"
+                    className="w-full sm:w-auto bg-transparent hover:bg-slate-100/50 dark:hover:bg-slate-900/50 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 px-6 py-4 rounded-2xl text-base transition-all duration-300 cursor-pointer flex items-center justify-center tracking-wide font-sans font-bold"
                   >
-                    <svg className="w-5 h-5 mr-2 animate-pulse text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <svg className="w-5 h-5 mr-2 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -326,74 +310,75 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
             className="lg:col-span-5 relative"
           >
             {/* Ambient Backlight Glow */}
-            <div className="absolute inset-0 bg-emerald-500/10 rounded-3xl filter blur-2xl pointer-events-none" />
+            <div className="absolute inset-0 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-3xl filter blur-[80px] pointer-events-none" />
 
             {/* Dashboard Container */}
             <Link href="/map?type=tutor" className="block group cursor-pointer decoration-none">
-              <div className="relative glass-card rounded-3xl border border-slate-800/80 overflow-hidden shadow-2xl p-6 bg-slate-950/40 backdrop-blur-xl space-y-6 group-hover:border-emerald-500/40 group-hover:shadow-[0_0_30px_rgba(var(--theme-rgb),0.06)] transition-all duration-300">
+              <div className="relative rounded-[2rem] border border-slate-200/60 dark:border-slate-800/80 overflow-hidden shadow-2xl p-5 sm:p-6 bg-white/60 dark:bg-slate-950/40 backdrop-blur-3xl space-y-5 group-hover:shadow-[0_20px_40px_rgba(16,185,129,0.08)] group-hover:border-slate-300/80 dark:group-hover:border-emerald-500/30 transition-all duration-500">
                 
+                {/* Subtle internal glow */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none -z-10" />
+
                 {/* Header Bar */}
-                <div className="flex items-center justify-between border-b border-slate-800/60 pb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="relative flex h-3 w-3">
+                <div className="flex items-center justify-between pb-1">
+                  <div className="flex items-center space-x-2">
+                    <div className="relative flex h-2 w-2">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </div>
-                    <span className="text-xs font-mono font-bold tracking-widest text-slate-400 uppercase">Live Match Engine</span>
+                    <span className="text-[10px] font-sans font-bold tracking-[0.2em] text-slate-500 dark:text-slate-400 uppercase">Live Match Engine</span>
                   </div>
-                  <span className="text-[10px] font-mono font-extrabold uppercase bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded">
-                    Active Radar
-                  </span>
+                  <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/50 dark:border-emerald-500/20 px-2.5 py-1 rounded-full flex items-center shadow-sm">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Active Radar</span>
+                  </div>
                 </div>
 
                 {/* Simulated Search Bar */}
-                <div className="bg-slate-950/80 border border-slate-800/80 rounded-2xl p-3 flex items-center justify-between shadow-inner">
-                  <div className="flex items-center space-x-3 text-xs">
-                    <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                <div className="bg-white/90 dark:bg-slate-950/80 border border-slate-200/60 dark:border-slate-800/80 rounded-full p-3 px-5 flex items-center justify-between shadow-[0_2px_15px_rgba(0,0,0,0.03)] dark:shadow-inner backdrop-blur-md transition-all duration-300 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+                  <div className="flex items-center space-x-3">
+                    <svg className="w-4 h-4 text-emerald-500 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    <span className="text-slate-200 font-medium">
+                    <span className="text-slate-700 dark:text-slate-200 text-sm font-medium">
                       {mockIndex % 2 === 1
                         ? "Tutors in Dhaka..."
                         : "Jobs in Dhaka..."}
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-mono">1.5km radius</span>
+                  <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 rounded-full">
+                    1.5km radius
+                  </span>
                 </div>
 
                 {/* Stylized Map View Mockup */}
-                <div className="relative h-44 rounded-2xl bg-slate-900/60 border border-slate-800/80 overflow-hidden flex items-center justify-center">
+                <div className="relative h-48 rounded-[1.5rem] bg-gradient-to-b from-slate-50/80 to-slate-100/80 dark:from-slate-900/60 dark:to-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 overflow-hidden flex items-center justify-center shadow-inner">
                   {/* Styled Map Background Grid */}
                   <div 
-                    className="absolute inset-0 opacity-[0.06]"
+                    className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
                     style={{
                       backgroundImage: `
-                        linear-gradient(#fff 1px, transparent 1px),
-                        linear-gradient(90deg, #fff 1px, transparent 1px)
+                        linear-gradient(var(--foreground) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--foreground) 1px, transparent 1px)
                       `,
-                      backgroundSize: "20px 20px"
+                      backgroundSize: "24px 24px"
                     }}
                   />
                   
-                  {/* Decorative map roads/paths */}
-                  <svg className="absolute inset-0 w-full h-full text-slate-800/40" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M-20 40 L400 120 M120 -20 L180 200 M-20 130 C 100 120, 150 160, 400 140" stroke="currentColor" strokeWidth="2.5" fill="none" />
-                    <path d="M50 -20 C 60 40, 100 80, 250 200" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 4" fill="none" />
-                  </svg>
+                  {/* Decorative map roads/paths (removed) */}
 
                   {/* Radar rotating sweep line and concentric sonar rings */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                     {/* Concentric rings */}
-                    <div className="absolute w-[260px] h-[260px] rounded-full border border-emerald-500/10 animate-pulse" />
-                    <div className="absolute w-[180px] h-[180px] rounded-full border border-emerald-500/10" />
-                    <div className="absolute w-[100px] h-[100px] rounded-full border border-emerald-500/10" />
-                    <div className="absolute w-[40px] h-[40px] rounded-full border border-emerald-500/15" />
+                    <div className="absolute w-[280px] h-[280px] rounded-full border border-emerald-500/10 animate-pulse" />
+                    <div className="absolute w-[200px] h-[200px] rounded-full border border-emerald-500/10" />
+                    <div className="absolute w-[120px] h-[120px] rounded-full border border-emerald-500/15" />
+                    <div className="absolute w-[40px] h-[40px] rounded-full border border-emerald-500/20" />
                     
                     {/* Sonar sweep overlay */}
                     <div 
-                      className="absolute w-[360px] h-[360px] rounded-full animate-radar-sweep"
+                      className="absolute w-[400px] h-[400px] rounded-full animate-radar-sweep opacity-60 dark:opacity-100"
                       style={{
-                        background: "conic-gradient(from 0deg, rgba(20, 184, 166, 0.12) 0deg, rgba(20, 184, 166, 0.03) 60deg, transparent 180deg, transparent 360deg)",
+                        background: "conic-gradient(from 0deg, rgba(20, 184, 166, 0.15) 0deg, rgba(20, 184, 166, 0.04) 60deg, transparent 180deg, transparent 360deg)",
                       }}
                     />
                   </div>
@@ -402,19 +387,19 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                   <AnimatePresence mode="wait">
                     <motion.div 
                       key={`tutor-pin-${mockIndex % tutorPositions.length}`}
-                      initial={{ opacity: 0, scale: 0.7 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.7 }}
-                      transition={{ duration: 0.4 }}
+                      initial={{ opacity: 0, scale: 0.5, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       style={{ top: currentTutorPos.top, left: currentTutorPos.left }}
                       className="absolute group/pin flex flex-col items-center -translate-x-1/2 -translate-y-1/2 z-20"
                     >
-                      <div className="bg-slate-900/90 text-[8px] font-mono text-slate-300 border border-slate-800 px-2 py-0.5 rounded shadow-lg mb-1 whitespace-nowrap transition-colors duration-200">
+                      <div className="bg-white/95 dark:bg-slate-900/95 text-[10px] font-medium text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/80 px-2.5 py-1 rounded-lg shadow-xl mb-1.5 whitespace-nowrap backdrop-blur-md">
                         Tutor: {shortTutorName}
                       </div>
                       <div className="relative flex h-3.5 w-3.5 items-center justify-center">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-450 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_10px_rgba(20,184,166,0.8)]"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white dark:border-slate-900 shadow-md"></span>
                       </div>
                     </motion.div>
                   </AnimatePresence>
@@ -423,32 +408,32 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                   <AnimatePresence mode="wait">
                     <motion.div 
                       key={`job-pin-${jobPositions.length - 1 - (mockIndex % jobPositions.length)}`}
-                      initial={{ opacity: 0, scale: 0.7 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.7 }}
-                      transition={{ duration: 0.4 }}
+                      initial={{ opacity: 0, scale: 0.5, y: 10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       style={{ bottom: currentJobPos.bottom, right: currentJobPos.right }}
                       className="absolute group/pin flex flex-col items-center translate-x-1/2 translate-y-1/2 z-20"
                     >
-                      <div className="bg-slate-900/90 text-[8px] font-mono text-slate-300 border border-slate-800 px-2 py-0.5 rounded shadow-lg mb-1 whitespace-nowrap transition-colors duration-200">
+                      <div className="bg-white/95 dark:bg-slate-900/95 text-[10px] font-medium text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700/80 px-2.5 py-1 rounded-lg shadow-xl mb-1.5 whitespace-nowrap backdrop-blur-md">
                         Job: {shortJobTitle}
                       </div>
                       <div className="relative flex h-3.5 w-3.5 items-center justify-center">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-450 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,0.8)]"></span>
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500 border-2 border-white dark:border-slate-900 shadow-md"></span>
                       </div>
                     </motion.div>
                   </AnimatePresence>
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent dark:from-slate-950/90 dark:via-transparent dark:to-transparent pointer-events-none" />
 
                   {/* Matching Status Pill */}
-                  <div className="absolute bottom-4 bg-slate-900/90 border border-slate-800/80 px-3.5 py-1.5 rounded-full flex items-center space-x-2 text-[10px] font-mono shadow-lg">
-                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-450 animate-pulse" />
-                    <span className="text-slate-300 font-bold uppercase tracking-wider">
+                  <div className="absolute bottom-4 bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-700/80 px-4 py-2 rounded-full flex items-center space-x-2.5 shadow-[0_8px_20px_rgba(0,0,0,0.06)] dark:shadow-xl backdrop-blur-md z-30">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest">
                       {mockIndex % 2 === 1
-                        ? "Discovering nearby tutors..."
-                        : "Discovering tuition jobs..."}
+                        ? "Discovering tutors..."
+                        : "Discovering jobs..."}
                     </span>
                   </div>
                 </div>
@@ -457,108 +442,108 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={mockIndex}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -15 }}
+                    initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -15, scale: 0.98 }}
                     transition={{ duration: 0.4, ease: "easeInOut" }}
-                    className="bg-slate-900/40 border border-slate-800/80 rounded-2xl p-3 shadow-md relative overflow-hidden w-full h-[185px] flex flex-col justify-between group-hover:border-emerald-500/20 transition-all duration-300"
+                    className="bg-white/80 dark:bg-slate-900/50 border border-slate-200/80 dark:border-slate-800/80 rounded-[1.5rem] p-4 shadow-lg shadow-slate-200/50 dark:shadow-md relative overflow-hidden w-full h-[150px] flex flex-col justify-between group-hover:border-emerald-500/20 transition-all duration-300 backdrop-blur-md"
                   >
                     {/* Subtle glass shimmer */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-shimmer" style={{ animationDuration: '3s' }} />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent -translate-x-full animate-shimmer" style={{ animationDuration: '3s' }} />
 
                     {mockIndex % 2 === 1 ? (
                       <>
-                        <div>
-                          {/* Tutor Profile Preview */}
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <span className="text-[10px] font-mono font-extrabold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/15">
-                                Verified Educator
-                              </span>
-                              <h4 className="text-sm font-bold text-slate-200 font-heading mt-2">
-                                {currentTutor.name}
-                              </h4>
-                              <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                                {currentTutor.specs}
-                              </p>
+                        <div className="space-y-3">
+                          {/* Tutor Profile Header */}
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-100 to-teal-50 dark:from-emerald-900/40 dark:to-teal-900/20 border border-emerald-200/60 dark:border-emerald-800/50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              </svg>
                             </div>
-                            <span className="text-[10px] font-mono text-slate-500">
-                              {currentTutor.sector}
-                            </span>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="text-sm font-bold text-[var(--foreground)]">
+                                    {currentTutor.name}
+                                  </h4>
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 font-medium">
+                                    {currentTutor.specs}
+                                  </p>
+                                </div>
+                                <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 px-2 py-0.5 rounded-md flex items-center shadow-sm">
+                                  <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
+                                    Verified
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="h-px bg-slate-800/60 my-1.5" />
-
-                          {/* Bio in lower section */}
-                          <div className="text-[10.5px] text-slate-400 italic font-sans leading-relaxed line-clamp-1">
-                            <span className="font-bold text-slate-300 font-mono not-italic uppercase tracking-wider text-[8px] block mb-0.5 text-slate-500">Bio / Expertise:</span>
+                          {/* Bio */}
+                          <div className="text-[11px] text-slate-600 dark:text-slate-400 italic font-sans leading-relaxed line-clamp-2 px-1 border-l-2 border-slate-200 dark:border-slate-700 ml-1">
                             "{currentTutor.expertise}"
                           </div>
                         </div>
 
-                        <div>
-                          <div className="h-px bg-slate-800/40 my-1.5" />
-
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center space-x-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                              <span className="text-[9px] text-emerald-400 font-mono uppercase tracking-wider font-bold">University Verified</span>
-                            </div>
-                            <div className="text-right space-y-0.5">
-                              <span className="block text-[8px] font-mono text-slate-500 uppercase">Coordinates</span>
-                              <span className="text-emerald-400/90 font-mono font-bold text-[9px] flex items-center justify-end space-x-1">
-                                <span>🔒 Secured</span>
-                              </span>
-                            </div>
+                        <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
+                          <div className="flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-900/50 px-2 py-1 rounded-md border border-slate-100 dark:border-slate-800">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-[9px] text-slate-600 dark:text-slate-300 font-bold uppercase tracking-wider">Univ. Verified</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Location:</span>
+                            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center">
+                              🔒 Secured
+                            </span>
                           </div>
                         </div>
                       </>
                     ) : (
                       <>
-                        <div>
-                          {/* Job Listing Preview */}
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <span className="text-[10px] font-mono font-extrabold text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/15">
-                                Premium Job Matching
-                              </span>
-                              <h4 className="text-sm font-bold text-slate-200 font-heading mt-2">
-                                {currentJob.title}
-                              </h4>
-                              <p className="text-[11px] text-slate-400 font-mono mt-0.5">
-                                {currentJob.grade}
-                              </p>
+                        <div className="space-y-3">
+                          {/* Job Profile Header */}
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/20 border border-indigo-200/60 dark:border-indigo-800/50 flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
                             </div>
-                            <span className="text-[10px] font-mono text-slate-500">
-                              {currentJob.sector}
-                            </span>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="text-sm font-bold text-[var(--foreground)]">
+                                    {currentJob.title}
+                                  </h4>
+                                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 font-medium">
+                                    {currentJob.grade} • {currentJob.sector}
+                                  </p>
+                                </div>
+                                <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 px-2 py-0.5 rounded-md flex items-center shadow-sm">
+                                  <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
+                                    Premium Job
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="h-px bg-slate-800/60 my-1.5" />
-
-                          {/* Requirements in lower section */}
-                          <div className="text-[10.5px] text-slate-400 italic font-sans leading-relaxed line-clamp-1">
-                            <span className="font-bold text-slate-300 font-mono not-italic uppercase tracking-wider text-[8px] block mb-0.5 text-slate-500">Requirements:</span>
+                          {/* Requirements */}
+                          <div className="text-[11px] text-slate-600 dark:text-slate-400 italic font-sans leading-relaxed line-clamp-2 px-1 border-l-2 border-slate-200 dark:border-slate-700 ml-1">
                             "{currentJob.description || currentJob.sector}"
                           </div>
                         </div>
 
-                        <div>
-                          <div className="h-px bg-slate-800/40 my-1.5" />
-
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="space-y-0.5">
-                              <span className="block text-[8px] font-mono text-slate-500 uppercase">Monthly Budget</span>
-                              <span className="text-slate-300 font-bold font-sans text-[11px]">
-                                {currentJob.salary}
-                              </span>
-                            </div>
-                            <div className="text-right space-y-0.5">
-                              <span className="block text-[8px] font-mono text-slate-500 uppercase">Coordinates</span>
-                              <span className="text-indigo-400/90 font-mono font-bold text-[9px] flex items-center justify-end space-x-1">
-                                <span>🔒 Secured</span>
-                              </span>
-                            </div>
+                        <div className="mt-auto pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
+                          <div className="flex items-center space-x-1.5 bg-slate-50 dark:bg-slate-900/50 px-2.5 py-1 rounded-md border border-slate-100 dark:border-slate-800">
+                            <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Budget:</span>
+                            <span className="text-[11px] text-[var(--foreground)] font-bold">{currentJob.salary}</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Location:</span>
+                            <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 flex items-center">
+                              🔒 Secured
+                            </span>
                           </div>
                         </div>
                       </>

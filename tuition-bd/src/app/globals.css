@@ -10,7 +10,7 @@
   --muted: #94a3b8;
   --font-sans: var(--font-body), ui-sans-serif, system-ui;
   --font-serif: var(--font-heading), ui-serif, Georgia;
-  --theme-rgb: 20, 184, 166;
+  --theme-rgb: 82, 82, 91; /* Neutral/Zinc tone */
   
   /* Slate system overrides for pure-dark experience */
   --slate-800: #121214;
@@ -44,31 +44,31 @@
   --color-slate-900: var(--slate-900);
   --color-slate-950: var(--slate-950);
 
-  /* Redefine emerald to Teal (#14b8a6) */
-  --color-emerald-50: #f0fdfa;
-  --color-emerald-100: #ccfbf1;
-  --color-emerald-200: #99f6e4;
-  --color-emerald-300: #5eead4;
-  --color-emerald-400: #2dd4bf;
-  --color-emerald-500: #14b8a6;
-  --color-emerald-600: #0d9488;
-  --color-emerald-700: #0f766e;
-  --color-emerald-800: #115e59;
-  --color-emerald-900: #134e4a;
-  --color-emerald-950: #042f2e;
+  /* Redefine emerald to Neutral/Monochrome */
+  --color-emerald-50: #fafafa;
+  --color-emerald-100: #f5f5f5;
+  --color-emerald-200: #e5e5e5;
+  --color-emerald-300: #d4d4d4;
+  --color-emerald-400: #a3a3a3;
+  --color-emerald-500: #737373;
+  --color-emerald-600: #525252;
+  --color-emerald-700: #404040;
+  --color-emerald-800: #262626;
+  --color-emerald-900: #171717;
+  --color-emerald-950: #0a0a0a;
 
-  /* Redefine teal to Teal (#14b8a6) */
-  --color-teal-50: #f0fdfa;
-  --color-teal-100: #ccfbf1;
-  --color-teal-200: #99f6e4;
-  --color-teal-300: #5eead4;
-  --color-teal-400: #2dd4bf;
-  --color-teal-500: #14b8a6;
-  --color-teal-600: #0d9488;
-  --color-teal-700: #0f766e;
-  --color-teal-800: #115e59;
-  --color-teal-900: #134e4a;
-  --color-teal-950: #042f2e;
+  /* Redefine teal to Neutral/Monochrome */
+  --color-teal-50: #fafafa;
+  --color-teal-100: #f5f5f5;
+  --color-teal-200: #e5e5e5;
+  --color-teal-300: #d4d4d4;
+  --color-teal-400: #a3a3a3;
+  --color-teal-500: #737373;
+  --color-teal-600: #525252;
+  --color-teal-700: #404040;
+  --color-teal-800: #262626;
+  --color-teal-900: #171717;
+  --color-teal-950: #0a0a0a;
 }
 
 body {
@@ -742,4 +742,13 @@ html:not(.light) .h-px[class*="bg-slate-8"] {
 
 .animate-radar-sweep {
   animation: radar-sweep 5s linear infinite;
+}
+
+/* Logo Blending Utility to remove white/black backgrounds from images */
+.logo-blend {
+  mix-blend-mode: multiply;
+}
+:where(html:not(.light)) .logo-blend {
+  mix-blend-mode: screen;
+  filter: invert(1);
 }

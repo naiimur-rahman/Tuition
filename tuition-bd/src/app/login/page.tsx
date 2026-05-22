@@ -47,14 +47,14 @@ export default function Login() {
           {/* Logo Badge */}
           <Link href="/" className="inline-block">
             <div className="text-emerald-400 font-mono text-xs uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full w-fit mx-auto mb-2 shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)]">
-              Tuition Console
+              TutorHire
             </div>
           </Link>
           <h2 className="text-3xl font-bold font-heading text-white">
             Welcome Back
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm font-sans">
-            Enter your console account credentials to sign in
+            Enter your account credentials to sign in
           </p>
         </div>
 

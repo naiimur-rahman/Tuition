@@ -47,13 +47,13 @@ export async function POST(request: Request) {
     });
 
     const mailOptions = {
-      from: `"Tuition Console" <${process.env.SMTP_EMAIL}>`,
+      from: `"TutorHire" <${process.env.SMTP_EMAIL}>`,
       to: email,
-      subject: "Your Password Reset OTP - Tuition Console",
+      subject: "Your Password Reset OTP - TutorHire",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0f172a; color: #f1f5f9; border-radius: 10px; border: 1px solid #1e293b;">
           <div style="text-align: center; margin-bottom: 20px;">
-            <h2 style="color: #38bdf8; margin: 0;">Tuition Console</h2>
+            <h2 style="color: #38bdf8; margin: 0;">TutorHire</h2>
             <p style="color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">Security Verification</p>
           </div>
           

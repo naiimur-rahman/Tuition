@@ -951,7 +951,7 @@ export default function MapComponent({
             <div className="space-y-2">
               <h3 className="text-xl font-heading font-extrabold text-white">Pay Later Coordination</h3>
               <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                To activate the match coordinates for **{payLaterJob.title}** and settle the commission after matching, please contact the Tuition Console Hotline.
+                To activate the match coordinates for **{payLaterJob.title}** and settle the commission after matching, please contact the TutorHire Hotline.
               </p>
             </div>
 
