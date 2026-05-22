@@ -40,8 +40,14 @@ export default function RootLayout({
               try {
                 const root = document.documentElement;
                 const stored = localStorage.getItem('theme');
-                const useDark = stored === 'dark';
-                root.classList.toggle('dark', useDark);
+                const userPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (stored === 'dark' || (!stored && userPrefersDark)) {
+                  root.classList.add('dark');
+                  root.classList.remove('light');
+                } else {
+                  root.classList.add('light');
+                  root.classList.remove('dark');
+                }
               } catch (_) {}
             `,
           }}
