@@ -22,7 +22,7 @@
     "framer-motion": "^12.38.0",
     "heic-convert": "^2.1.0",
     "leaflet": "^1.9.4",
-    "next": "16.2.6",
+    "next": "15.1.12",
     "next-auth": "^4.24.14",
     "nodemailer": "^7.0.13",
     "prisma": "^5.22.0",
@@ -41,7 +41,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "15.1.12",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
     "typescript": "^5"
