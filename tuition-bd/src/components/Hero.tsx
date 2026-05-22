@@ -1,19 +1,19 @@
 "use client";
- 
+
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { DEFAULT_TUTORS, DEFAULT_JOBS } from "@/constants/mockData";
- 
+
 interface HeroProps {
   onTriggerDemo?: () => void;
 }
- 
+
 export default function Hero({ onTriggerDemo }: HeroProps) {
   const words = useMemo(() => {
     return ["tutor near you", "tuition match", "home educator", "academic guide"];
   }, []);
- 
+
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -35,7 +35,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
         if (tutorsRes.ok && jobsRes.ok) {
           const tutorsData = await tutorsRes.json();
           const jobsData = await jobsRes.json();
-          
+
           if (tutorsData && tutorsData.length > 0) {
             const mappedTutors = tutorsData.map((t: any, index: number) => {
               const p = t.profile || {};
@@ -51,7 +51,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
             });
             setTutors(mappedTutors);
           }
-          
+
           if (jobsData && jobsData.length > 0) {
             const mappedJobs = jobsData.map((j: any) => {
               const rawTitle = j.title || "Tuition Job";
@@ -84,7 +84,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
   const currentTutor = activeTutors[tutorIndex];
   const currentJob = activeJobs[jobIndex];
 
-  const shortTutorName = currentTutor 
+  const shortTutorName = currentTutor
     ? (currentTutor.name.split(" ")[0] + (currentTutor.name.split(" ")[1] ? ` ${currentTutor.name.split(" ")[1][0]}.` : ""))
     : "Fahim R.";
   const shortJobTitle = currentJob
@@ -106,10 +106,10 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
     { bottom: "35%", right: "40%" },
     { bottom: "15%", right: "25%" },
   ];
-  
+
   const currentTutorPos = tutorPositions[mockIndex % tutorPositions.length];
   const currentJobPos = jobPositions[mockIndex % jobPositions.length];
- 
+
   // Detect mobile screens to disable expensive blur animations
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);
@@ -147,7 +147,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
           return;
         }
       }
-      
+
       timer = setTimeout(handleType, typingSpeed);
     };
 
@@ -179,7 +179,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
     <div className="relative min-h-[70vh] flex items-center justify-center overflow-hidden pt-6 pb-16 lg:pt-8 lg:pb-24">
       {/* Background Decorative Element (Subtle Monochrome Grid) */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.03]">
-        <div 
+        <div
           className="absolute inset-0"
           style={{
             backgroundImage: `
@@ -204,7 +204,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
             {/* Title */}
             <motion.h1
               variants={itemVariants}
-              className="text-4xl tracking-tight font-extrabold text-[var(--foreground)] sm:text-5xl md:text-6xl font-heading leading-tight"
+              className="text-4xl tracking-tight font-extrabold text-[var(--foreground)] sm:text-5xl md:text-6xl font-sans leading-tight"
             >
               Find the perfect <br />
               <span className="text-slate-500 drop-shadow-sm">
@@ -218,9 +218,9 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
               variants={itemVariants}
               className="max-w-2xl mx-auto lg:mx-0 text-base text-[var(--muted)] sm:text-lg md:text-xl font-normal leading-relaxed"
             >
-              First ever in Bangladesh. Connect with verified educators and discover premium tuition jobs at your exact coordinates.
+              বাংলাদেশের প্রথম স্মার্ট ও ম্যাপ-ভিত্তিক টিউশন প্ল্যাটফর্ম — সহজেই খুঁজে নিন আপনার কাছাকাছি ভেরিফাইড টিউটর ও সেরা টিউশন সুযোগ।
             </motion.p>
- 
+
             {/* CTAs */}
             <div className="space-y-6 pt-6">
               <motion.div
@@ -236,14 +236,14 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                   >
                     {/* Shimmer light effect */}
                     <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" style={{ animationDuration: '1.5s' }} />
-                    
+
                     <span>Find a Tutor</span>
                     <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                     </svg>
                   </motion.button>
                 </Link>
- 
+
                 {/* Find Tuition Jobs Button */}
                 <Link href="/map?type=tuition" className="w-full sm:w-auto">
                   <motion.button
@@ -307,7 +307,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ type: "spring", stiffness: 80, damping: 18, delay: 0.4 }}
-            className="lg:col-span-5 relative"
+            className="lg:col-span-5 relative mt-12 lg:mt-0"
           >
             {/* Ambient Backlight Glow */}
             <div className="absolute inset-0 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-3xl filter blur-[80px] pointer-events-none" />
@@ -315,7 +315,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
             {/* Dashboard Container */}
             <Link href="/map?type=tutor" className="block group cursor-pointer decoration-none">
               <div className="relative rounded-[2rem] border border-slate-200/60 dark:border-slate-800/80 overflow-hidden shadow-2xl p-5 sm:p-6 bg-white/60 dark:bg-slate-950/40 backdrop-blur-3xl space-y-5 group-hover:shadow-[0_20px_40px_rgba(16,185,129,0.08)] group-hover:border-slate-300/80 dark:group-hover:border-emerald-500/30 transition-all duration-500">
-                
+
                 {/* Subtle internal glow */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-[80px] pointer-events-none -z-10" />
 
@@ -353,7 +353,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                 {/* Stylized Map View Mockup */}
                 <div className="relative h-48 rounded-[1.5rem] bg-gradient-to-b from-slate-50/80 to-slate-100/80 dark:from-slate-900/60 dark:to-slate-900/90 border border-slate-200/80 dark:border-slate-800/80 overflow-hidden flex items-center justify-center shadow-inner">
                   {/* Styled Map Background Grid */}
-                  <div 
+                  <div
                     className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
                     style={{
                       backgroundImage: `
@@ -363,7 +363,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                       backgroundSize: "24px 24px"
                     }}
                   />
-                  
+
                   {/* Decorative map roads/paths (removed) */}
 
                   {/* Radar rotating sweep line and concentric sonar rings */}
@@ -373,9 +373,9 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                     <div className="absolute w-[200px] h-[200px] rounded-full border border-emerald-500/10" />
                     <div className="absolute w-[120px] h-[120px] rounded-full border border-emerald-500/15" />
                     <div className="absolute w-[40px] h-[40px] rounded-full border border-emerald-500/20" />
-                    
+
                     {/* Sonar sweep overlay */}
-                    <div 
+                    <div
                       className="absolute w-[400px] h-[400px] rounded-full animate-radar-sweep opacity-60 dark:opacity-100"
                       style={{
                         background: "conic-gradient(from 0deg, rgba(20, 184, 166, 0.15) 0deg, rgba(20, 184, 166, 0.04) 60deg, transparent 180deg, transparent 360deg)",
@@ -385,7 +385,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
 
                   {/* Dynamic map point 1 (Tutor) */}
                   <AnimatePresence mode="wait">
-                    <motion.div 
+                    <motion.div
                       key={`tutor-pin-${mockIndex % tutorPositions.length}`}
                       initial={{ opacity: 0, scale: 0.5, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -406,7 +406,7 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
 
                   {/* Dynamic map point 2 (Job) */}
                   <AnimatePresence mode="wait">
-                    <motion.div 
+                    <motion.div
                       key={`job-pin-${jobPositions.length - 1 - (mockIndex % jobPositions.length)}`}
                       initial={{ opacity: 0, scale: 0.5, y: 10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -461,17 +461,17 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                               </svg>
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               <div className="flex justify-between items-start">
-                                <div>
-                                  <h4 className="text-sm font-bold text-[var(--foreground)]">
+                                <div className="min-w-0 pr-2">
+                                  <h4 className="text-sm font-bold text-[var(--foreground)] truncate">
                                     {currentTutor.name}
                                   </h4>
                                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 font-medium">
                                     {currentTutor.specs}
                                   </p>
                                 </div>
-                                <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 px-2 py-0.5 rounded-md flex items-center shadow-sm">
+                                <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 px-2 py-0.5 rounded-md flex items-center shadow-sm shrink-0">
                                   <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">
                                     Verified
                                   </span>
@@ -509,17 +509,17 @@ export default function Hero({ onTriggerDemo }: HeroProps) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                               </svg>
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               <div className="flex justify-between items-start">
-                                <div>
-                                  <h4 className="text-sm font-bold text-[var(--foreground)]">
+                                <div className="min-w-0 pr-2">
+                                  <h4 className="text-sm font-bold text-[var(--foreground)] truncate">
                                     {currentJob.title}
                                   </h4>
                                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1 font-medium">
                                     {currentJob.grade} • {currentJob.sector}
                                   </p>
                                 </div>
-                                <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 px-2 py-0.5 rounded-md flex items-center shadow-sm">
+                                <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 px-2 py-0.5 rounded-md flex items-center shadow-sm shrink-0">
                                   <span className="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">
                                     Premium Job
                                   </span>

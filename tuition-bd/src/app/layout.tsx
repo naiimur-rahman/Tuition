@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/providers/SessionProvider";
 import BackButton from "@/components/BackButton";
 import Footer from "@/components/Footer";
 
-const headingFont = Bricolage_Grotesque({
+const headingFont = Outfit({
   variable: "--font-heading",
   subsets: ["latin"],
   display: "swap",
@@ -40,11 +40,8 @@ export default function RootLayout({
               try {
                 const root = document.documentElement;
                 const stored = localStorage.getItem('theme');
-                const useLight =
-                  stored === 'light' ||
-                  (stored !== 'dark' && window.matchMedia('(prefers-color-scheme: light)').matches);
-                root.classList.toggle('light', useLight);
-                root.classList.toggle('dark', !useLight);
+                const useDark = stored === 'dark';
+                root.classList.toggle('dark', useDark);
               } catch (_) {}
             `,
           }}

@@ -1,26 +1,11 @@
 @import "tailwindcss";
 
-/* App theme: .light on <html> = light; no .light = dark (not OS media) */
-@custom-variant dark (&:where(html:not(.light), html:not(.light) *));
-@custom-variant light (&:where(html.light, html.light *));
+/* App theme: .dark on <html> = dark; no .dark = light */
+@custom-variant dark (&:where(html.dark, html.dark *));
+@custom-variant light (&:where(html:not(.dark), html:not(.dark) *));
 
 :root {
-  --background: #000000; /* Absolute fully dark black background */
-  --foreground: #f8fafc;
-  --muted: #94a3b8;
-  --font-sans: var(--font-body), ui-sans-serif, system-ui;
-  --font-serif: var(--font-heading), ui-serif, Georgia;
-  --theme-rgb: 82, 82, 91; /* Neutral/Zinc tone */
-  
-  /* Slate system overrides for pure-dark experience */
-  --slate-800: #121214;
-  --slate-850: #09090b;
-  --slate-900: #050507;
-  --slate-950: #000000;
-}
-
-/* Light Theme Variable Overrides */
-.light {
+  /* Default Light Theme */
   --background: #f8fafc;
   --foreground: #0f172a;
   --muted: #64748b;
@@ -29,6 +14,22 @@
   --slate-850: #cbd5e1;
   --slate-900: #f1f5f9;
   --slate-950: #ffffff;
+
+  --font-sans: var(--font-body), ui-sans-serif, system-ui;
+  --font-serif: var(--font-heading), ui-serif, Georgia;
+  --theme-rgb: 82, 82, 91;
+}
+
+.dark {
+  /* Deep Rich Slate Background (No more solid black) */
+  --background: #0B1120;
+  --foreground: #f8fafc;
+  --muted: #94a3b8;
+  
+  --slate-800: #334155;
+  --slate-850: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
 }
 
 @theme {

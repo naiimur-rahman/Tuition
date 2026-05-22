@@ -106,7 +106,7 @@ export default function FrontPageAdditions({ selectedRole }: FrontPageAdditionsP
   ];
 
   return (
-    <div className="space-y-24 pb-24">
+    <div className="space-y-16 pb-4">
       {/* 1. Timeline Section: How it Works */}
       <section className="relative">
         {/* Decorative backdrop gradients */}

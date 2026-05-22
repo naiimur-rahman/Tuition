@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 
 export default function Footer() {
   const pathname = usePathname();
-  
+
   // Hide footer on interactive map and dashboard views for clean layout
   const isMapOrDashboard = pathname?.startsWith("/dashboard") || pathname?.startsWith("/map");
-  
+
   if (isMapOrDashboard) return null;
 
   return (
@@ -16,12 +16,12 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 sm:gap-12">
           {/* Logo / Tagline */}
-          <div className="md:col-span-2 space-y-4">
+          <div className="md:col-span-2">
             <Link href="/" className="inline-block group -ml-3 sm:-ml-4">
               <img src="/logo.png" alt="TutorHire Logo" className="h-24 sm:h-28 w-auto dark:invert" />
             </Link>
-            <p className="text-xs sm:text-sm text-[var(--muted)] max-w-sm leading-relaxed">
-              Connect with verified tutors and find tuition jobs in Bangladesh using our interactive, premium map-based platform.
+            <p className="text-xs sm:text-sm text-[var(--muted)] max-w-sm leading-relaxed -mt-6 sm:-mt-8">
+              Connect with verified tutors and find tuition jobs in Bangladesh using our interactive map-based platform.
             </p>
           </div>
 
@@ -68,11 +68,6 @@ export default function Footer() {
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-xs text-[var(--muted)] font-mono">
             <p>&copy; {new Date().getFullYear()} TutorHire. All rights reserved.</p>
-            <p className="flex items-center gap-1">
-              Made with 
-              <span className="text-pink-500 animate-pulse">&hearts;</span> 
-              for Bangladesh student community.
-            </p>
           </div>
         </div>
       </div>

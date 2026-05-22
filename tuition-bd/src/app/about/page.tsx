@@ -10,7 +10,7 @@ export default function AboutPage() {
   const [activeRole, setActiveRole] = useState<"parent" | "tutor">("parent");
 
   return (
-    <div className="relative min-h-screen bg-slate-950 text-[var(--foreground)] overflow-hidden pb-24">
+    <div className="relative flex-grow w-full bg-slate-950 text-[var(--foreground)] overflow-hidden pb-24">
       {/* Premium Ambient Background Grid */}
       <div 
         className="absolute inset-0 pointer-events-none opacity-20"
@@ -31,10 +31,7 @@ export default function AboutPage() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 mt-12 sm:mt-20">
         {/* Page Header */}
         <div className="text-center space-y-4 mb-16">
-          <span className="text-[10px] tracking-[0.3em] font-mono font-extrabold uppercase bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-full">
-            Our Mission
-          </span>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--foreground)] mt-4 flex flex-wrap items-center justify-center gap-1 sm:gap-2">
+<h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[var(--foreground)] mt-4 flex flex-wrap items-center justify-center gap-1 sm:gap-2">
             About <img src="/logo.png" alt="TutorHire" className="h-24 sm:h-28 lg:h-32 w-auto dark:invert -mb-2 sm:-mb-3 -ml-1 sm:-ml-2" />
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto leading-relaxed font-sans">

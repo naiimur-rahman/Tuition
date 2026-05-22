@@ -67,7 +67,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
   };
 
   return (
-    <nav className="glass-panel sticky top-4 z-50 transition-all duration-300 rounded-2xl mx-auto max-w-7xl w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] lg:w-[calc(100%-4rem)] shadow-[0_12px_40px_rgba(0,0,0,0.5)] border border-slate-800/40">
+    <nav className="glass-panel sticky top-0 z-50 transition-all duration-300 w-full shadow-md border-b border-slate-200 dark:border-slate-800/40">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
@@ -77,15 +77,9 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
               <motion.button
                 whileHover={{ scale: 1.05, x: -2 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  if (typeof window !== "undefined" && window.history.length > 1) {
-                    router.back();
-                  } else {
-                    router.push("/");
-                  }
-                }}
+                onClick={() => router.push("/")}
                 className="mr-2 sm:mr-3 p-1.5 sm:p-2 rounded-xl border border-slate-800/60 bg-slate-900/60 hover:border-emerald-500/40 text-slate-400 hover:text-white transition-all cursor-pointer flex items-center justify-center group shrink-0"
-                title="Go Back"
+                title="Go to Homepage"
               >
                 <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-emerald-400 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -122,13 +116,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
                 Find Tuition
-                {isLinkActive("/map?type=tuition") && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
+                
               </Link>
 
               <Link
@@ -143,13 +131,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
                 Find Tutors
-                {isLinkActive("/map?type=tutor") && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
+                
               </Link>
 
               <Link
@@ -161,13 +143,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 }`}
               >
                 About Us
-                {isLinkActive("/about") && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
+                
               </Link>
 
               <Link
@@ -179,13 +155,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 }`}
               >
                 Contact Us
-                {isLinkActive("/contact") && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
+                
               </Link>
 
               <Link
@@ -197,13 +167,7 @@ export default function Navbar({ selectedRole }: NavbarProps = {}) {
                 }`}
               >
                 Policy Guidelines
-                {isLinkActive("/guidelines") && (
-                  <motion.div
-                    layoutId="activeNavIndicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
+                
               </Link>
             </div>
         </div>
