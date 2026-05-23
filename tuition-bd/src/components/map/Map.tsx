@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Circle, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Circle, Marker, Popup, useMap, CircleMarker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
@@ -75,6 +75,45 @@ function getDistanceInKm(lat1: number, lon1: number, lat2: number, lon2: number)
       Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
+}
+
+function AutoCenter({ userLocation }: { userLocation: [number, number] | null }) {
+  const map = useMap();
+  const [hasCentered, setHasCentered] = useState(false);
+  useEffect(() => {
+    if (userLocation && !hasCentered) {
+      map.setView(userLocation, 14, { animate: true });
+      setHasCentered(true);
+    }
+  }, [userLocation, map, hasCentered]);
+  return null;
+}
+
+function MapClickHandler({ 
+  setUserLocation, 
+  setSearchRadius,
+  userLocation,
+  searchRadius
+}: { 
+  setUserLocation: (loc: [number, number]) => void; 
+  setSearchRadius: (r: 1.5 | 3 | 5) => void; 
+  userLocation: [number, number] | null;
+  searchRadius: number;
+}) {
+  const map = useMapEvents({
+    click(e) {
+      if (userLocation) {
+        const dist = getDistanceInKm(userLocation[0], userLocation[1], e.latlng.lat, e.latlng.lng);
+        if (dist <= searchRadius) {
+          return; // Ignore clicks inside the current search radius
+        }
+      }
+      setUserLocation([e.latlng.lat, e.latlng.lng]);
+      setSearchRadius(1.5);
+      map.setView(e.latlng, 14, { animate: true });
+    },
+  });
+  return null;
 }
 
 export default function MapComponent({
@@ -441,9 +480,10 @@ export default function MapComponent({
 
       <MapContainer
         center={userLocation || center}
-        zoom={12}
+        zoom={14}
         scrollWheelZoom={true}
         attributionControl={false}
+        preferCanvas={true}
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
@@ -453,6 +493,8 @@ export default function MapComponent({
 
         <RecenterControl userLocation={userLocation} />
         <ZoomTracker onZoomChange={setZoomLevel} />
+        <MapClickHandler setUserLocation={setUserLocation} setSearchRadius={setSearchRadius} userLocation={userLocation} searchRadius={searchRadius} />
+        <AutoCenter userLocation={userLocation} />
 
         {userLocation && (
           <>
@@ -460,42 +502,15 @@ export default function MapComponent({
             <Circle
               center={userLocation}
               radius={searchRadius * 1000} // Dynamic search radius in meters
+              interactive={false}
               pathOptions={{
-                color: "#14b8a6",
+                color: "#0d9488",
                 fillColor: "#14b8a6",
-                fillOpacity: 0.03,
-                weight: 1.5,
-                dashArray: "6 8",
+                fillOpacity: 0.12,
+                weight: 3,
+                dashArray: "10 10",
               }}
             />
-            {/* Core User Beacon */}
-            <Circle
-              center={userLocation}
-              radius={150} // Core radius marker (slightly larger)
-              pathOptions={{
-                color: "#14b8a6",
-                fillColor: "#14b8a6",
-                fillOpacity: 0.85,
-                weight: 2,
-                className: "leaflet-animated-marker", // Pulse animation
-              }}
-            >
-              <Popup>
-                <div className="p-2.5 font-sans min-w-[160px] text-slate-200">
-                  <p className="font-bold text-emerald-400 font-mono text-[11px] uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="flex h-2 w-2 relative">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                    </span>
-                    User Position
-                  </p>
-                  <div className="h-px bg-slate-800 my-1.5" />
-                  <p className="text-[10px] text-slate-400 leading-relaxed font-sans">
-                    A <span className="text-emerald-400 font-extrabold font-mono">{searchRadius} km range</span> is established around your location. Scan markers within this sector.
-                  </p>
-                </div>
-              </Popup>
-            </Circle>
           </>
         )}        {filteredItems.map((item: any) => {
           const isTutor = type === "tutor";
@@ -526,10 +541,16 @@ export default function MapComponent({
 
           if (zoomLevel <= 13) {
             return (
-              <Marker
+              <CircleMarker
                 key={item.id}
-                position={[item.approxLat, item.approxLng]}
-                icon={customIcon}
+                center={[item.approxLat, item.approxLng]}
+                radius={8}
+                pathOptions={{
+                  color: themeColor,
+                  fillColor: themeColor,
+                  fillOpacity: 0.8,
+                  weight: 2,
+                }}
                 eventHandlers={{
                   click: () => handleItemClick(item)
                 }}

@@ -181,7 +181,7 @@ function MapSearchContent() {
             {/* Legend Indicators */}
             <div className="space-y-2 text-[10px] font-mono text-slate-400">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
+                <span className="w-3 h-3 rounded-full border-[1.5px] border-dashed border-[#0d9488] bg-[#14b8a6]/20 shrink-0" />
                 <span>Teal: Search Boundary ({searchRadius} km)</span>
               </div>
               {type !== "tutor" ? (

@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 
 export default function Login() {
   const router = useRouter();
-  const [data, setData] = useState({ email: "", password: "" });
+  const [data, setData] = useState({ email: "", password: "", role: "PARENT" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -60,6 +60,21 @@ export default function Login() {
 
         <form className="mt-8 space-y-6" onSubmit={loginUser}>
           <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Log in as</label>
+              <select
+                value={data.role}
+                onChange={(e) => {
+                  setData({ ...data, role: e.target.value });
+                  setError("");
+                }}
+                className="w-full bg-slate-950 border border-slate-800 text-slate-100 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all duration-200 cursor-pointer"
+              >
+                <option value="PARENT">Guardian / Parent</option>
+                <option value="TUTOR">Educator / Tutor</option>
+              </select>
+            </div>
+
             <div className="space-y-1">
               <label className="block text-[10px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Email Address</label>
               <input

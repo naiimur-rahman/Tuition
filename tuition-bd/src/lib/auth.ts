@@ -10,10 +10,11 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        role: { label: "Role", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials");
+        if (!credentials?.email || !credentials?.password || !credentials?.role) {
+          throw new Error("Invalid credentials or missing role selection");
         }
 
         const user = await prisma.user.findUnique({
@@ -33,11 +34,16 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
+        // Check if the user's account actually has the requested role
+        if (!user.role.includes(credentials.role) && user.role !== "ADMIN") {
+          throw new Error(`Account does not have a registered ${credentials.role} profile.`);
+        }
+
         return {
           id: user.id,
           name: user.name,
           email: user.email,
-          role: user.role,
+          role: user.role === "ADMIN" ? "ADMIN" : credentials.role,
         };
       },
     }),

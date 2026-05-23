@@ -74,6 +74,41 @@ export async function POST(request: Request) {
     // Set verification based on NID uploaded during tutor sign up
     const verificationStatus = role === "TUTOR" && nidImageUrl ? "PENDING" : "UNVERIFIED";
 
+    const existingUser = await prisma.user.findUnique({ where: { email }, include: { profile: true } });
+    if (existingUser) {
+      const isCorrectPassword = await bcrypt.compare(password, existingUser.password || "");
+      if (!isCorrectPassword) {
+        return new NextResponse("Email already registered. Invalid password provided for account upgrading.", { status: 400 });
+      }
+      if (existingUser.role.includes(role)) {
+        return new NextResponse(`You already have a ${role} profile under this email.`, { status: 400 });
+      }
+      
+      const newRoleStr = `${existingUser.role},${role}`;
+      const updatedUser = await prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          role: newRoleStr,
+          profile: {
+            update: {
+              phone: phone || existingUser.profile?.phone,
+              address: address || existingUser.profile?.address,
+              bio: role === "TUTOR" ? bio : undefined,
+              education: role === "TUTOR" ? education : undefined,
+              nidImageUrl: role === "TUTOR" ? nidImageUrl : undefined,
+              universityIdImageUrl: role === "TUTOR" ? universityIdImageUrl : undefined,
+              selfieImageUrl: role === "TUTOR" ? selfieImageUrl : undefined,
+              gender: role === "TUTOR" ? gender : undefined,
+              preferable_time: role === "TUTOR" ? preferable_time : undefined,
+              is_active: role === "TUTOR" ? true : undefined,
+              verificationStatus: role === "TUTOR" ? verificationStatus : undefined,
+            }
+          }
+        }
+      });
+      return NextResponse.json(updatedUser);
+    }
+
     const user = await prisma.user.create({
       data: {
         name,
