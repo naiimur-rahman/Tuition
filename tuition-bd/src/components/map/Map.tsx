@@ -102,15 +102,7 @@ function MapClickHandler({
 }) {
   const map = useMapEvents({
     click(e) {
-      if (userLocation) {
-        const dist = getDistanceInKm(userLocation[0], userLocation[1], e.latlng.lat, e.latlng.lng);
-        if (dist <= searchRadius) {
-          return; // Ignore clicks inside the current search radius
-        }
-      }
-      setUserLocation([e.latlng.lat, e.latlng.lng]);
-      setSearchRadius(1.5);
-      map.setView(e.latlng, 14, { animate: true });
+      // Radius is locked. Do not change user location or radius on map click.
     },
   });
   return null;
