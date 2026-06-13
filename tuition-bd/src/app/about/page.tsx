@@ -141,12 +141,12 @@ export default function AboutPage() {
               </div>
               <div className="space-y-2">
                 <h3 className="text-lg font-bold text-[var(--foreground)] font-heading">
-                  {activeRole === "parent" ? "Smart Scheduling" : "Frictionless Payments"}
+                  {activeRole === "parent" ? "Smart Scheduling" : "Instant Matching"}
                 </h3>
                 <p className="text-xs sm:text-sm text-[var(--muted)] leading-relaxed font-sans">
                   {activeRole === "parent"
                     ? "Coordinate weekly tutoring calendars, syllabus schedules, and class time duration preferences directly with active matches inside your unified home dashboard."
-                    : "Experience seamless local integration. Unlock exact parent contact phone directories and handle commission match fees via our secure, simulated bKash Tokenized Checkout."}
+                    : "Experience seamless local integration. Unlock exact parent contact phone directories instantly for free."}
                 </p>
               </div>
             </div>

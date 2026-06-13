@@ -285,7 +285,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleAcceptRequest = async (jobId: string, paymentType: "instant" | "later") => {
+  const handleAcceptRequest = async (jobId: string) => {
     setIsAccepting(true);
     try {
       const res = await fetch("/api/jobs", {
@@ -294,21 +294,14 @@ export default function Dashboard() {
         body: JSON.stringify({
           jobId,
           action: "accept",
-          paymentType
         })
       });
       if (res.ok) {
-        const updated = await res.json();
         setRequestModalJob(null);
-        if (paymentType === "instant") {
-          setPopupType("success");
-          setPopupMessage("✓ Request accepted and parent contact details unlocked successfully!");
-          setPopupOpen(true);
-          loadDashboardData();
-        } else {
-          setHelplineModalJob(updated);
-          loadDashboardData();
-        }
+        setPopupType("success");
+        setPopupMessage("✓ Request accepted and parent contact details unlocked successfully!");
+        setPopupOpen(true);
+        loadDashboardData();
       } else {
         const txt = await res.text();
         setPopupType("error");
@@ -1146,7 +1139,7 @@ export default function Dashboard() {
                                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                                   : "bg-amber-500/10 text-amber-400 border-amber-500/20"
                               }`}>
-                                {job.locationUnlocked ? "Active Match" : "Payment Pending"}
+                                {job.locationUnlocked ? "Active Match" : "Pending Parent Approval"}
                               </span>
                             </div>
 
@@ -1187,75 +1180,12 @@ export default function Dashboard() {
                                 </div>
                               ) : (
                                 <div className="space-y-2">
-                                  {job.payment && job.payment.status === "PENDING" ? (
-                                    <div className="bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-xl text-[10px] font-mono text-amber-500 leading-normal text-left">
-                                      Your payment of **{job.payment.amount} BDT** is under verification. Parent credentials will unlock automatically as soon as verified by the admin console.
-                                    </div>
-                                  ) : (
-                                    <>
-                                      <div className="bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-xl text-[10px] font-mono text-amber-500 leading-normal text-left">
-                                        {job.status === "ASSIGNED" && (
-                                          <span className="text-emerald-400 font-bold block mb-1">✓ Assigned manually by Admin (Pay Later active)</span>
-                                        )}
-                                        Please complete the 20% commission match payment of **{Math.floor(job.salary * 0.2)} BDT** to unlock parent contact information and GPS location.
-                                      </div>
-                                      <div className={job.status === "ASSIGNED" ? "block" : "grid grid-cols-2 gap-2"}>
-                                        <Link href={`/payment?jobId=${job.id}`} className="block w-full">
-                                          <button className="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2 px-3 rounded-lg text-xs transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1 border-none h-9">
-                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                            </svg>
-                                            <span>Pay Now (Instant Access)</span>
-                                          </button>
-                                        </Link>
-                                        {job.status !== "ASSIGNED" && (
-                                          <button 
-                                            onClick={() => setPayLaterJob(job)}
-                                            className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 px-3 rounded-lg text-xs transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1 border-none h-9"
-                                          >
-                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span>Pay Later</span>
-                                          </button>
-                                        )}
-                                      </div>
-                                      <div className="bg-slate-900/60 border border-slate-850 p-2 rounded-lg text-center mt-1">
-                                        <p className="text-[9px] font-mono text-slate-400">
-                                          📞 Need Help? Call TutorHire: <span className="text-emerald-400 font-bold">096-96-847-847</span>
-                                        </p>
-                                      </div>
-                                    </>
-                                  )}
+                                  <div className="bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-xl text-[10px] font-mono text-amber-500 leading-normal text-left">
+                                    Your application has been received! Contact information and exact location will unlock immediately once the parent accepts your request.
+                                  </div>
                                 </div>
                               )}
                             </div>
-
-                            {/* Payment metadata summary shown directly inside the tutor panel */}
-                            {job.payment && (
-                              <div className="bg-slate-900/30 p-2.5 rounded-xl border border-slate-900/60 space-y-1.5 font-mono text-[9px] text-left mt-2">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-slate-500 uppercase font-bold text-[8px]">Verification Log</span>
-                                  <span className={`px-1.5 py-0.5 rounded font-extrabold text-[8px] uppercase ${
-                                    job.payment.status === "SUCCESS"
-                                      ? "bg-emerald-500/10 text-emerald-400"
-                                      : job.payment.status === "FAILED"
-                                      ? "bg-red-500/10 text-red-400"
-                                      : "bg-amber-500/10 text-amber-400"
-                                  }`}>
-                                    {job.payment.status}
-                                  </span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-slate-500">Transaction ID:</span>
-                                  <span className="text-slate-300 font-extrabold uppercase select-all">{job.payment.trxId}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-slate-500">Amount Sent:</span>
-                                  <span className="text-slate-300 font-extrabold">{job.payment.amount} BDT</span>
-                                </div>
-                              </div>
-                            )}
                           </div>
                         ))}
                       </div>
@@ -1265,62 +1195,6 @@ export default function Dashboard() {
                   );
                   })()}
 
-                  {/* DYNAMIC MATCH PAYMENT HISTORY LOG FOR TUTORS */}
-                  <div className="mt-8 border-t border-slate-800/80 pt-8 space-y-6">
-                    <div>
-                      <h2 className="text-xl font-bold font-heading text-white">Match Payment History Log</h2>
-                      <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">Audit ledger of cleared secure matching payments</p>
-                    </div>
-                    <div className="h-px bg-slate-800/80" />
-
-                    {(!paymentHistory || paymentHistory.length === 0) ? (
-                      <div className="bg-slate-900/40 border border-slate-850 rounded-2xl p-6 text-center">
-                        <p className="text-xs text-slate-500 font-mono italic">No cleared transaction histories recorded yet.</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {paymentHistory.map((history: any) => (
-                          <div
-                            key={history.id}
-                            className="bg-slate-950/60 border border-slate-850 p-4.5 rounded-2xl flex flex-col md:flex-row gap-4 items-start md:items-center justify-between hover:border-emerald-500/20 transition-all duration-300"
-                          >
-                            <div className="space-y-2 flex-1">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-slate-900 text-slate-400 border-slate-800 font-extrabold uppercase">
-                                  TCT-{String(history.job?.jobSeq || 1).padStart(3, '0')}
-                                </span>
-                                <span className="text-[9px] font-mono px-2 py-0.5 rounded-md border font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
-                                  ৳ {history.amount} BDT Paid
-                                </span>
-                                <span className="text-[9px] font-mono px-2 py-0.5 rounded-md border font-extrabold uppercase tracking-wider bg-black/40 text-slate-400 border-slate-800/50">
-                                  TrxID: {history.trxId}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-xs text-slate-200 font-bold block">{history.job?.title || "Match Commission Payment"}</span>
-                                <span className="text-[10px] text-slate-400 block font-sans">
-                                  {history.job?.subject} • {history.job?.classLevel} • Salary: ৳ {history.job?.salary} BDT/month
-                                </span>
-                              </div>
-                            </div>
-
-                            <div className="text-left md:text-right shrink-0">
-                              <span className="text-[9px] text-slate-500 font-mono uppercase block font-bold">Assignment / Paid Date</span>
-                              <span className="text-xs text-slate-300 font-semibold font-mono block">
-                                {new Date(history.createdAt).toLocaleDateString("en-US", {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit"
-                                })}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
 
                   {/* DYNAMIC EDUCATOR RATING SYSTEM PANEL */}
                   {hasConfirmedTuition && (
@@ -1853,24 +1727,17 @@ export default function Dashboard() {
             <div className="space-y-2">
               <h3 className="text-lg font-extrabold font-heading text-white">Accept Tuition Request</h3>
               <p className="text-slate-300 text-xs sm:text-sm leading-relaxed font-sans px-2">
-                Select payment type to accept assignment for Tuition Code <strong className="text-emerald-400 font-mono">TCT-{String(requestModalJob.jobSeq).padStart(3, '0')}</strong>.
+                Accept assignment for Tuition Code <strong className="text-emerald-400 font-mono">TCT-{String(requestModalJob.jobSeq).padStart(3, '0')}</strong> to instantly unlock parent details.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3.5 pt-2">
+            <div className="grid grid-cols-1 gap-3.5 pt-2">
               <button
                 disabled={isAccepting}
-                onClick={() => handleAcceptRequest(requestModalJob.id, "instant")}
+                onClick={() => handleAcceptRequest(requestModalJob.id)}
                 className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-800 text-slate-950 font-bold py-3 px-4 rounded-xl text-xs transition duration-200 cursor-pointer border-none shadow-[0_4px_12px_rgba(var(--theme-rgb),0.15)] flex items-center justify-center"
               >
-                {isAccepting ? "Accepting..." : "Instant Pay"}
-              </button>
-              <button
-                disabled={isAccepting}
-                onClick={() => handleAcceptRequest(requestModalJob.id, "later")}
-                className="bg-slate-800 hover:bg-slate-700 disabled:bg-slate-800 text-slate-200 font-bold py-3 px-4 rounded-xl text-xs transition duration-200 cursor-pointer border-none flex items-center justify-center"
-              >
-                Pay Later
+                {isAccepting ? "Accepting..." : "Accept Request"}
               </button>
             </div>
 

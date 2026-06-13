@@ -20,7 +20,7 @@ export default function FrontPageAdditions({ selectedRole }: FrontPageAdditionsP
     { value: "BDT 22k+", label: "Top Monthly Salary", description: "Premium rates for elite academic coaches" },
     { value: "4,800+", label: "Active Jobs", description: "New tuition requests posted daily" },
     { value: "100%", label: "Parent Verified", description: "Secure phone & location confirmations" },
-    { value: "Instant", label: "bKash Checkout", description: "Unlock parent contact info in one tap" },
+    { value: "Instant", label: "Free Instant Unlock", description: "Unlock parent contact info in one tap" },
   ];
 
   const steps = selectedRole === "parent" ? [
@@ -62,8 +62,8 @@ export default function FrontPageAdditions({ selectedRole }: FrontPageAdditionsP
     },
     {
       num: "03",
-      title: "Secure bKash Match",
-      desc: "Lock in the job, instantly unlock parent verified telephone contact numbers via secure bKash Checkout, and begin professional classes.",
+      title: "Free Instant Match",
+      desc: "Lock in the job, instantly unlock parent verified telephone contact numbers for free, and begin professional classes.",
       textColor: "text-indigo-400",
       glow: "rgba(244,63,94,0.15)"
     }

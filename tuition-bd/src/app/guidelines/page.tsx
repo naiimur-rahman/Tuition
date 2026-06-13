@@ -52,7 +52,7 @@ export default function GuidelinesPage() {
               2. Escrow Protection
             </h3>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-              To guarantee seamless payment operations, transaction funds are held in secure escrow. Once parents and tutors verify match completion, payouts are routed instantly.
+              To guarantee seamless operations, parent and tutor contacts are revealed instantly upon matching.
             </p>
           </div>
 

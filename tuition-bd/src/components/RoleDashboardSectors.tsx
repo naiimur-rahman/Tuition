@@ -263,7 +263,7 @@ export default function RoleDashboardSectors({}: RoleDashboardSectorsProps = {})
                 </li>
                 <li className="flex items-start">
                   <span className="text-indigo-400 mr-2.5">→</span>
-                  <span><strong>Match & Teach:</strong> Connect with parents, coordinate lessons, and secure payments.</span>
+                  <span><strong>Match & Teach:</strong> Connect with parents and coordinate lessons.</span>
                 </li>
               </ul>
             </div>

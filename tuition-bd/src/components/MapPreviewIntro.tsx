@@ -116,7 +116,7 @@ export default function MapPreviewIntro({ onComplete }: MapPreviewIntroProps) {
     { key: "scanning", title: "1. Finding Locations", desc: "Loading Bangladesh map sectors and live database." },
     { key: "posting", title: "2. Guardian Posts Job", desc: "A parent posts a new tuition request on the map." },
     { key: "matching", title: "3. Finding Tutors", desc: "Our platform searches for nearby verified tutors." },
-    { key: "connecting", title: "4. Secure Escrow Lock", desc: "Securing payment and trust channels between both sides." },
+    { key: "connecting", title: "4. Secure Connection", desc: "Securing trust and contact channels between both sides." },
     { key: "success", title: "5. Match Successful", desc: "Job is matched securely! Parent and Tutor are both happy." }
   ];
 

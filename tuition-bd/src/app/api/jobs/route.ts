@@ -347,58 +347,16 @@ export async function PATCH(request: Request) {
     }
 
     if (action === "accept") {
-      const { paymentType } = body;
-      if (!paymentType) {
-        return new NextResponse("Payment type is required", { status: 400 });
-      }
-
-      // Ensure the job exists and matches the tutorId
-      const job = await prisma.tuitionJob.findUnique({
-        where: { id: jobId }
+      // Unlock immediately since the service is free
+      const updatedJob = await prisma.tuitionJob.update({
+        where: { id: jobId },
+        data: {
+          status: "ASSIGNED",
+          locationUnlocked: true
+        }
       });
-      if (!job) {
-        return new NextResponse("Job not found", { status: 404 });
-      }
-      if (job.tutorId !== userId) {
-        return new NextResponse("Forbidden: You are not assigned to this job", { status: 403 });
-      }
 
-      if (paymentType === "instant") {
-        const crypto = await import("crypto");
-        // Unlock immediately: status = ASSIGNED, locationUnlocked = true
-        const updatedJob = await prisma.tuitionJob.update({
-          where: { id: jobId },
-          data: {
-            status: "ASSIGNED",
-            locationUnlocked: true
-          }
-        });
-
-        // Create successful Payment record representing the instant commission checkout
-        await prisma.payment.create({
-          data: {
-            amount: Math.floor(job.salary * 0.2),
-            status: "SUCCESS",
-            type: "SALARY_COMMISSION",
-            trxId: `INST-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
-            jobId: jobId,
-            tutorId: userId,
-          }
-        });
-
-        return NextResponse.json(updatedJob);
-      } else {
-        // Pay Later: status = ASSIGNED, locationUnlocked = false
-        const updatedJob = await prisma.tuitionJob.update({
-          where: { id: jobId },
-          data: {
-            status: "ASSIGNED",
-            locationUnlocked: false
-          }
-        });
-
-        return NextResponse.json(updatedJob);
-      }
+      return NextResponse.json(updatedJob);
     }
 
     return new NextResponse("Invalid action", { status: 400 });

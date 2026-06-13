@@ -62,8 +62,7 @@ export default function AdminDashboard() {
   const [loadingAllProfiles, setLoadingAllProfiles] = useState(false);
   const [blacklisted, setBlacklisted] = useState<any[]>([]);
   const [loadingBlacklist, setLoadingBlacklist] = useState(false);
-  const [payments, setPayments] = useState<any[]>([]);
-  const [loadingPayments, setLoadingPayments] = useState(false);
+
   const [jobs, setJobs] = useState<any[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [previewDocuments, setPreviewDocuments] = useState<{
@@ -252,25 +251,7 @@ export default function AdminDashboard() {
     }
   }, [session, activeTab]);
 
-  const fetchPaymentsList = () => {
-    setLoadingPayments(true);
-    fetch(`/api/admin/payments?t=${Date.now()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setPayments(Array.isArray(data) ? data : []);
-        setLoadingPayments(false);
-      })
-      .catch((err) => {
-        console.error("Load Payments error:", err);
-        setLoadingPayments(false);
-      });
-  };
 
-  useEffect(() => {
-    if (session && (session.user as any).role === "ADMIN" && activeTab === "payments") {
-      fetchPaymentsList();
-    }
-  }, [session, activeTab]);
 
   const fetchJobsList = () => {
     setLoadingJobs(true);
@@ -315,25 +296,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleVerifyPayment = async (paymentId: string, status: "SUCCESS" | "FAILED") => {
-    if (!confirm(`Are you sure you want to mark this transaction as ${status}?`)) return;
-    try {
-      const res = await fetch("/api/admin/payments", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId, status }),
-      });
-      if (res.ok) {
-        alert(`✓ Transaction marked as ${status} successfully!`);
-        fetchPaymentsList();
-      } else {
-        alert("Failed to update payment status.");
-      }
-    } catch (err) {
-      console.error("Verify payment error:", err);
-      alert("An error occurred during verification.");
-    }
-  };
+
 
   const handleBanUser = async (userId: string) => {
     const reason = prompt("Enter a reason for banning this user:");
@@ -1071,17 +1034,7 @@ export default function AdminDashboard() {
           >
             🚫 Blacklist Manager
           </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("payments")}
-            className={`px-6 py-3.5 font-bold font-mono text-xs uppercase tracking-wider transition-all duration-300 border-b-2 cursor-pointer ${
-              activeTab === "payments"
-                ? "text-pink-400 border-pink-500 bg-pink-500/5 shadow-[inset_0_-2px_0_rgba(236,72,153,1)]"
-                : "text-slate-400 border-transparent hover:text-slate-200"
-            }`}
-          >
-            ৳ bKash Transactions ({payments.filter((p) => p.status === "PENDING").length})
-          </button>
+
           <button
             type="button"
             onClick={() => setActiveTab("jobs")}
@@ -1418,122 +1371,7 @@ export default function AdminDashboard() {
             </motion.div>
           )}
 
-          {activeTab === "payments" && (
-            <motion.div
-              key="paymentsTab"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.2 }}
-              className="space-y-6"
-            >
-              <div className="glass-card rounded-2xl p-6 md:p-8 border border-pink-500/20 space-y-6 relative overflow-hidden bg-slate-950">
-                <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-pink-500/5 rounded-full filter blur-[60px] pointer-events-none" />
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-bold font-heading text-pink-400">bKash Payment Verification Ledgers</h2>
-                    <p className="text-xs text-slate-500 mt-1 font-mono uppercase tracking-wider">
-                      Audit submitted transaction IDs and manually unlock coordinates for tutors
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono bg-pink-500/10 text-pink-400 px-2.5 py-1 rounded-full border border-pink-500/20">
-                      {payments.filter((p) => p.status === "PENDING").length} PENDING
-                    </span>
-                    <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                      {payments.filter((p) => p.status === "SUCCESS").length} SUCCESS
-                    </span>
-                  </div>
-                </div>
-                <div className="h-px bg-slate-800/80" />
 
-                {loadingPayments ? (
-                  <div className="py-12 flex flex-col items-center justify-center space-y-3">
-                    <div className="animate-spin h-6 w-6 border-2 border-pink-500 border-t-transparent rounded-full" />
-                    <span className="text-xs text-slate-400 font-mono">Fetching transaction logs...</span>
-                  </div>
-                ) : payments.length === 0 ? (
-                  <div className="py-12 text-center bg-slate-900/10 border border-slate-900 rounded-xl space-y-2 animate-fadeIn">
-                    <span className="text-3xl">💸</span>
-                    <h3 className="text-sm font-bold text-slate-300">No Transactions Logged</h3>
-                    <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                      There are no bKash coordinate unlock transactions registered on the platform.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {payments.map((payment) => (
-                      <div
-                        key={payment.id}
-                        className="bg-slate-900/40 border border-slate-800 p-5 rounded-2xl space-y-4 hover:border-pink-500/30 transition-all duration-300 animate-fadeIn"
-                      >
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                          <div className="space-y-3 w-full">
-                            <div className="flex items-center gap-3">
-                              {/* Small bKash Pink Icon */}
-                              <div className="w-8 h-8 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center font-bold text-pink-500 text-sm shrink-0">
-                                ৳
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider block">Transaction ID</span>
-                                <span className="font-mono font-bold text-white tracking-wide text-sm select-all">
-                                  {payment.trxId || "NO_TRX_ID"}
-                                </span>
-                              </div>
-                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono uppercase tracking-wider font-bold border ml-2 ${
-                                payment.status === "PENDING"
-                                  ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20 animate-pulse"
-                                  : payment.status === "SUCCESS"
-                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                    : "bg-red-500/10 text-red-400 border-red-500/20"
-                              }`}>
-                                {payment.status}
-                              </span>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6 text-xs bg-black/30 border border-slate-900 rounded-xl p-3.5">
-                              <div>
-                                <span className="text-[10px] text-slate-500 font-mono uppercase block">Tutor Profile</span>
-                                <span className="text-slate-200 font-semibold">{payment.tutor?.name || "Unregistered User"}</span>
-                                <span className="text-slate-400 text-[10px] font-mono block">{payment.tutor?.email || "N/A"}</span>
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-slate-500 font-mono uppercase block">Tuition Target Post</span>
-                                <span className="text-slate-200 font-semibold">{payment.job?.title || "N/A"}</span>
-                                <span className="text-slate-400 text-[10px] font-mono block">Parent: {payment.job?.parent?.name || "N/A"}</span>
-                              </div>
-                              <div>
-                                <span className="text-[10px] text-slate-500 font-mono uppercase block font-bold">Amount & Date</span>
-                                <span className="text-pink-400 font-extrabold">{payment.amount} BDT</span>
-                                <span className="text-slate-500 text-[10px] font-mono block">{new Date(payment.createdAt).toLocaleString()}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {payment.status === "PENDING" && (
-                            <div className="flex lg:flex-col sm:flex-row items-stretch lg:items-end gap-2 shrink-0">
-                              <button
-                                onClick={() => handleVerifyPayment(payment.id, "SUCCESS")}
-                                className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-[0_4px_12px_rgba(var(--theme-rgb),0.1)] border-none"
-                              >
-                                Approve & Unlock
-                              </button>
-                              <button
-                                onClick={() => handleVerifyPayment(payment.id, "FAILED")}
-                                className="bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-800 px-4 py-2.5 rounded-xl transition duration-200 cursor-pointer text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1 border-none"
-                              >
-                                Reject Pay
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
           {activeTab === "jobs" && (
             <motion.div
               key="jobsTab"

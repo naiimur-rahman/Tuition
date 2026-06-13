@@ -154,8 +154,13 @@ export default function TuitionEstimator({}: TuitionEstimatorProps = {}) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Title Block */}
         <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-          <div className="inline-block text-emerald-500 font-mono text-xs uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)]">
-            Market Intelligence Tool
+          <div className="flex justify-center items-center gap-3">
+            <div className="inline-block text-emerald-500 font-mono text-xs uppercase tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full shadow-[0_0_10px_rgba(var(--theme-rgb),0.1)]">
+              Market Intelligence Tool
+            </div>
+            <div className="inline-block text-white font-mono text-xs uppercase font-extrabold tracking-widest bg-emerald-600 border border-emerald-500 px-3 py-1 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)] animate-pulse">
+              সম্পূর্ণ ফ্রি
+            </div>
           </div>
           <h2 className="text-3xl md:text-5xl font-extrabold font-heading text-[var(--foreground)] tracking-tight">
             Salary & Demand Estimator

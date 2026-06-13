@@ -236,7 +236,7 @@ export default function MapComponent({
         body: JSON.stringify({ jobId, action: "apply" }),
       });
       if (res.ok) {
-        alert("✓ Applied successfully! Check your tutor dashboard assigned section to complete the commission match payment.");
+        alert("✓ Applied successfully! Check your tutor dashboard assigned section.");
         window.location.reload();
       } else {
         const errorText = await res.text();
@@ -453,6 +453,8 @@ export default function MapComponent({
     });
   }
 
+  // Removed Strict 5km max distance filter so all pins are visible
+
   const withinProximityCount = filteredItems.filter((item: any) => {
     return userLocation
       ? getDistanceInKm(userLocation[0], userLocation[1], item.approxLat, item.approxLng) <= searchRadius
@@ -531,18 +533,12 @@ export default function MapComponent({
             popupAnchor: [0, -16],
           }) : undefined;
 
-          if (zoomLevel <= 13) {
+          if (customIcon) {
             return (
-              <CircleMarker
+              <Marker
                 key={item.id}
-                center={[item.approxLat, item.approxLng]}
-                radius={8}
-                pathOptions={{
-                  color: themeColor,
-                  fillColor: themeColor,
-                  fillOpacity: 0.8,
-                  weight: 2,
-                }}
+                position={[item.approxLat, item.approxLng]}
+                icon={customIcon}
                 eventHandlers={{
                   click: () => handleItemClick(item)
                 }}
@@ -550,17 +546,17 @@ export default function MapComponent({
             );
           }
 
+          // Fallback if customIcon is undefined
           return (
-            <Circle
+            <CircleMarker
               key={item.id}
               center={[item.approxLat, item.approxLng]}
-              radius={180}
+              radius={8}
               pathOptions={{
                 color: themeColor,
                 fillColor: themeColor,
                 fillOpacity: 0.8,
                 weight: 2,
-                className: "leaflet-animated-marker",
               }}
               eventHandlers={{
                 click: () => handleItemClick(item)
@@ -573,7 +569,29 @@ export default function MapComponent({
       {/* Side Drawer (Desktop) */}
       {selectedItem && (
         <div className="hidden md:flex absolute right-4 top-4 bottom-4 w-[350px] bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-2xl p-5 z-[1000] flex-col shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 animate-slideInRight overflow-y-auto custom-scrollbar">
-          {type === "tutor" ? (
+          {(!session || !userLocation || getDistanceInKm(userLocation[0], userLocation[1], selectedItem.approxLat, selectedItem.approxLng) > 5) ? (
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+              <button onClick={() => setSelectedItem(null)} className="absolute right-4 top-4 text-slate-400 hover:text-white transition cursor-pointer bg-transparent border-none">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-3xl mb-2">
+                🔒
+              </div>
+              <h3 className="text-white font-bold text-lg font-heading">Area Restricted</h3>
+              <p className="text-slate-400 text-xs leading-relaxed px-4">
+                You must be logged in and located within 5km of this pin to view the contact details and apply.
+              </p>
+              {!session && (
+                <Link href="/login">
+                  <button className="mt-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 px-6 rounded-xl text-xs transition duration-200 cursor-pointer border-none">
+                    Log in
+                  </button>
+                </Link>
+              )}
+            </div>
+          ) : type === "tutor" ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-extrabold">
@@ -709,23 +727,8 @@ export default function MapComponent({
                         Verified Match Unlocked!
                       </div>
                     ) : (
-                      <div className="space-y-2">
-                        <div className="bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-lg text-[9px] font-mono text-amber-500 leading-normal text-center">
-                          Application received! Pay 20% commission fee ({Math.floor(selectedItem.salary * 0.2)} BDT) to unlock parents exact details.
-                        </div>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          <Link href={`/payment?jobId=${selectedItem.id}`} className="block w-full">
-                            <button className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2 py-1.5 rounded-lg text-[10px] font-bold w-full transition duration-200 cursor-pointer h-8 border-none flex items-center justify-center">
-                              Pay Now
-                            </button>
-                          </Link>
-                          <button 
-                            onClick={() => setPayLaterJob(selectedItem)}
-                            className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1.5 rounded-lg text-[10px] font-bold w-full transition duration-200 cursor-pointer h-8 border-none flex items-center justify-center"
-                          >
-                            Pay Later
-                          </button>
-                        </div>
+                      <div className="bg-amber-500/10 border border-amber-500/20 p-2.5 rounded-lg text-center font-mono text-[10px] text-amber-400 font-extrabold">
+                        Application received! Awaiting parent approval.
                       </div>
                     )}
                   </div>
@@ -768,7 +771,29 @@ export default function MapComponent({
       {/* Bottom Sheet (Mobile) */}
       {selectedItem && (
         <div className="md:hidden absolute bottom-4 left-4 right-4 bg-slate-950/95 backdrop-blur-md border border-slate-800 rounded-2xl p-5 z-[1000] flex flex-col shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-300 animate-slideUp overflow-y-auto max-h-[320px] custom-scrollbar">
-          {type === "tutor" ? (
+          {(!session || !userLocation || getDistanceInKm(userLocation[0], userLocation[1], selectedItem.approxLat, selectedItem.approxLng) > 5) ? (
+            <div className="flex flex-col items-center justify-center py-8 text-center space-y-4">
+              <button onClick={() => setSelectedItem(null)} className="absolute right-4 top-4 text-slate-400 hover:text-white transition cursor-pointer bg-transparent border-none">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-2xl mb-1">
+                🔒
+              </div>
+              <h3 className="text-white font-bold text-base font-heading">Area Restricted</h3>
+              <p className="text-slate-400 text-xs leading-relaxed px-2">
+                You must be logged in and located within 5km to view details.
+              </p>
+              {!session && (
+                <Link href="/login">
+                  <button className="mt-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2 px-5 rounded-lg text-[10px] transition duration-200 cursor-pointer border-none">
+                    Log in
+                  </button>
+                </Link>
+              )}
+            </div>
+          ) : type === "tutor" ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 font-extrabold">
@@ -893,23 +918,8 @@ export default function MapComponent({
                         Verified Match Unlocked!
                       </div>
                     ) : (
-                      <div className="space-y-1.5">
-                        <div className="bg-amber-500/5 border border-amber-500/10 p-2 rounded-lg text-[8px] font-mono text-amber-500 text-center">
-                          Pay 20% commission fee ({Math.floor(selectedItem.salary * 0.2)} BDT) to unlock.
-                        </div>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          <Link href={`/payment?jobId=${selectedItem.id}`} className="block w-full">
-                            <button className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2 py-1 rounded-lg text-[9px] font-bold w-full transition duration-200 cursor-pointer h-7 border-none">
-                              Pay Now
-                            </button>
-                          </Link>
-                          <button 
-                            onClick={() => setPayLaterJob(selectedItem)}
-                            className="bg-slate-800 hover:bg-slate-700 text-slate-200 px-2 py-1 rounded-lg text-[9px] font-bold w-full transition duration-200 cursor-pointer h-7 border-none"
-                          >
-                            Pay Later
-                          </button>
-                        </div>
+                      <div className="bg-amber-500/10 border border-amber-500/20 p-2 rounded-lg text-center font-mono text-[9px] text-amber-400 font-extrabold">
+                        Application received! Awaiting approval.
                       </div>
                     )}
                   </div>
@@ -950,54 +960,6 @@ export default function MapComponent({
       )}
 
 
-      {/* Dynamic Pay Later Coordination Modal */}
-      {payLaterJob && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-[0_10px_40px_rgba(0,0,0,0.8)] text-center space-y-6 transform scale-100 transition-all duration-300">
-            {/* Decorative hotline icon header */}
-            <div className="mx-auto w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(var(--theme-rgb),0.15)]">
-              <svg className="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-              </svg>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-xl font-heading font-extrabold text-white">Pay Later Coordination</h3>
-              <p className="text-xs text-slate-400 leading-relaxed font-sans">
-                To activate the match coordinates for **{payLaterJob.title}** and settle the commission after matching, please contact the TutorHire Hotline.
-              </p>
-            </div>
-
-            {/* Hotline information box */}
-            <div className="bg-slate-950/60 border border-slate-850 p-5 rounded-2xl space-y-2 text-center relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full filter blur-xl pointer-events-none" />
-              <span className="text-[10px] text-slate-500 uppercase tracking-widest block font-mono">Official Hotline</span>
-              <a href="tel:09696847847" className="text-2xl font-heading font-black text-emerald-400 block hover:underline hover:text-emerald-300 transition duration-200">
-                096-96-847-847
-              </a>
-              <span className="text-[9px] text-slate-500 block font-mono">Available 24/7 for swift activation</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <a 
-                href="tel:09696847847"
-                className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs transition duration-200 cursor-pointer shadow-md flex items-center justify-center space-x-1.5 border-none h-10"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                <span>Call Support</span>
-              </a>
-              <button 
-                onClick={() => setPayLaterJob(null)}
-                className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2.5 px-4 rounded-xl text-xs transition duration-200 cursor-pointer shadow-md flex items-center justify-center border-none h-10"
-              >
-                <span>Close Portal</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
